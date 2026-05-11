@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
@@ -171,6 +172,7 @@ interface CompetitionData {
 
 export default function LocalIQ() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [pinLocation, setPinLocation] = useState<PinLocation | null>(null);
@@ -179,10 +181,8 @@ export default function LocalIQ() {
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
-  const [competitionData, setCompetitionData] = useState<CompetitionData | null>(null);
   const [analyzingLocation, setAnalyzingLocation] = useState(false);
   const [propertyId, setPropertyId] = useState<string | null>(null);
-  const [publishing, setPublishing] = useState(false);
   const [pinError, setPinError] = useState(false);
   const [locationOptions, setLocationOptions] = useState<{ label: string; placeId: string }[]>([]);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -330,8 +330,6 @@ export default function LocalIQ() {
         });
         if (nearbyRes.ok) {
           const competition = await nearbyRes.json() as CompetitionData;
-          setCompetitionData(competition);
-          // Persist snapshot to the property row
           if (inserted?.id) {
             await supabase
               .from('properties')
@@ -342,22 +340,8 @@ export default function LocalIQ() {
       } catch { /* analysis is non-blocking */ }
       setAnalyzingLocation(false);
     }
-  };
 
-  const handlePublish = async () => {
-    if (!propertyId) return;
-    setPublishing(true);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyId }),
-      });
-      const { url } = await res.json();
-      if (url) window.location.href = url;
-    } catch {
-      setPublishing(false);
-    }
+    router.push(`/propiedades/${inserted.id}`);
   };
 
   const startNew = () => {
@@ -369,11 +353,9 @@ export default function LocalIQ() {
     setPhotos([]);
     setPhotoPreviews([]);
     setPhotoError(null);
-    setCompetitionData(null);
     setAnalyzingLocation(false);
     setPinError(false);
     setPropertyId(null);
-    setPublishing(false);
     setLocationOptions([]);
   };
 
@@ -402,136 +384,14 @@ export default function LocalIQ() {
             <Typography variant="body2" color="text.secondary">Commercial property registration</Typography>
           </Box>
 
-          {/* ── SUCCESS STATE ── */}
+          {/* ── LOADING / REDIRECT STATE ── */}
           {submitted ? (
-            <Box py={6}>
-              {/* Header */}
-              <Box textAlign="center" mb={5}>
-                <Box sx={{
-                  width: 72, height: 72, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 32, margin: '0 auto 20px',
-                  boxShadow: '0 0 40px rgba(0,245,160,0.3)',
-                }}>✓</Box>
-                <Typography variant="h5" fontWeight={800} mb={1}>Property registered!</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, maxWidth: 420, mx: 'auto' }}>
-                  Your property is now on the platform. Here&apos;s a quick look at what&apos;s nearby.
-                </Typography>
-              </Box>
-
-              {/* Competition snapshot */}
-              <Box sx={{ border: '1px solid #1e1e3e', borderRadius: 3, p: 3, mb: 4, background: '#0b0b1a' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                  <Typography variant="body2" fontWeight={700} sx={{ letterSpacing: 1, color: '#8888aa', fontSize: 12 }}>
-                    NEARBY COMPETITION
-                  </Typography>
-                  {analyzingLocation && (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <CircularProgress size={12} sx={{ color: '#00f5a0' }} />
-                      <Typography variant="caption" color="text.secondary">Analyzing area...</Typography>
-                    </Box>
-                  )}
-                </Box>
-
-                {!analyzingLocation && !competitionData && (
-                  <>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 13, mb: 2 }}>
-                      No location provided — add a map pin or address to unlock competition analysis.
-                    </Typography>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={handlePublish}
-                      disabled={publishing}
-                      sx={{
-                        background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-                        color: '#0a0a14', fontWeight: 800, fontSize: 15, py: 1.5,
-                        '&:hover': { background: 'linear-gradient(135deg, #00dda0, #009fc4)' },
-                        '&:disabled': { opacity: 0.6 },
-                      }}
-                    >
-                      {publishing ? 'Redirigiendo...' : 'Publicar anuncio · $299 MXN'}
-                    </Button>
-                  </>
-                )}
-
-                {competitionData && (
-                  <>
-                    {/* Category grid */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 3 }}>
-                      {Object.entries(competitionData.within_500m)
-                        .sort(([, a], [, b]) => b - a)
-                        .map(([cat, count]) => {
-                          const level = count >= 6 ? 'high' : count >= 3 ? 'med' : 'low';
-                          const color = level === 'high' ? '#ff6b6b' : level === 'med' ? '#fbbf24' : '#00f5a0';
-                          const bg    = level === 'high' ? 'rgba(255,107,107,0.08)' : level === 'med' ? 'rgba(251,191,36,0.08)' : 'rgba(0,245,160,0.08)';
-                          return (
-                            <Box key={cat} sx={{ border: `1px solid ${color}33`, borderRadius: 2, px: 1.5, py: 0.75, background: bg }}>
-                              <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color }}>
-                                {cat} · {count} within 500m
-                              </Typography>
-                            </Box>
-                          );
-                        })
-                      }
-                      {Object.keys(competitionData.within_500m).length === 0 && (
-                        <Typography variant="caption" sx={{ color: '#00f5a0', fontFamily: "'DM Mono', monospace" }}>
-                          No major competitors found within 500m
-                        </Typography>
-                      )}
-                    </Box>
-
-                    {/* Top nearby list */}
-                    {competitionData.top_nearby.filter(p => p.category).slice(0, 5).length > 0 && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>
-                          CLOSEST BUSINESSES
-                        </Typography>
-                        {competitionData.top_nearby.filter(p => p.category).slice(0, 5).map((p, i) => (
-                          <Box key={i} display="flex" justifyContent="space-between" alignItems="center"
-                            sx={{ py: 0.75, borderBottom: '1px solid #1a1a2e', '&:last-child': { borderBottom: 'none' } }}>
-                            <Box>
-                              <Typography variant="body2" fontWeight={600} sx={{ fontSize: 13 }}>{p.name}</Typography>
-                              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace" }}>{p.category}</Typography>
-                            </Box>
-                            {p.rating && (
-                              <Typography variant="caption" sx={{ color: '#fbbf24', fontFamily: "'DM Mono', monospace" }}>
-                                ★ {p.rating}
-                              </Typography>
-                            )}
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-
-                    {/* Publish CTA */}
-                    <Box sx={{ mt: 2.5, pt: 2.5, borderTop: '1px solid #1e1e3e' }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace", display: 'block', mb: 1.5 }}>
-                        ⚡ Mapa completo 2km · scores de saturación · recomendaciones IA
-                      </Typography>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={handlePublish}
-                        disabled={publishing}
-                        sx={{
-                          background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-                          color: '#0a0a14', fontWeight: 800, fontSize: 15, py: 1.5,
-                          '&:hover': { background: 'linear-gradient(135deg, #00dda0, #009fc4)' },
-                          '&:disabled': { opacity: 0.6 },
-                        }}
-                      >
-                        {publishing ? 'Redirigiendo...' : 'Publicar anuncio · $299 MXN'}
-                      </Button>
-                    </Box>
-                  </>
-                )}
-              </Box>
-
-              <Box textAlign="center">
-                <Button variant="contained" onClick={startNew}>Register another property</Button>
-              </Box>
+            <Box py={10} textAlign="center">
+              <CircularProgress size={44} sx={{ color: '#00f5a0', mb: 3 }} />
+              <Typography variant="h6" fontWeight={700} mb={1}>¡Propiedad registrada!</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {analyzingLocation ? 'Analizando negocios cercanos...' : 'Redirigiendo a tu anuncio...'}
+              </Typography>
             </Box>
           ) : (
             /* ── FORM STATE ── */
