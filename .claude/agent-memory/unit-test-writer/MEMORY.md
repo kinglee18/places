@@ -1,0 +1,1 @@
+- [LocalIQ Project Testing Context](project_context.md) — architectural facts, mock strategies, testable logic per file; read before writing any test

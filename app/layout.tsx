@@ -1,8 +1,9 @@
 import './globals.css'
+import Providers from '../components/Providers'
 
 export const metadata = {
   title: 'LocalIQ Platform',
-  description: 'Inteligencia de negocio para locales comerciales y registro de propiedades.',
+  description: 'Business intelligence for commercial properties and property registration.',
 }
 
 export default function RootLayout({
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   )
 }

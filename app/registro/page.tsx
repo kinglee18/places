@@ -2,8 +2,8 @@ import LocalIQComponent from '../../components/LocalIQ';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Registro de Propiedad - LocalIQ',
-  description: 'Ingresa los datos de tu propiedad para el análisis de IA.',
+  title: 'Property Registration - LocalIQ',
+  description: 'Enter your property details for AI analysis.',
 }
 
 export default function RegistroPage() {
@@ -20,7 +20,7 @@ export default function RegistroPage() {
         <Link href="/" style={{
           fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', color: '#8888aa', transition: 'color 0.2s'
         }}>
-          <span>← Volver al inicio</span>
+          <span>← Back to home</span>
         </Link>
       </header>
       
