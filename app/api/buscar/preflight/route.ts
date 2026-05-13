@@ -65,14 +65,14 @@ async function detectGiroByAi(descripcion: string): Promise<GiroDef | null> {
   if (!process.env.ANTHROPIC_API_KEY) return null;
 
   const catalogo = GIROS.map((g) => `- ${g.id}: ${g.label}`).join('\n');
-  const prompt = `Clasifica la siguiente descripción de un emprendedor en UNO de los siguientes giros (responde solo con el id, sin nada más; si ninguno aplica responde "ninguno"):
+  const prompt = `Classify the following entrepreneur description into ONE of the business categories below (respond with only the id, nothing else; if none apply respond "ninguno"):
 
 ${catalogo}
 
-Descripción:
+Description:
 "${descripcion}"
 
-Respuesta (solo el id):`;
+Response (id only):`;
 
   try {
     const message = await client.messages.create({
@@ -94,12 +94,12 @@ export async function POST(req: NextRequest) {
     descripcion?: string;
     lat?: number | null;
     lng?: number | null;
-    modalidad?: 'rent' | 'sale' | 'cualquiera' | null;
+    modalidad?: 'rent' | 'sale' | 'any' | null;
     presupuesto?: number | null;
   };
 
   if (!descripcion || descripcion.trim().length < 10) {
-    return NextResponse.json({ error: 'Descripción muy corta.' }, { status: 400 });
+    return NextResponse.json({ error: 'Description too short.' }, { status: 400 });
   }
 
   // ── 1. Detección híbrida de giro ──────────────────────────────────────────
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
 
   const { data: properties, error: dbError } = await query;
   if (dbError) {
-    return NextResponse.json({ error: 'No se pudieron cargar las propiedades.' }, { status: 500 });
+    return NextResponse.json({ error: 'Could not load properties.' }, { status: 500 });
   }
 
   const all = (properties as RawProperty[]) ?? [];
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
 
       const saturacion = giro
         ? computeSaturation(giro, p.competition_data)
-        : { competidores_500m: 0, competidores_2km: 0, nivel: 'baja' as const };
+        : { competidores_500m: 0, competidores_2km: 0, nivel: 'low' as const };
 
       const { competition_data: _omit, ...rest } = p;
       void _omit;
@@ -175,8 +175,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     giro_detectado: giro
       ? { id: giro.id, label: giro.label, emoji: giro.emoji, source: giroSource }
-      : { id: null, label: 'No identificado', emoji: '❓', source: giroSource },
-    modalidad_filtro: modalidad ?? 'cualquiera',
+      : { id: null, label: 'Not identified', emoji: '❓', source: giroSource },
+    modalidad_filtro: modalidad ?? 'any',
     geo_aplicado: hasGeo,
     radio_km: hasGeo ? MAX_RADIUS_KM : null,
     total_disponibles: all.length,

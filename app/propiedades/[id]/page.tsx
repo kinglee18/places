@@ -81,7 +81,7 @@ export default function PropertyDetailPage() {
   const [activePhoto, setActivePhoto] = useState(0);
 
   type Analysis = {
-    nivel_competencia: 'bajo' | 'medio' | 'alto';
+    nivel_competencia: 'low' | 'medium' | 'high';
     oportunidad: string;
     usos_recomendados: { uso: string; razon: string }[];
     advertencia: string | null;
@@ -103,7 +103,7 @@ export default function PropertyDetailPage() {
         body: JSON.stringify({ propertyId: id }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Error analyzing');
+      if (!res.ok) throw new Error(json.error ?? 'Analysis failed');
       setAnalysis(json.analysis);
     } catch (e) {
       setAnalyzeError(e instanceof Error ? e.message : 'Unknown error');
@@ -339,7 +339,7 @@ export default function PropertyDetailPage() {
               <div style={{ color: '#6b6b9a', fontSize: 13, lineHeight: 1.6 }}>
                 {isOwner && p.lat && p.lng ? (
                   <div>
-                    <p style={{ marginBottom: 14 }}>This listing has no zone analysis yet.</p>
+                    <p style={{ marginBottom: 14 }}>This listing does not have zone analysis yet.</p>
                     {zoneError && (
                       <p style={{ color: '#ff6b6b', fontSize: 12, marginBottom: 12, fontFamily: "'DM Mono', monospace" }}>{zoneError}</p>
                     )}
@@ -396,7 +396,7 @@ export default function PropertyDetailPage() {
 
                       {/* Business suggestions */}
                       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#fbbf24', marginBottom: 8, textTransform: 'uppercase' }}>
-                        Recommended business types for this area
+                        Recommended businesses for this area
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {tc.suggestions.map((s, i) => (
@@ -469,7 +469,7 @@ export default function PropertyDetailPage() {
 
                 {/* Top nearby list */}
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>
-                  Nearby businesses
+                  Nearest businesses
                 </p>
                 {competition.top_nearby.filter(b => b.category).slice(0, 5).map((b, i) => (
                   <div key={i} style={{
@@ -486,7 +486,7 @@ export default function PropertyDetailPage() {
                   </div>
                 ))}
                 {competition.top_nearby.filter(b => b.category).length === 0 && (
-                  <p style={{ fontSize: 12, color: '#6b6b9a' }}>No businesses found within 500m.</p>
+                  <p style={{ fontSize: 12, color: '#6b6b9a' }}>No businesses registered within 500m.</p>
                 )}
               </>
             )}
@@ -544,11 +544,11 @@ export default function PropertyDetailPage() {
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
-                    background: analysis.nivel_competencia === 'alto' ? 'rgba(255,107,107,0.1)' : analysis.nivel_competencia === 'medio' ? 'rgba(251,191,36,0.1)' : 'rgba(0,245,160,0.1)',
-                    border: `1px solid ${analysis.nivel_competencia === 'alto' ? 'rgba(255,107,107,0.4)' : analysis.nivel_competencia === 'medio' ? 'rgba(251,191,36,0.4)' : 'rgba(0,245,160,0.4)'}`,
-                    color: analysis.nivel_competencia === 'alto' ? '#ff6b6b' : analysis.nivel_competencia === 'medio' ? '#fbbf24' : '#00f5a0',
+                    background: analysis.nivel_competencia === 'high' ? 'rgba(255,107,107,0.1)' : analysis.nivel_competencia === 'medium' ? 'rgba(251,191,36,0.1)' : 'rgba(0,245,160,0.1)',
+                    border: `1px solid ${analysis.nivel_competencia === 'high' ? 'rgba(255,107,107,0.4)' : analysis.nivel_competencia === 'medium' ? 'rgba(251,191,36,0.4)' : 'rgba(0,245,160,0.4)'}`,
+                    color: analysis.nivel_competencia === 'high' ? '#ff6b6b' : analysis.nivel_competencia === 'medium' ? '#fbbf24' : '#00f5a0',
                   }}>
-                    Competition: {{ bajo: 'low', medio: 'medium', alto: 'high' }[analysis.nivel_competencia] ?? analysis.nivel_competencia}
+                    {analysis.nivel_competencia === 'high' ? 'High competition' : analysis.nivel_competencia === 'medium' ? 'Medium competition' : 'Low competition'}
                   </span>
                 </div>
                 <p style={{ fontSize: 14, color: '#c8c8e8', lineHeight: 1.6 }}>{analysis.oportunidad}</p>
@@ -571,7 +571,7 @@ export default function PropertyDetailPage() {
                   </div>
                 )}
 
-                <button onClick={() => setAnalysis(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#6b6b9a', cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.15s' }}>
+                <button onClick={() => setAnalysis(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#6b6b9a', cursor: 'pointer', fontFamily: "'Inter', sans-serif', transition: 'border-color 0.15s'" }}>
                   Regenerate analysis
                 </button>
               </div>

@@ -72,44 +72,45 @@ export async function POST(req: NextRequest) {
     lat?: number | null;
     lng?: number | null;
     presupuesto?: number | null;
-    modalidad?: 'rent' | 'sale' | 'cualquiera' | null;
+    disponibilidad?: string[];
+    modalidad?: 'rent' | 'sale' | 'any' | null;
     giro_pre_detectado?: string | null;
     preflight_property_ids?: string[];
   };
 
   if (!descripcion || descripcion.trim().length < 10) {
-    return NextResponse.json({ error: 'Descripción muy corta.' }, { status: 400 });
+    return NextResponse.json({ error: 'Description too short.' }, { status: 400 });
   }
 
   // ── 1. AI analysis ──────────────────────────────────────────────────────────
   const giroAnchor = giro_pre_detectado
-    ? `\nGiro ya identificado en el paso previo: "${giro_pre_detectado}". Úsalo como base, no inventes uno distinto a menos que la descripción claramente contradiga este valor.`
+    ? `\nBusiness category already identified in the previous step: "${giro_pre_detectado}". Use it as a base; only suggest a different one if the description clearly contradicts it.`
     : '';
 
-  const modalidadHint = modalidad && modalidad !== 'cualquiera'
-    ? `\nEl emprendedor busca específicamente en modalidad: ${modalidad === 'rent' ? 'RENTA' : 'COMPRA'}. Considéralo en tus consejos.`
+  const modalidadHint = modalidad && modalidad !== 'any'
+    ? `\nThe entrepreneur is specifically looking for: ${modalidad === 'rent' ? 'RENT' : 'BUY'}. Factor this into your advice.`
     : '';
 
-  const prompt = `Eres un experto en mercado comercial inmobiliario con conocimiento global de ciudades.
-Un emprendedor describe su situación así:
+  const prompt = `You are a commercial real estate market expert with global city knowledge.
+An entrepreneur describes their situation:
 
 "${descripcion}"
 
-${zona ? `Zona / ciudad preferida: ${zona}` : ''}
-${lat && lng ? `Coordenadas GPS seleccionadas en el mapa: ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` : ''}
-${presupuesto ? `Presupuesto de renta mensual: $${presupuesto} MXN` : ''}${giroAnchor}${modalidadHint}
+${zona ? `Preferred zone / city: ${zona}` : ''}
+${lat && lng ? `GPS coordinates selected on the map: ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` : ''}
+${presupuesto ? `Monthly rent budget: $${presupuesto} MXN` : ''}
 
-Analiza la situación y extrae:
-1. El giro de negocio implícito
-2. Los requisitos físicos del espacio que necesita (m², servicios, características)
-3. Las 3 mejores zonas para ese giro (basado en la ciudad preferida si se proporcionó, sino CDMX), con razón y nivel de oportunidad
-4. Si el presupuesto es viable para esas zonas (si se proporcionó)
-5. Alertas importantes y consejos prácticos
+Analyze the situation and extract:
+1. The implicit business category
+2. Physical space requirements (m², utilities, features)
+3. The 3 best neighborhoods for that category (based on the preferred city if provided, otherwise CDMX), with reason and opportunity level
+4. Whether the budget is viable for those areas (if provided)
+5. Important alerts and practical tips
 
-Responde ÚNICAMENTE con un JSON válido sin markdown, con esta estructura exacta:
+Respond ONLY with valid JSON without markdown, using this exact structure:
 {
   "giro_detectado": "string",
-  "resumen_interpretacion": "string de 1-2 oraciones describiendo lo que entendiste",
+  "resumen_interpretacion": "1-2 sentence string describing what you understood",
   "requisitos_espacio": {
     "m2_minimo": number,
     "m2_ideal": number,
@@ -120,7 +121,7 @@ Responde ÚNICAMENTE con un JSON válido sin markdown, con esta estructura exact
     {
       "nombre": "string",
       "razon": "string",
-      "nivel_competencia": "bajo|medio|alto",
+      "nivel_competencia": "low|medium|high",
       "nivel_oportunidad": number
     }
   ],
@@ -176,18 +177,18 @@ Responde ÚNICAMENTE con un JSON válido sin markdown, con esta estructura exact
       // ── Geo proximity (preferido sobre substring) ──
       if (hasGeo && p.lat != null && p.lng != null) {
         const d = distanceKm(lat as number, lng as number, p.lat, p.lng);
-        if (d <= 0.5) { score += 50; reasons.push(`A ${(d * 1000).toFixed(0)}m de la zona`); }
-        else if (d <= 1) { score += 40; reasons.push(`A ${d.toFixed(2)}km de la zona`); }
-        else if (d <= MAX_RADIUS_KM) { score += 25; reasons.push(`A ${d.toFixed(1)}km de la zona`); }
-        else if (d <= 5) { score += 10; reasons.push(`A ${d.toFixed(1)}km — algo lejos`); }
+        if (d <= 0.5) { score += 50; reasons.push(`${(d * 1000).toFixed(0)}m from the area`); }
+        else if (d <= 1) { score += 40; reasons.push(`${d.toFixed(2)}km from the area`); }
+        else if (d <= MAX_RADIUS_KM) { score += 25; reasons.push(`${d.toFixed(1)}km from the area`); }
+        else if (d <= 5) { score += 10; reasons.push(`${d.toFixed(1)}km — a bit far`); }
       } else {
         // Fallback: zone-name match (legacy behavior)
         const zoneIdx = recommendedZones.findIndex(z =>
           p.colonia.toLowerCase().includes(z) || z.includes(p.colonia.toLowerCase())
         );
-        if (zoneIdx === 0) { score += 50; reasons.push(`Zona top recomendada: ${p.colonia}`); }
-        else if (zoneIdx === 1) { score += 35; reasons.push(`Zona recomendada: ${p.colonia}`); }
-        else if (zoneIdx === 2) { score += 20; reasons.push(`Zona compatible: ${p.colonia}`); }
+        if (zoneIdx === 0) { score += 50; reasons.push(`Top recommended zone: ${p.colonia}`); }
+        else if (zoneIdx === 1) { score += 35; reasons.push(`Recommended zone: ${p.colonia}`); }
+        else if (zoneIdx === 2) { score += 20; reasons.push(`Compatible zone: ${p.colonia}`); }
       }
 
       // ── m² compatibility ──
@@ -195,10 +196,10 @@ Responde ÚNICAMENTE con un JSON válido sin markdown, con esta estructura exact
       const m2FlexMin = m2_minimo * 0.7;
       if (p.m2 >= m2_minimo && p.m2 <= m2_ideal) {
         score += 30;
-        reasons.push(`${p.m2} m² — tamaño ideal`);
+        reasons.push(`${p.m2} m² — ideal size`);
       } else if (p.m2 >= m2FlexMin && p.m2 <= m2Max) {
         score += 15;
-        reasons.push(`${p.m2} m² — tamaño aceptable`);
+        reasons.push(`${p.m2} m² — acceptable size`);
       } else {
         return { ...p, match_score: 0, match_reasons: [] };
       }
@@ -206,30 +207,28 @@ Responde ÚNICAMENTE con un JSON válido sin markdown, con esta estructura exact
       // ── Water/drainage ──
       if (needsWater && p.agua_drenaje && /agua|water/i.test(p.agua_drenaje)) {
         score += 20;
-        reasons.push('Agua y drenaje disponibles');
+        reasons.push('Water and drainage available');
       }
 
       // ── Gas ──
       if (needsGas && p.descripcion && /gas/i.test(p.descripcion)) {
         score += 10;
-        reasons.push('Conexión de gas');
+        reasons.push('Gas connection');
       }
 
       // ── Budget fit ──
       if (presupuestoNum && p.precio_inmueble) {
         if (p.precio_inmueble <= presupuestoNum) {
           score += 15;
-          reasons.push('Dentro de tu presupuesto');
+          reasons.push('Within your budget');
         } else if (p.precio_inmueble <= presupuestoNum * 1.2) {
           score += 5;
-          reasons.push('Ligeramente arriba del presupuesto');
+          reasons.push('Slightly above budget');
         }
       }
 
-      // ── Modalidad: hard filter, not bonus ──
-      // (si llegó aquí ya pasó el filtro de la query, así que solo lo etiquetamos)
-      if (p.modalidad === 'rent') reasons.push('En renta');
-      else if (p.modalidad === 'sale') reasons.push('En venta');
+      if (p.modalidad === 'rent') reasons.push('For rent');
+      else if (p.modalidad === 'sale') reasons.push('For sale');
 
       return { ...p, match_score: score, match_reasons: reasons };
     })

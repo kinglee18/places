@@ -16,7 +16,7 @@ const MapPicker = dynamic(() => import("./MapPicker"), {
   ssr: false,
   loading: () => (
     <Box sx={{ height: 280, borderRadius: '12px', bgcolor: '#0e0e22', border: '1px solid #2a2a4a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Typography variant="caption" color="text.secondary">Cargando mapa...</Typography>
+      <Typography variant="caption" color="text.secondary">Loading map...</Typography>
     </Box>
   )
 });
@@ -394,9 +394,9 @@ export default function LocalIQ() {
           {submitted ? (
             <Box py={10} textAlign="center">
               <CircularProgress size={44} sx={{ color: '#00f5a0', mb: 3 }} />
-              <Typography variant="h6" fontWeight={700} mb={1}>¡Propiedad registrada!</Typography>
+              <Typography variant="h6" fontWeight={700} mb={1}>Property registered!</Typography>
               <Typography variant="body2" color="text.secondary">
-                {analyzingLocation ? 'Analizando negocios cercanos...' : 'Redirigiendo a tu anuncio...'}
+                {analyzingLocation ? 'Analyzing nearby businesses...' : 'Redirecting to your listing...'}
               </Typography>
             </Box>
           ) : (

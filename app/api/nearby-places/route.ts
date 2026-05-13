@@ -40,22 +40,22 @@ const TOURIST_TYPES = [
 
 // Maps tourist Google type → display label
 const TOURIST_CATEGORY_MAP: Record<string, string> = {
-  tourist_attraction: 'Atracción turística',
-  museum: 'Museo',
-  art_gallery: 'Galería de arte',
-  historical_landmark: 'Monumento histórico',
-  monument: 'Monumento',
+  tourist_attraction: 'Tourist attraction',
+  museum: 'Museum',
+  art_gallery: 'Art gallery',
+  historical_landmark: 'Historical landmark',
+  monument: 'Monument',
   hotel: 'Hotel',
-  lodging: 'Hospedaje',
-  amusement_park: 'Parque de atracciones',
-  park: 'Parque',
-  zoo: 'Zoológico',
-  church: 'Iglesia',
-  hindu_temple: 'Templo',
-  mosque: 'Mezquita',
-  synagogue: 'Sinagoga',
-  stadium: 'Estadio',
-  performing_arts_theater: 'Teatro',
+  lodging: 'Lodging',
+  amusement_park: 'Amusement park',
+  park: 'Park',
+  zoo: 'Zoo',
+  church: 'Church',
+  hindu_temple: 'Temple',
+  mosque: 'Mosque',
+  synagogue: 'Synagogue',
+  stadium: 'Stadium',
+  performing_arts_theater: 'Theater',
 };
 
 type ZoneType = 'cultural' | 'religious' | 'entertainment' | 'nature' | 'lodging' | 'mixed';
@@ -63,41 +63,41 @@ type ZoneType = 'cultural' | 'religious' | 'entertainment' | 'nature' | 'lodging
 // Business suggestions per tourist zone type
 const ZONE_SUGGESTIONS: Record<ZoneType, Array<{ category: string; reason: string }>> = {
   cultural: [
-    { category: 'Souvenir / Artesanías', reason: 'Los visitantes de museos y zonas históricas buscan recuerdos representativos del lugar.' },
-    { category: 'Café temático', reason: 'Los turistas culturales valoran espacios para descansar y socializar entre visitas.' },
-    { category: 'Tour operator', reason: 'Alta demanda de guías, recorridos y experiencias organizadas.' },
-    { category: 'Fotografía / Impresión', reason: 'Los visitantes buscan imprimir o enmarcar fotos de su visita.' },
-    { category: 'Librería / Arte', reason: 'Venta de libros, catálogos y reproducciones artísticas locales.' },
+    { category: 'Souvenir / Crafts', reason: 'Museum and historic district visitors look for local mementos.' },
+    { category: 'Themed café', reason: 'Cultural tourists value spaces to rest and socialize between visits.' },
+    { category: 'Tour operator', reason: 'High demand for guided tours and organized experiences.' },
+    { category: 'Photo / Print shop', reason: 'Visitors want to print or frame photos from their trip.' },
+    { category: 'Bookstore / Art', reason: 'Books, catalogs, and local art reproductions sell well here.' },
   ],
   religious: [
-    { category: 'Artículos religiosos', reason: 'Visitantes y feligreses demandan velas, imágenes y artículos devocionales.' },
-    { category: 'Café / Panadería', reason: 'Los visitantes de zonas religiosas buscan opciones de descanso cercanas.' },
-    { category: 'Floristería', reason: 'Alta demanda de flores y ofrendas para ceremonias.' },
-    { category: 'Convenience / Grocery', reason: 'Necesidades básicas de turistas y residentes en la zona.' },
+    { category: 'Religious articles', reason: 'Visitors and worshippers seek candles, icons, and devotional items.' },
+    { category: 'Café / Bakery', reason: 'Religious-zone visitors look for nearby rest options.' },
+    { category: 'Flower shop', reason: 'High demand for flowers and offerings for ceremonies.' },
+    { category: 'Convenience / Grocery', reason: 'Basic needs for tourists and residents in the area.' },
   ],
   entertainment: [
-    { category: 'Snacks / Comida rápida', reason: 'Estadios y parques de diversiones generan alta demanda de comida informal.' },
-    { category: 'Souvenir / Merchandise', reason: 'Los asistentes a eventos buscan artículos de recuerdo y merchandise.' },
-    { category: 'Fotografía / Impresión', reason: 'Impresión de fotos y recuerdos del evento.' },
-    { category: 'Conveniencia', reason: 'Bebidas, snacks y artículos de uso rápido antes y después de eventos.' },
+    { category: 'Snacks / Fast food', reason: 'Stadiums and amusement parks drive high demand for casual food.' },
+    { category: 'Souvenir / Merchandise', reason: 'Event attendees look for memorabilia and branded goods.' },
+    { category: 'Photo / Print shop', reason: 'Photo printing and event souvenirs.' },
+    { category: 'Convenience store', reason: 'Drinks, snacks, and quick-use items before and after events.' },
   ],
   nature: [
-    { category: 'Renta de equipo outdoor', reason: 'Bicicletas, kayaks y equipo de campismo son muy solicitados cerca de parques y zoológicos.' },
-    { category: 'Café / Restaurant', reason: 'Los visitantes de parques buscan opciones de alimentos al aire libre.' },
-    { category: 'Snacks / Jugos naturales', reason: 'Alta demanda de opciones saludables y ligeras.' },
-    { category: 'Fotografía / Impresión', reason: 'Los turistas de naturaleza buscan imprimir sus fotos localmente.' },
+    { category: 'Outdoor gear rental', reason: 'Bicycles, kayaks, and camping equipment are in high demand near parks and zoos.' },
+    { category: 'Café / Restaurant', reason: 'Park visitors look for outdoor dining options.' },
+    { category: 'Snacks / Juices', reason: 'High demand for healthy and light options.' },
+    { category: 'Photo / Print shop', reason: 'Nature tourists want to print their photos locally.' },
   ],
   lodging: [
-    { category: 'Lavandería', reason: 'Huéspedes de hoteles y hostales requieren servicio de lavado frecuentemente.' },
-    { category: 'Convenience / Grocery', reason: 'Turistas alojados buscan tiendas cercanas para artículos básicos.' },
-    { category: 'Café / Desayunos', reason: 'Los viajeros buscan opciones de desayuno rápido cerca de su hospedaje.' },
-    { category: 'Tour operator', reason: 'Viajeros hospedados buscan actividades y excursiones organizadas.' },
+    { category: 'Laundry', reason: 'Hotel and hostel guests frequently need laundry service.' },
+    { category: 'Convenience / Grocery', reason: 'Staying tourists look for nearby stores for essentials.' },
+    { category: 'Café / Breakfast', reason: 'Travelers want quick breakfast options near their accommodation.' },
+    { category: 'Tour operator', reason: 'Hotel guests seek organized activities and excursions.' },
   ],
   mixed: [
-    { category: 'Souvenir / Artesanías', reason: 'Zona con flujo turístico mixto — alta demanda de recuerdos generales.' },
-    { category: 'Café', reason: 'Punto de descanso universal para cualquier tipo de turista.' },
-    { category: 'Tour operator', reason: 'Diversidad de atracciones genera demanda de recorridos organizados.' },
-    { category: 'Fotografía / Impresión', reason: 'Turistas de todo tipo buscan guardar recuerdos visuales.' },
+    { category: 'Souvenir / Crafts', reason: 'Mixed tourist flow zone — high demand for general souvenirs.' },
+    { category: 'Café', reason: 'Universal rest point for any type of tourist.' },
+    { category: 'Tour operator', reason: 'Diverse attractions generate demand for organized tours.' },
+    { category: 'Photo / Print shop', reason: 'Tourists of all types want to save visual memories.' },
   ],
 };
 
@@ -208,8 +208,8 @@ function detectTouristContext(places: PlacesV2Result[]): TouristContext | null {
     : dominant[0][0];
 
   const nearby_attractions = places.slice(0, 5).map(p => ({
-    name: p.displayName?.text ?? 'Desconocido',
-    type: TOURIST_CATEGORY_MAP[(p.types ?? []).find(t => TOURIST_CATEGORY_MAP[t]) ?? ''] ?? 'Atracción',
+    name: p.displayName?.text ?? 'Unknown',
+    type: TOURIST_CATEGORY_MAP[(p.types ?? []).find(t => TOURIST_CATEGORY_MAP[t]) ?? ''] ?? 'Attraction',
   }));
 
   return {
@@ -283,9 +283,9 @@ async function fetchNearbyV2(
     console.error(`[nearby-places] Google API error (radius=${radius}): ${status} ${code} — ${message}`);
     if (status === 'PERMISSION_DENIED') {
       throw new Error(
-        `Google Places API key bloqueada: ${message}. ` +
-        `Solución: en Google Cloud Console → Credenciales → edita la API key → ` +
-        `cambia la restricción de "HTTP referrers" a "Ninguna" o agrega tu dominio (${appUrl}).`
+        `Google Places API key blocked: ${message}. ` +
+        `Fix: in Google Cloud Console → Credentials → edit the API key → ` +
+        `change the restriction from "HTTP referrers" to "None" or add your domain (${appUrl}).`
       );
     }
     throw new Error(`Google Places API: ${message}`);
@@ -309,7 +309,7 @@ export async function POST(req: NextRequest) {
       fetchNearbyV2(lat, lng, 1000, key, TOURIST_TYPES),
     ]);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Error al consultar Google Places';
+    const message = err instanceof Error ? err.message : 'Error querying Google Places';
     console.error('[nearby-places] Fatal:', message);
     return NextResponse.json({ error: message }, { status: 502 });
   }
