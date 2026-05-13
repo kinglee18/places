@@ -87,13 +87,6 @@ const darkTheme = createTheme({
   },
 });
 
-const DISPONIBILIDAD_OPTS = [
-  { value: "tiempo_completo", label: "Tiempo completo" },
-  { value: "fines_semana", label: "Fines de semana" },
-  { value: "entre_semana", label: "Entre semana" },
-  { value: "por_horas", label: "Por horas / turnos" },
-];
-
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 interface ColoniaResult {
   nombre: string;
@@ -217,12 +210,14 @@ export default function BuscarLocal() {
   const [error, setError] = useState<string | null>(null);
   const [dots, setDots] = useState("");
 
+  const isLoading = appState === "preflight_loading" || appState === "ai_loading";
+
   // Animación de puntos en loading
   useEffect(() => {
-    if (appState !== "preflight_loading" && appState !== "ai_loading") { setDots(""); return; }
+    if (!isLoading) return;
     const interval = setInterval(() => setDots((d) => (d.length >= 3 ? "" : d + ".")), 400);
-    return () => clearInterval(interval);
-  }, [appState]);
+    return () => { clearInterval(interval); setDots(""); };
+  }, [isLoading]);
 
   const toggleDisponibilidad = (val: string) => {
     setDisponibilidad((prev) =>
@@ -457,33 +452,6 @@ export default function BuscarLocal() {
                         { value: 50000, label: "$50k" },
                       ]}
                     />
-                  </Box>
-
-                  {/* Disponibilidad */}
-                  <Box>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
-                      ¿CUÁNDO NECESITAS EL ESPACIO?
-                    </Typography>
-                    <FormGroup row sx={{ gap: 1 }}>
-                      {DISPONIBILIDAD_OPTS.map((opt) => (
-                        <FormControlLabel
-                          key={opt.value}
-                          control={
-                            <Checkbox
-                              checked={disponibilidad.includes(opt.value)}
-                              onChange={() => toggleDisponibilidad(opt.value)}
-                              size="small"
-                            />
-                          }
-                          label={
-                            <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
-                              {opt.label}
-                            </Typography>
-                          }
-                          sx={{ mr: 0 }}
-                        />
-                      ))}
-                    </FormGroup>
                   </Box>
                 </Box>
               </Box>

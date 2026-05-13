@@ -260,7 +260,7 @@ export default function UpgradePage() {
               <span className="gradient-text-accent">to analyze your market</span>
             </h2>
             <p style={{ color: 'var(--muted)', maxWidth: '540px', margin: '0 auto', fontSize: '17px' }}>
-              Six powerful tools designed to maximize your property's value and help you make data-backed decisions.
+              Six powerful tools designed to maximize your property&amp;s value and help you make data-backed decisions.
             </p>
           </div>
 
@@ -311,7 +311,7 @@ export default function UpgradePage() {
                   ))}
                 </div>
                 <p style={{ fontSize: '16px', lineHeight: 1.75, marginBottom: '24px', color: 'var(--foreground)', fontStyle: 'italic' }}>
-                  "{t.quote}"
+                  {t.quote}
                 </p>
                 <div style={{ borderTop: '1px solid var(--surface-border)', paddingTop: '16px' }}>
                   <div style={{ fontSize: '15px', fontWeight: 700, marginBottom: '4px' }}>{t.name}</div>
@@ -462,7 +462,7 @@ export default function UpgradePage() {
             <span className="section-label">Ready?</span>
             <h2 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-0.02em' }}>
               <span className="gradient-text-accent">Get Pro analysis</span><br />
-              and unlock your property's potential
+              and unlock your property&quot;s potential
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: '18px', marginBottom: '44px', lineHeight: 1.7 }}>
               Start with a free basic registration, then upgrade your property to Pro for complete market analysis.
