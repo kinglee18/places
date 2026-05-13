@@ -165,9 +165,17 @@ function NumberStepper({ label, value, onChange, min = 0, max = 99 }: {
 const steps = ['Location', 'Features', 'Details'];
 
 interface CompetitionData {
-  within_500m: Record<string, number>;
-  within_2km:  Record<string, number>;
-  top_nearby:  Array<{ name: string; category: string | null; vicinity: string; rating: number | null }>;
+  within_500m:     Record<string, number>;
+  within_2km:      Record<string, number>;
+  top_nearby:      Array<{ name: string; category: string | null; vicinity: string; rating: number | null }>;
+  opportunities:   Array<{ category: string; count_500m: number; count_2km: number; score: 'high' | 'medium' }>;
+  saturated:       Array<{ category: string; count_500m: number }>;
+  tourist_context: {
+    zone_type: 'cultural' | 'religious' | 'entertainment' | 'nature' | 'lodging' | 'mixed';
+    attraction_count: number;
+    nearby_attractions: Array<{ name: string; type: string }>;
+    suggestions: Array<{ category: string; reason: string }>;
+  } | null;
 }
 
 export default function LocalIQ() {
@@ -182,10 +190,11 @@ export default function LocalIQ() {
   const [uploading, setUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [analyzingLocation, setAnalyzingLocation] = useState(false);
-  const [propertyId, setPropertyId] = useState<string | null>(null);
   const [pinError, setPinError] = useState(false);
-  const [locationOptions, setLocationOptions] = useState<{ label: string; placeId: string }[]>([]);
+  const [locationOptions, setLocationOptions] = useState<{ label: string; placeId: string; lat?: number; lng?: number }[]>([]);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [mapFlyTo, setMapFlyTo] = useState<{ lat: number; lng: number } | null>(null);
+  const [pinAddress, setPinAddress] = useState<{ colonia: string | null; city: string | null; state: string | null; country: string | null } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const locationDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -203,7 +212,16 @@ export default function LocalIQ() {
     }, 300);
   }, []);
 
-  const { control, handleSubmit, trigger, watch, reset: resetForm, formState: { errors } } = useForm<FormData>({
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    try {
+      const res = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+      if (!res.ok) return;
+      const addr = await res.json();
+      setPinAddress(addr);
+    } catch { /* non-blocking */ }
+  }, []);
+
+  const { control, handleSubmit, trigger, watch, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       colonia: '', calle: '', numero: '',
       descripcion: '',
@@ -285,7 +303,10 @@ export default function LocalIQ() {
       .from('properties')
       .insert({
         user_email: session?.user?.email ?? 'anonymous',
-        colonia: data.colonia,
+        colonia: pinAddress?.colonia ?? data.colonia,
+        city:    pinAddress?.city    ?? null,
+        state:   pinAddress?.state   ?? null,
+        country: pinAddress?.country ?? null,
         calle: data.calle || null,
         numero: data.numero || null,
         descripcion: data.descripcion || null,
@@ -316,7 +337,6 @@ export default function LocalIQ() {
     }
 
     // Show success immediately; run competition analysis in background
-    setPropertyId(inserted.id);
     setSubmitted(true);
 
     // ── 4. Nearby competition analysis ────────────────────────────────────
@@ -326,7 +346,7 @@ export default function LocalIQ() {
         const nearbyRes = await fetch('/api/nearby-places', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lat: pinLocation.lat, lng: pinLocation.lng }),
+          body: JSON.stringify({ lat: pinLocation.lat, lng: pinLocation.lng, tipoLocal: data.tipoLocal }),
         });
         if (nearbyRes.ok) {
           const competition = await nearbyRes.json() as CompetitionData;
@@ -342,21 +362,6 @@ export default function LocalIQ() {
     }
 
     router.push(`/propiedades/${inserted.id}`);
-  };
-
-  const startNew = () => {
-    setSubmitted(false);
-    setActiveStep(0);
-    resetForm();
-    setPinLocation(null);
-    setSubmitError(null);
-    setPhotos([]);
-    setPhotoPreviews([]);
-    setPhotoError(null);
-    setAnalyzingLocation(false);
-    setPinError(false);
-    setPropertyId(null);
-    setLocationOptions([]);
   };
 
   return (
@@ -422,7 +427,16 @@ export default function LocalIQ() {
                           loading={locationLoading}
                           inputValue={field.value}
                           onInputChange={(_, val) => { field.onChange(val); searchLocation(val); }}
-                          onChange={(_, val) => { field.onChange(typeof val === 'string' ? val : val?.label ?? ''); }}
+                          onChange={(_, val) => {
+                            field.onChange(typeof val === 'string' ? val : val?.label ?? '');
+                            if (val && typeof val !== 'string' && val.lat && val.lng) {
+                              const coords = { lat: val.lat, lng: val.lng };
+                              setMapFlyTo(coords);
+                              setPinLocation(coords);
+                              setPinError(false);
+                              reverseGeocode(val.lat, val.lng);
+                            }
+                          }}
                           filterOptions={(x) => x}
                           renderInput={(params) => (
                             <TextField
@@ -464,9 +478,10 @@ export default function LocalIQ() {
                       </Box>
                       <Box sx={{ borderRadius: '12px', outline: pinError ? '1.5px solid #ff6b6b' : 'none' }}>
                         <MapPicker
-                          onLocationSelect={(lat, lng) => { setPinLocation({ lat, lng }); setPinError(false); }}
+                          onLocationSelect={(lat, lng) => { setPinLocation({ lat, lng }); setPinError(false); reverseGeocode(lat, lng); }}
                           initialLat={pinLocation?.lat}
                           initialLng={pinLocation?.lng}
+                          flyTo={mapFlyTo}
                         />
                       </Box>
                       {pinError ? (

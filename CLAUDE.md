@@ -43,6 +43,13 @@ npm run lint
 
 ## Architecture & Key Files
 
+## Code style
+
+- User server actions where is possible
+- Add code in English
+- Respect eslint rules
+
+
 ### Authentication & Middleware
 - **`auth.ts`**: NextAuth configuration with Google provider. Exports `handlers`, `auth`, `signIn`, `signOut`
 - **`middleware.ts`**: Protects `/registro` route - redirects unauthenticated users to `/login`

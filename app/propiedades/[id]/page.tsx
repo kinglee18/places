@@ -14,15 +14,27 @@ interface CompetitionEntry {
 }
 
 interface CompetitionData {
-  within_500m: Record<string, number>;
-  within_2km:  Record<string, number>;
-  top_nearby:  CompetitionEntry[];
+  within_500m:     Record<string, number>;
+  within_2km:      Record<string, number>;
+  top_nearby:      CompetitionEntry[];
+  opportunities:   Array<{ category: string; count_500m: number; count_2km: number; score: 'high' | 'medium' }>;
+  saturated:       Array<{ category: string; count_500m: number }>;
+  tourist_context: {
+    zone_type: 'cultural' | 'religious' | 'entertainment' | 'nature' | 'lodging' | 'mixed';
+    attraction_count: number;
+    nearby_attractions: Array<{ name: string; type: string }>;
+    suggestions: Array<{ category: string; reason: string }>;
+  } | null;
 }
 
 interface Property {
   id: string;
   created_at: string;
+  user_email: string;
   colonia: string;
+  city:    string | null;
+  state:   string | null;
+  country: string | null;
   calle: string | null;
   numero: string | null;
   descripcion: string | null;
@@ -77,6 +89,8 @@ export default function PropertyDetailPage() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [runningZone, setRunningZone] = useState(false);
+  const [zoneError, setZoneError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!id) return;
@@ -95,6 +109,33 @@ export default function PropertyDetailPage() {
       setAnalyzeError(e instanceof Error ? e.message : 'Error desconocido');
     }
     setAnalyzing(false);
+  };
+
+  const handleAnalyzeZone = async () => {
+    if (!property?.lat || !property?.lng) return;
+    setRunningZone(true);
+    setZoneError(null);
+    try {
+      const nearbyRes = await fetch('/api/nearby-places', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: property.lat, lng: property.lng, tipoLocal: property.tipo_local }),
+      });
+      if (!nearbyRes.ok) throw new Error('Error al obtener datos de la zona');
+      const competition_data = await nearbyRes.json();
+
+      const saveRes = await fetch(`/api/properties/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ competition_data }),
+      });
+      if (!saveRes.ok) throw new Error('Error al guardar el análisis');
+
+      setProperty(prev => prev ? { ...prev, competition_data } : prev);
+    } catch (e) {
+      setZoneError(e instanceof Error ? e.message : 'Error desconocido');
+    }
+    setRunningZone(false);
   };
 
   useEffect(() => {
@@ -157,6 +198,7 @@ export default function PropertyDetailPage() {
   ].filter(Boolean) as { icon: string; label: string; value: string }[];
 
   const competition = p.competition_data;
+  const isOwner = session?.user?.email === p.user_email;
   const mapsUrl = p.lat && p.lng
     ? `https://www.google.com/maps?q=${p.lat},${p.lng}`
     : p.calle
@@ -217,6 +259,11 @@ export default function PropertyDetailPage() {
               <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: '#00f5a0', textTransform: 'uppercase' }}>
                 {p.colonia}
               </span>
+              {(p.city || p.state || p.country) && (
+                <span style={{ fontSize: 11, color: '#6b6b9a', fontFamily: "'DM Mono', monospace" }}>
+                  {[p.city, p.state, p.country].filter(Boolean).join(', ')}
+                </span>
+              )}
               {p.modalidad && (
                 <span style={{
                   fontSize: 11, fontWeight: 700, borderRadius: 100,
@@ -284,39 +331,146 @@ export default function PropertyDetailPage() {
             )}
           </div>
 
-          {/* Competition */}
+          {/* Competition & Opportunities */}
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 18, textTransform: 'uppercase' }}>Nearby competition</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 18, textTransform: 'uppercase' }}>Análisis de zona</p>
 
             {!competition ? (
               <div style={{ color: '#6b6b9a', fontSize: 13, lineHeight: 1.6 }}>
-                <p>No competition data available.</p>
-                <p style={{ marginTop: 8 }}>Competition analysis requires a location pin or street address.</p>
+                {isOwner && p.lat && p.lng ? (
+                  <div>
+                    <p style={{ marginBottom: 14 }}>Este anuncio aún no tiene análisis de zona.</p>
+                    {zoneError && (
+                      <p style={{ color: '#ff6b6b', fontSize: 12, marginBottom: 12, fontFamily: "'DM Mono', monospace" }}>{zoneError}</p>
+                    )}
+                    <button
+                      onClick={handleAnalyzeZone}
+                      disabled={runningZone}
+                      style={{
+                        background: runningZone ? 'rgba(0,245,160,0.08)' : 'linear-gradient(135deg, #00f5a0, #00b4d8)',
+                        color: runningZone ? '#00f5a0' : '#0a0a14',
+                        border: runningZone ? '1px solid rgba(0,245,160,0.3)' : 'none',
+                        borderRadius: 8, padding: '10px 20px',
+                        fontWeight: 700, fontSize: 13, cursor: runningZone ? 'not-allowed' : 'pointer',
+                        fontFamily: "'DM Mono', monospace", letterSpacing: '0.04em',
+                        transition: 'opacity 0.15s',
+                      }}
+                    >
+                      {runningZone ? '⏳ Analizando zona...' : '📍 Analizar zona ahora'}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p>No hay datos de zona disponibles.</p>
+                    <p style={{ marginTop: 8 }}>El análisis requiere un pin en el mapa o dirección.</p>
+                  </>
+                )}
               </div>
             ) : (
               <>
-                {/* Category tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-                  {Object.entries(competition.within_500m)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([cat, count]) => {
-                      const level = count >= 6 ? 'high' : count >= 3 ? 'med' : 'low';
-                      const color = level === 'high' ? '#ff6b6b' : level === 'med' ? '#fbbf24' : '#00f5a0';
-                      const bg    = level === 'high' ? 'rgba(255,107,107,0.08)' : level === 'med' ? 'rgba(251,191,36,0.08)' : 'rgba(0,245,160,0.08)';
-                      return (
-                        <span key={cat} style={{ border: `1px solid ${color}44`, borderRadius: 8, padding: '4px 10px', background: bg, fontSize: 11, color, fontFamily: "'DM Mono', monospace" }}>
-                          {cat} · {count}
+                {/* Tourist context */}
+                {competition.tourist_context && (() => {
+                  const tc = competition.tourist_context!;
+                  const zoneLabels: Record<string, string> = {
+                    cultural: 'Cultural / Histórica',
+                    religious: 'Religiosa',
+                    entertainment: 'Entretenimiento',
+                    nature: 'Naturaleza',
+                    lodging: 'Hotelera / Hospedaje',
+                    mixed: 'Turística mixta',
+                  };
+                  return (
+                    <div style={{ marginBottom: 20, padding: '16px', borderRadius: 10, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#fbbf24', marginBottom: 12, textTransform: 'uppercase' }}>
+                        🗺️ Zona turística — {zoneLabels[tc.zone_type]}
+                      </p>
+
+                      {/* Nearby attractions */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+                        {tc.nearby_attractions.map((a, i) => (
+                          <span key={i} style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", padding: '3px 9px', borderRadius: 6, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', color: '#fde68a' }}>
+                            {a.name} · {a.type}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Business suggestions */}
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#fbbf24', marginBottom: 8, textTransform: 'uppercase' }}>
+                        Rubros recomendados para esta zona
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {tc.suggestions.map((s, i) => (
+                          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#fde68a' }}>{s.category}</span>
+                            <span style={{ fontSize: 12, color: '#a0906a', lineHeight: 1.5 }}>{s.reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Opportunities */}
+                {competition.opportunities?.length > 0 && (
+                  <div style={{ marginBottom: 20 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#00f5a0', marginBottom: 10, textTransform: 'uppercase' }}>
+                      💡 Oportunidades en esta zona
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {competition.opportunities.map((o) => (
+                        <div key={o.category} style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '8px 12px', borderRadius: 8,
+                          background: o.score === 'high' ? 'rgba(0,245,160,0.07)' : 'rgba(0,245,160,0.03)',
+                          border: `1px solid ${o.score === 'high' ? 'rgba(0,245,160,0.25)' : 'rgba(0,245,160,0.1)'}`,
+                        }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#e0e0ff' }}>{o.category}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontSize: 11, color: '#6b6b9a', fontFamily: "'DM Mono', monospace" }}>
+                              {o.count_500m} en 500m · {o.count_2km} en 2km
+                            </span>
+                            <span style={{
+                              fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4,
+                              background: o.score === 'high' ? 'rgba(0,245,160,0.15)' : 'rgba(0,245,160,0.07)',
+                              color: '#00f5a0', fontFamily: "'DM Mono', monospace", letterSpacing: '0.05em',
+                            }}>
+                              {o.score === 'high' ? 'ALTA' : 'MEDIA'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Saturated */}
+                {competition.saturated?.length > 0 && (
+                  <div style={{ marginBottom: 20 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#ff6b6b', marginBottom: 10, textTransform: 'uppercase' }}>
+                      ⚠️ Categorías saturadas — alta competencia
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                      {competition.saturated.map((s) => (
+                        <span key={s.category} style={{
+                          fontSize: 11, fontFamily: "'DM Mono', monospace",
+                          padding: '4px 10px', borderRadius: 7,
+                          background: 'rgba(255,107,107,0.07)', border: '1px solid rgba(255,107,107,0.22)',
+                          color: '#ff6b6b',
+                        }}>
+                          {s.category} · {s.count_500m} en 500m
                         </span>
-                      );
-                    })}
-                  {Object.keys(competition.within_500m).length === 0 && (
-                    <span style={{ fontSize: 12, color: '#00f5a0', fontFamily: "'DM Mono', monospace" }}>
-                      No major competitors within 500m
-                    </span>
-                  )}
-                </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Divider */}
+                <div style={{ borderTop: '1px solid #1e1e35', marginBottom: 16 }} />
 
                 {/* Top nearby list */}
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>
+                  Negocios más cercanos
+                </p>
                 {competition.top_nearby.filter(b => b.category).slice(0, 5).map((b, i) => (
                   <div key={i} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -331,22 +485,9 @@ export default function PropertyDetailPage() {
                     )}
                   </div>
                 ))}
-
-                {/* Pro upsell */}
-                <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 10 }}>
-                  <p style={{ fontSize: 12, color: '#a78bfa', marginBottom: 8 }}>⚡ Pro: full 2km map, saturation scores, AI business recommendations</p>
-                  <Link href="/registro?plan=pro" style={{
-                    fontSize: 12, fontWeight: 700, color: '#a78bfa',
-                    border: '1px solid rgba(124,58,237,0.4)', borderRadius: 6,
-                    padding: '5px 12px', textDecoration: 'none', display: 'inline-block',
-                    transition: 'background 0.15s',
-                  }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(124,58,237,0.1)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    Upgrade to Pro →
-                  </Link>
-                </div>
+                {competition.top_nearby.filter(b => b.category).length === 0 && (
+                  <p style={{ fontSize: 12, color: '#6b6b9a' }}>Sin negocios registrados en 500m.</p>
+                )}
               </>
             )}
           </div>

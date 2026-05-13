@@ -6,12 +6,13 @@ interface MapPickerProps {
   onLocationSelect: (lat: number, lng: number) => void;
   initialLat?: number;
   initialLng?: number;
+  flyTo?: { lat: number; lng: number } | null;
 }
 
 const DEFAULT_LAT = 19.4326; // CDMX centro
 const DEFAULT_LNG = -99.1332;
 
-export default function MapPicker({ onLocationSelect, initialLat, initialLng }: MapPickerProps) {
+export default function MapPicker({ onLocationSelect, initialLat, initialLng, flyTo }: MapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -130,6 +131,39 @@ export default function MapPicker({ onLocationSelect, initialLat, initialLng }: 
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Pan + place marker when the parent selects a location from autocomplete
+  useEffect(() => {
+    if (!flyTo || !leafletMap.current) return;
+    const { lat, lng } = flyTo;
+
+    import('leaflet').then((L) => {
+      if (!leafletMap.current) return;
+
+      leafletMap.current.setView([lat, lng], 15, { animate: true });
+
+      const customIcon = L.divIcon({
+        html: `<div style="width:32px;height:32px;background:linear-gradient(135deg,#00f5a0,#00b4d8);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #ffffff33;box-shadow:0 0 12px rgba(0,245,160,0.6),0 2px 8px rgba(0,0,0,0.5);"></div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -36],
+      });
+
+      if (markerRef.current) {
+        markerRef.current.setLatLng([lat, lng]);
+      } else {
+        markerRef.current = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(leafletMap.current);
+        markerRef.current.on('dragend', (e: any) => {
+          const pos = e.target.getLatLng();
+          setCoords({ lat: pos.lat, lng: pos.lng });
+          onLocationSelect(pos.lat, pos.lng);
+        });
+      }
+      setCoords({ lat, lng });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flyTo]);
 
   return (
     <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1px solid #2a2a4a" }}>
