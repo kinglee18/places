@@ -33,7 +33,7 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
           borderBottom: activePage === 'propiedades' ? '1px solid #00f5a0' : 'none',
           paddingBottom: '2px',
         }}>
-          Propiedades
+          Properties
         </Link>
 
         {/* Auth section */}
@@ -91,7 +91,7 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
                     onMouseEnter={e => (e.currentTarget.style.background = '#1e1e35')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    📝 Publicar propiedad
+                    📝 Publish property
                   </Link>
                   <Link href="/mis-propiedades" onClick={() => setMenuOpen(false)} style={{
                     display: 'block', padding: '9px 12px', borderRadius: '8px',
@@ -101,7 +101,7 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
                     onMouseEnter={e => (e.currentTarget.style.background = '#1e1e35')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    🏠 Mis propiedades
+                    🏠 My properties
                   </Link>
                   <button
                     onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }); }}
@@ -115,7 +115,7 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
                     onMouseEnter={e => (e.currentTarget.style.background = '#2a0a0a')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    🚪 Cerrar sesión
+                    🚪 Sign out
                   </button>
                 </div>
               </div>

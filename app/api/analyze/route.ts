@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   const { propertyId } = await req.json();
   if (!propertyId) {
-    return NextResponse.json({ error: 'propertyId requerido' }, { status: 400 });
+    return NextResponse.json({ error: 'propertyId required' }, { status: 400 });
   }
 
   const { data: property, error } = await supabase
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error || !property) {
-    return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
+    return NextResponse.json({ error: 'Property not found' }, { status: 404 });
   }
 
   const competitionSummary = property.competition_data
@@ -32,32 +32,32 @@ export async function POST(req: NextRequest) {
         .slice(0, 5)
         .map(([cat, count]) => `${cat}: ${count}`)
         .join(', ')
-    : 'Sin datos de competencia disponibles';
+    : 'No competition data available';
 
-  const prompt = `Eres un consultor de bienes raíces comerciales especializado en la Ciudad de México.
-Analiza la siguiente propiedad y proporciona recomendaciones de negocio concretas en español.
+  const prompt = `You are a commercial real estate consultant with global city market expertise.
+Analyze the following property and provide concrete business recommendations in English.
 
-DATOS DE LA PROPIEDAD:
-- Tipo: ${property.tipo_local}
-- Colonia: ${property.colonia}
-- Superficie: ${property.m2} m²
-- Modalidad: ${property.modalidad === 'rent' ? 'Renta' : property.modalidad === 'sale' ? 'Venta' : 'No especificada'}
-- Precio: ${property.precio_inmueble ? `$${property.precio_inmueble.toLocaleString('es-MX')} MXN` : 'No especificado'}
-${property.descripcion ? `- Descripción: ${property.descripcion}` : ''}
+PROPERTY DATA:
+- Type: ${property.tipo_local}
+- Neighborhood: ${property.colonia}
+- Size: ${property.m2} m²
+- Listing type: ${property.modalidad === 'rent' ? 'For rent' : property.modalidad === 'sale' ? 'For sale' : 'Not specified'}
+- Price: ${property.precio_inmueble ? `$${property.precio_inmueble.toLocaleString('en-US')} MXN` : 'Not specified'}
+${property.descripcion ? `- Description: ${property.descripcion}` : ''}
 
-COMPETENCIA CERCANA (500m):
+NEARBY COMPETITION (500m):
 ${competitionSummary}
 
-Responde en formato JSON con esta estructura exacta:
+Respond in JSON format with this exact structure:
 {
-  "nivel_competencia": "bajo | medio | alto",
-  "oportunidad": "Una oración sobre la oportunidad de mercado en esta zona",
+  "nivel_competencia": "low | medium | high",
+  "oportunidad": "One sentence about the market opportunity in this area",
   "usos_recomendados": [
-    { "uso": "Nombre del negocio", "razon": "Por qué funciona en esta zona" },
-    { "uso": "Nombre del negocio", "razon": "Por qué funciona en esta zona" },
-    { "uso": "Nombre del negocio", "razon": "Por qué funciona en esta zona" }
+    { "uso": "Business name", "razon": "Why it works in this area" },
+    { "uso": "Business name", "razon": "Why it works in this area" },
+    { "uso": "Business name", "razon": "Why it works in this area" }
   ],
-  "advertencia": "Riesgo principal o consideración importante (o null si no hay)"
+  "advertencia": "Main risk or important consideration (or null if none)"
 }`;
 
   const message = await client.messages.create({
@@ -71,7 +71,7 @@ Responde en formato JSON con esta estructura exacta:
   // Extract JSON from potential markdown fences
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    return NextResponse.json({ error: 'No se pudo generar el análisis' }, { status: 500 });
+    return NextResponse.json({ error: 'Could not generate analysis' }, { status: 500 });
   }
 
   const analysis = JSON.parse(jsonMatch[0]);
