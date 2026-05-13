@@ -81,7 +81,7 @@ export default function PropertyDetailPage() {
   const [activePhoto, setActivePhoto] = useState(0);
 
   type Analysis = {
-    nivel_competencia: 'bajo' | 'medio' | 'alto';
+    nivel_competencia: 'low' | 'medium' | 'high';
     oportunidad: string;
     usos_recomendados: { uso: string; razon: string }[];
     advertencia: string | null;
@@ -103,10 +103,10 @@ export default function PropertyDetailPage() {
         body: JSON.stringify({ propertyId: id }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Error al analizar');
+      if (!res.ok) throw new Error(json.error ?? 'Analysis failed');
       setAnalysis(json.analysis);
     } catch (e) {
-      setAnalyzeError(e instanceof Error ? e.message : 'Error desconocido');
+      setAnalyzeError(e instanceof Error ? e.message : 'Unknown error');
     }
     setAnalyzing(false);
   };
@@ -121,7 +121,7 @@ export default function PropertyDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat: property.lat, lng: property.lng, tipoLocal: property.tipo_local }),
       });
-      if (!nearbyRes.ok) throw new Error('Error al obtener datos de la zona');
+      if (!nearbyRes.ok) throw new Error('Error fetching zone data');
       const competition_data = await nearbyRes.json();
 
       const saveRes = await fetch(`/api/properties/${id}`, {
@@ -129,11 +129,11 @@ export default function PropertyDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ competition_data }),
       });
-      if (!saveRes.ok) throw new Error('Error al guardar el análisis');
+      if (!saveRes.ok) throw new Error('Error saving the analysis');
 
       setProperty(prev => prev ? { ...prev, competition_data } : prev);
     } catch (e) {
-      setZoneError(e instanceof Error ? e.message : 'Error desconocido');
+      setZoneError(e instanceof Error ? e.message : 'Unknown error');
     }
     setRunningZone(false);
   };
@@ -333,13 +333,13 @@ export default function PropertyDetailPage() {
 
           {/* Competition & Opportunities */}
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 18, textTransform: 'uppercase' }}>Análisis de zona</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 18, textTransform: 'uppercase' }}>Zone analysis</p>
 
             {!competition ? (
               <div style={{ color: '#6b6b9a', fontSize: 13, lineHeight: 1.6 }}>
                 {isOwner && p.lat && p.lng ? (
                   <div>
-                    <p style={{ marginBottom: 14 }}>Este anuncio aún no tiene análisis de zona.</p>
+                    <p style={{ marginBottom: 14 }}>This listing does not have zone analysis yet.</p>
                     {zoneError && (
                       <p style={{ color: '#ff6b6b', fontSize: 12, marginBottom: 12, fontFamily: "'DM Mono', monospace" }}>{zoneError}</p>
                     )}
@@ -356,13 +356,13 @@ export default function PropertyDetailPage() {
                         transition: 'opacity 0.15s',
                       }}
                     >
-                      {runningZone ? '⏳ Analizando zona...' : '📍 Analizar zona ahora'}
+                      {runningZone ? '⏳ Analyzing zone...' : '📍 Analyze zone now'}
                     </button>
                   </div>
                 ) : (
                   <>
-                    <p>No hay datos de zona disponibles.</p>
-                    <p style={{ marginTop: 8 }}>El análisis requiere un pin en el mapa o dirección.</p>
+                    <p>No zone data available.</p>
+                    <p style={{ marginTop: 8 }}>Analysis requires a map pin or address.</p>
                   </>
                 )}
               </div>
@@ -372,17 +372,17 @@ export default function PropertyDetailPage() {
                 {competition.tourist_context && (() => {
                   const tc = competition.tourist_context!;
                   const zoneLabels: Record<string, string> = {
-                    cultural: 'Cultural / Histórica',
-                    religious: 'Religiosa',
-                    entertainment: 'Entretenimiento',
-                    nature: 'Naturaleza',
-                    lodging: 'Hotelera / Hospedaje',
-                    mixed: 'Turística mixta',
+                    cultural: 'Cultural / Historic',
+                    religious: 'Religious',
+                    entertainment: 'Entertainment',
+                    nature: 'Nature',
+                    lodging: 'Hotel / Lodging',
+                    mixed: 'Mixed tourist',
                   };
                   return (
                     <div style={{ marginBottom: 20, padding: '16px', borderRadius: 10, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
                       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#fbbf24', marginBottom: 12, textTransform: 'uppercase' }}>
-                        🗺️ Zona turística — {zoneLabels[tc.zone_type]}
+                        🗺️ Tourist zone — {zoneLabels[tc.zone_type]}
                       </p>
 
                       {/* Nearby attractions */}
@@ -396,7 +396,7 @@ export default function PropertyDetailPage() {
 
                       {/* Business suggestions */}
                       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#fbbf24', marginBottom: 8, textTransform: 'uppercase' }}>
-                        Rubros recomendados para esta zona
+                        Recommended businesses for this area
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {tc.suggestions.map((s, i) => (
@@ -414,7 +414,7 @@ export default function PropertyDetailPage() {
                 {competition.opportunities?.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#00f5a0', marginBottom: 10, textTransform: 'uppercase' }}>
-                      💡 Oportunidades en esta zona
+                      💡 Opportunities in this area
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {competition.opportunities.map((o) => (
@@ -434,7 +434,7 @@ export default function PropertyDetailPage() {
                               background: o.score === 'high' ? 'rgba(0,245,160,0.15)' : 'rgba(0,245,160,0.07)',
                               color: '#00f5a0', fontFamily: "'DM Mono', monospace", letterSpacing: '0.05em',
                             }}>
-                              {o.score === 'high' ? 'ALTA' : 'MEDIA'}
+                              {o.score === 'high' ? 'HIGH' : 'MEDIUM'}
                             </span>
                           </div>
                         </div>
@@ -447,7 +447,7 @@ export default function PropertyDetailPage() {
                 {competition.saturated?.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#ff6b6b', marginBottom: 10, textTransform: 'uppercase' }}>
-                      ⚠️ Categorías saturadas — alta competencia
+                      ⚠️ Saturated categories — high competition
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                       {competition.saturated.map((s) => (
@@ -469,7 +469,7 @@ export default function PropertyDetailPage() {
 
                 {/* Top nearby list */}
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>
-                  Negocios más cercanos
+                  Nearest businesses
                 </p>
                 {competition.top_nearby.filter(b => b.category).slice(0, 5).map((b, i) => (
                   <div key={i} style={{
@@ -486,7 +486,7 @@ export default function PropertyDetailPage() {
                   </div>
                 ))}
                 {competition.top_nearby.filter(b => b.category).length === 0 && (
-                  <p style={{ fontSize: 12, color: '#6b6b9a' }}>Sin negocios registrados en 500m.</p>
+                  <p style={{ fontSize: 12, color: '#6b6b9a' }}>No businesses registered within 500m.</p>
                 )}
               </>
             )}
@@ -506,8 +506,8 @@ export default function PropertyDetailPage() {
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px', marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 4, textTransform: 'uppercase' }}>Análisis IA</p>
-                <p style={{ fontSize: 13, color: '#9090b8' }}>Recomendaciones de negocio generadas por Claude</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 4, textTransform: 'uppercase' }}>AI Analysis</p>
+                <p style={{ fontSize: 13, color: '#9090b8' }}>Business recommendations generated by Claude</p>
               </div>
               {!analysis && (
                 <button
@@ -527,9 +527,9 @@ export default function PropertyDetailPage() {
                   {analyzing ? (
                     <>
                       <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid #00f5a0', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                      Analizando...
+                      Analyzing...
                     </>
-                  ) : '✦ Analizar con IA'}
+                  ) : '✦ Analyze with AI'}
                 </button>
               )}
             </div>
@@ -544,18 +544,18 @@ export default function PropertyDetailPage() {
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
-                    background: analysis.nivel_competencia === 'alto' ? 'rgba(255,107,107,0.1)' : analysis.nivel_competencia === 'medio' ? 'rgba(251,191,36,0.1)' : 'rgba(0,245,160,0.1)',
-                    border: `1px solid ${analysis.nivel_competencia === 'alto' ? 'rgba(255,107,107,0.4)' : analysis.nivel_competencia === 'medio' ? 'rgba(251,191,36,0.4)' : 'rgba(0,245,160,0.4)'}`,
-                    color: analysis.nivel_competencia === 'alto' ? '#ff6b6b' : analysis.nivel_competencia === 'medio' ? '#fbbf24' : '#00f5a0',
+                    background: analysis.nivel_competencia === 'high' ? 'rgba(255,107,107,0.1)' : analysis.nivel_competencia === 'medium' ? 'rgba(251,191,36,0.1)' : 'rgba(0,245,160,0.1)',
+                    border: `1px solid ${analysis.nivel_competencia === 'high' ? 'rgba(255,107,107,0.4)' : analysis.nivel_competencia === 'medium' ? 'rgba(251,191,36,0.4)' : 'rgba(0,245,160,0.4)'}`,
+                    color: analysis.nivel_competencia === 'high' ? '#ff6b6b' : analysis.nivel_competencia === 'medium' ? '#fbbf24' : '#00f5a0',
                   }}>
-                    Competencia {analysis.nivel_competencia}
+                    {analysis.nivel_competencia === 'high' ? 'High competition' : analysis.nivel_competencia === 'medium' ? 'Medium competition' : 'Low competition'}
                   </span>
                 </div>
                 <p style={{ fontSize: 14, color: '#c8c8e8', lineHeight: 1.6 }}>{analysis.oportunidad}</p>
 
                 {/* Recommended uses */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', textTransform: 'uppercase' }}>Usos recomendados</p>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', textTransform: 'uppercase' }}>Recommended uses</p>
                   {analysis.usos_recomendados.map((item, i) => (
                     <div key={i} style={{ background: '#12122a', border: '1px solid #1e1e35', borderRadius: 10, padding: '12px 14px' }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: '#00f5a0', marginBottom: 4 }}>{item.uso}</div>
@@ -572,7 +572,7 @@ export default function PropertyDetailPage() {
                 )}
 
                 <button onClick={() => setAnalysis(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#6b6b9a', cursor: 'pointer', fontFamily: "'Inter', sans-serif', transition: 'border-color 0.15s'" }}>
-                  Regenerar análisis
+                  Regenerate analysis
                 </button>
               </div>
             )}

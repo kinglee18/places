@@ -42,10 +42,10 @@ export default async function MisPropiedadesPage() {
         {/* Header */}
         <div style={{ marginBottom: 36 }}>
           <h1 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 8 }}>
-            Mis propiedades
+            My properties
           </h1>
           <p style={{ color: '#6b6b9a', fontSize: 14 }}>
-            {items.length} propiedad{items.length !== 1 ? 'es' : ''} registrada{items.length !== 1 ? 's' : ''}
+            {items.length} registered propert{items.length !== 1 ? 'ies' : 'y'}
           </p>
         </div>
 
@@ -57,9 +57,9 @@ export default async function MisPropiedadesPage() {
             background: '#0a0a18',
           }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🏬</div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>Aún no tienes propiedades</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>No properties yet</h2>
             <p style={{ color: '#6b6b9a', marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
-              Registra tu primer local comercial y empieza a analizar tu mercado.
+              Register your first commercial space and start analyzing your market.
             </p>
             <Link href="/registro" style={{
               background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
@@ -67,7 +67,7 @@ export default async function MisPropiedadesPage() {
               fontWeight: 700, fontSize: 14, textDecoration: 'none',
               boxShadow: '0 6px 24px rgba(0,245,160,0.25)',
             }}>
-              + Registrar propiedad
+              + Register property
             </Link>
           </div>
         ) : (
@@ -102,7 +102,7 @@ export default async function MisPropiedadesPage() {
                       border: `1px solid ${p.is_published ? 'rgba(0,245,160,0.4)' : 'rgba(107,107,154,0.3)'}`,
                       color: p.is_published ? '#00f5a0' : '#9090b8',
                     }}>
-                      {p.is_published ? 'Publicado' : 'Sin publicar'}
+                      {p.is_published ? 'Published' : 'Unpublished'}
                     </span>
                   </div>
 
@@ -115,7 +115,7 @@ export default async function MisPropiedadesPage() {
                       {p.tipo_local}
                     </div>
                     <div style={{ fontSize: 12, color: '#6b6b9a', marginBottom: 14 }}>
-                      {p.m2} m²{p.modalidad ? ` · ${p.modalidad === 'rent' ? 'Renta' : 'Venta'}` : ''}
+                      {p.m2} m²{p.modalidad ? ` · ${p.modalidad === 'rent' ? 'Rent' : 'Sale'}` : ''}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: 15, fontWeight: 800, color: '#f0f0f8' }}>
@@ -143,7 +143,7 @@ export default async function MisPropiedadesPage() {
                 fontWeight: 700, fontSize: 14, textDecoration: 'none',
                 boxShadow: '0 6px 24px rgba(0,245,160,0.25)',
               }}>
-                + Registrar otra propiedad
+                + Register another property
               </Link>
             </div>
           </>

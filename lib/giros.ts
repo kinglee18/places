@@ -16,16 +16,16 @@ export interface GiroDef {
   label: string;
   emoji: string;
   keywords: string[];
-  /** Categorías en competition_data que cuentan como "negocio similar". */
+  /** Categories in competition_data that count as "similar business". */
   competitionCategories: string[];
-  /** m² mínimo razonable para que la preflight no descarte locales decentes. */
+  /** Minimum reasonable m² so preflight does not discard decent spaces. */
   m2Hint: { min: number; ideal: number };
 }
 
 export const GIROS: GiroDef[] = [
   {
     id: 'cafeteria',
-    label: 'Cafetería',
+    label: 'Coffee Shop',
     emoji: '☕',
     keywords: ['cafe', 'cafetera', 'cafeteria', 'café', 'cafetería', 'barista', 'espresso', 'capuchino', 'latte', 'pasteleria', 'pastelería', 'reposteria', 'repostería', 'panaderia', 'panadería', 'bakery'],
     competitionCategories: ['Café', 'Café / Bakery'],
@@ -33,7 +33,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'restaurante',
-    label: 'Restaurante',
+    label: 'Restaurant',
     emoji: '🍽️',
     keywords: ['restaurante', 'restaurant', 'cocina', 'comida corrida', 'fonda', 'taqueria', 'taquería', 'tacos', 'parrilla', 'asador', 'menu del dia', 'menú', 'chef', 'comedor'],
     competitionCategories: ['Restaurant'],
@@ -41,7 +41,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'bar',
-    label: 'Bar / Cantina',
+    label: 'Bar / Pub',
     emoji: '🍺',
     keywords: ['bar', 'cantina', 'cerveceria', 'cervecería', 'mezcaleria', 'mezcalería', 'pulqueria', 'pulquería', 'cocteles', 'cocteleria', 'cocktail', 'antro', 'night club'],
     competitionCategories: ['Bar'],
@@ -49,7 +49,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'estetica',
-    label: 'Estética / Salón',
+    label: 'Hair Salon',
     emoji: '💇',
     keywords: ['estetica', 'estética', 'estilista', 'salon de belleza', 'salón de belleza', 'tijeras', 'corte de pelo', 'cabello', 'tinte', 'manicure', 'pedicure', 'uñas', 'unas', 'barberia', 'barbería', 'barber'],
     competitionCategories: ['Beauty / Salon'],
@@ -57,7 +57,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'gimnasio',
-    label: 'Gimnasio / Wellness',
+    label: 'Gym / Wellness',
     emoji: '💪',
     keywords: ['gimnasio', 'gym', 'crossfit', 'pilates', 'yoga', 'spinning', 'entrenamiento', 'pesas', 'box', 'wellness', 'spa', 'masajes'],
     competitionCategories: ['Gym / Wellness'],
@@ -65,7 +65,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'farmacia',
-    label: 'Farmacia',
+    label: 'Pharmacy',
     emoji: '💊',
     keywords: ['farmacia', 'pharmacy', 'medicamentos', 'botica', 'drugstore'],
     competitionCategories: ['Pharmacy'],
@@ -73,7 +73,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'abarrotes',
-    label: 'Abarrotes / Conveniencia',
+    label: 'Grocery / Convenience',
     emoji: '🛒',
     keywords: ['abarrotes', 'tiendita', 'miscelanea', 'misceláneas', 'minisuper', 'mini super', 'conveniencia', 'supermercado', 'super', 'grocery'],
     competitionCategories: ['Convenience / Grocery'],
@@ -81,7 +81,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'tienda_ropa',
-    label: 'Tienda de ropa',
+    label: 'Clothing Store',
     emoji: '👕',
     keywords: ['ropa', 'boutique', 'moda', 'vestidos', 'sastreria', 'sastrería', 'maquiladora', 'taller de costura', 'costura', 'maquina de coser', 'máquina de coser'],
     competitionCategories: ['Clothing / Retail', 'Retail'],
@@ -89,7 +89,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'retail_general',
-    label: 'Retail / Tienda',
+    label: 'Retail / Store',
     emoji: '🏪',
     keywords: ['tienda', 'retail', 'venta al publico', 'showroom', 'punto de venta', 'mercancia'],
     competitionCategories: ['Retail', 'Clothing / Retail'],
@@ -97,7 +97,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'lavanderia',
-    label: 'Lavandería',
+    label: 'Laundry',
     emoji: '🧺',
     keywords: ['lavanderia', 'lavandería', 'tintoreria', 'tintorería', 'lavado de ropa', 'laundry'],
     competitionCategories: ['Laundry'],
@@ -105,7 +105,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'clinica',
-    label: 'Clínica / Consultorio',
+    label: 'Clinic / Practice',
     emoji: '🩺',
     keywords: ['consultorio', 'medico', 'médico', 'doctora', 'clinica', 'clínica', 'dentista', 'odontologo', 'odontólogo', 'dental', 'fisioterapia', 'psicologo', 'psicólogo', 'nutriologo', 'nutriólogo'],
     competitionCategories: ['Medical / Clinic'],
@@ -113,7 +113,7 @@ export const GIROS: GiroDef[] = [
   },
   {
     id: 'oficina',
-    label: 'Oficina / Coworking',
+    label: 'Office / Coworking',
     emoji: '💼',
     keywords: ['oficina', 'coworking', 'despacho', 'corporativo', 'home office'],
     competitionCategories: [],
@@ -125,9 +125,7 @@ export const GIRO_BY_ID: Record<string, GiroDef> = Object.fromEntries(
   GIROS.map((g) => [g.id, g])
 );
 
-/**
- * Normaliza texto: minúsculas + sin acentos.
- */
+/** Normalize text: lowercase + strip accents. */
 function norm(s: string): string {
   return s
     .toLowerCase()
@@ -136,22 +134,21 @@ function norm(s: string): string {
 }
 
 /**
- * Intento rápido y barato de detectar el giro a partir de la descripción.
- * Devuelve null si no hay confianza suficiente y el caller debe caer a IA.
+ * Quick keyword-based category detection.
+ * Returns null if confidence is insufficient; caller should fall back to AI.
  */
 export function detectGiroByKeywords(text: string): GiroDef | null {
   if (!text) return null;
   const haystack = ' ' + norm(text) + ' ';
 
-  // Conteo de hits por giro: ganamos especificidad si una descripción menciona
-  // varias palabras del mismo giro (ej. "cafetera" + "repostería" → cafetería).
+  // Hit count per category: higher specificity when multiple keywords match (e.g. "coffee machine" + "pastry" → Coffee Shop).
   const scores = new Map<string, number>();
 
   for (const giro of GIROS) {
     let hits = 0;
     for (const kw of giro.keywords) {
       const needle = ' ' + norm(kw);
-      // Match con frontera: empieza con espacio. Evita parciales tipo "barbero" → "bar".
+      // Boundary match: starts with space. Avoids partials like "barber" → "bar".
       if (haystack.includes(needle)) hits += 1;
     }
     if (hits > 0) scores.set(giro.id, hits);
@@ -164,13 +161,13 @@ export function detectGiroByKeywords(text: string): GiroDef | null {
 }
 
 /**
- * Dada una propiedad con competition_data poblada y un giro, devuelve cuántos
- * negocios del mismo giro hay alrededor.
+ * Given a property with competition_data and a category, returns how many
+ * similar businesses exist nearby.
  */
 export interface SaturationCount {
   competidores_500m: number;
   competidores_2km: number;
-  nivel: 'baja' | 'media' | 'alta';
+  nivel: 'low' | 'medium' | 'high';
 }
 
 export function computeSaturation(
@@ -187,10 +184,9 @@ export function computeSaturation(
     far += c2k[cat] ?? 0;
   }
 
-  // Heurística simple. Ajustable con datos reales.
-  let nivel: SaturationCount['nivel'] = 'baja';
-  if (near >= 4 || far >= 10) nivel = 'alta';
-  else if (near >= 2 || far >= 5) nivel = 'media';
+  let nivel: SaturationCount['nivel'] = 'low';
+  if (near >= 4 || far >= 10) nivel = 'high';
+  else if (near >= 2 || far >= 5) nivel = 'medium';
 
   return { competidores_500m: near, competidores_2km: far, nivel };
 }

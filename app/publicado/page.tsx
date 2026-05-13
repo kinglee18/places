@@ -20,11 +20,11 @@ function PublicadoContent() {
         }}>✓</div>
 
         <h1 style={{ color: '#e0e0ff', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, marginBottom: 12 }}>
-          ¡Anuncio publicado!
+          Listing published!
         </h1>
         <p style={{ color: '#8888aa', fontFamily: "'DM Mono', monospace", fontSize: 14, lineHeight: 1.8, marginBottom: 32 }}>
-          Tu propiedad ya está visible en el marketplace con badge verificado,<br />
-          análisis de competencia y reporte descargable activos.
+          Your property is now visible on the marketplace with verified badge,<br />
+          competition analysis and downloadable report active.
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -35,7 +35,7 @@ function PublicadoContent() {
               fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14,
               textDecoration: 'none',
             }}>
-              Ver mi anuncio
+              View my listing
             </Link>
           )}
           <Link href="/propiedades" style={{
@@ -43,7 +43,7 @@ function PublicadoContent() {
             fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14,
             textDecoration: 'none',
           }}>
-            Ver marketplace
+            View marketplace
           </Link>
         </div>
       </div>

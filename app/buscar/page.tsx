@@ -2,8 +2,8 @@ import BuscarLocal from '../../components/BuscarLocal';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Buscar Espacio — LocalIQ',
-  description: 'Describe tu proyecto y la IA encuentra el espacio comercial ideal para ti en CDMX.',
+  title: 'Find Space — LocalIQ',
+  description: 'Describe your project and AI finds the ideal commercial space for you.',
 };
 
 export default function BuscarPage() {

@@ -87,18 +87,11 @@ const darkTheme = createTheme({
   },
 });
 
-const DISPONIBILIDAD_OPTS = [
-  { value: "tiempo_completo", label: "Tiempo completo" },
-  { value: "fines_semana", label: "Fines de semana" },
-  { value: "entre_semana", label: "Entre semana" },
-  { value: "por_horas", label: "Por horas / turnos" },
-];
-
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 interface ColoniaResult {
   nombre: string;
   razon: string;
-  nivel_competencia: "bajo" | "medio" | "alto";
+  nivel_competencia: "low" | "medium" | "high";
   nivel_oportunidad: number;
 }
 
@@ -140,7 +133,7 @@ interface BuscarResult {
 }
 
 // ─── Preflight (paso 1) ──────────────────────────────────────────────────────
-type Modalidad = "rent" | "sale" | "cualquiera";
+type Modalidad = "rent" | "sale" | "any";
 
 interface PreflightProperty {
   id: string;
@@ -160,7 +153,7 @@ interface PreflightProperty {
   saturacion: {
     competidores_500m: number;
     competidores_2km: number;
-    nivel: "baja" | "media" | "alta";
+    nivel: "low" | "medium" | "high";
   };
 }
 
@@ -190,16 +183,16 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
 
 // ─── Badge de competencia ────────────────────────────────────────────────────
 const compConfig = {
-  bajo:  { bg: "#001a10", border: "#003820", color: "#44cc88", label: "baja competencia" },
-  medio: { bg: "#1a1200", border: "#3a2800", color: "#ccaa44", label: "competencia media" },
-  alto:  { bg: "#1a0808", border: "#3a1212", color: "#cc4444", label: "alta competencia" },
+  low:    { bg: "#001a10", border: "#003820", color: "#44cc88", label: "low competition" },
+  medium: { bg: "#1a1200", border: "#3a2800", color: "#ccaa44", label: "medium competition" },
+  high:   { bg: "#1a0808", border: "#3a1212", color: "#cc4444", label: "high competition" },
 };
 
 // ─── Ejemplos de descripción ─────────────────────────────────────────────────
 const EJEMPLOS = [
-  "Tengo una cafetera industrial, vitrinas refrigeradas y equipo para hacer repostería. Busco espacio los fines de semana.",
-  "Soy estilista con mis propias tijeras, silla y espejos. Necesito un lugar entre semana para atender clientes.",
-  "Tengo máquinas de coser y materiales para ropa a medida. Busco un espacio tranquilo con buena luz.",
+  "I have an industrial espresso machine, refrigerated display cases and pastry equipment. Looking for a weekend space to fulfill my orders.",
+  "I'm a hairstylist with my own scissors, chair and mirrors. I need a weekday space to see clients.",
+  "I have sewing machines and fabric for custom clothing. Looking for a quiet space with good natural light.",
 ];
 
 // ─── Componente principal ────────────────────────────────────────────────────
@@ -209,7 +202,7 @@ export default function BuscarLocal() {
   const [appState, setAppState] = useState<AppState>("input");
   const [descripcion, setDescripcion] = useState("");
   const [zona, setZona] = useState<{ label: string; lat: number; lng: number } | null>(null);
-  const [modalidad, setModalidad] = useState<Modalidad>("rent");
+  const [modalidad, setModalidad] = useState<Modalidad>("any");
   const [presupuesto, setPresupuesto] = useState<number>(8000);
   const [disponibilidad, setDisponibilidad] = useState<string[]>([]);
   const [preflight, setPreflight] = useState<PreflightResult | null>(null);
@@ -217,12 +210,14 @@ export default function BuscarLocal() {
   const [error, setError] = useState<string | null>(null);
   const [dots, setDots] = useState("");
 
+  const isLoading = appState === "preflight_loading" || appState === "ai_loading";
+
   // Animación de puntos en loading
   useEffect(() => {
-    if (appState !== "preflight_loading" && appState !== "ai_loading") { setDots(""); return; }
+    if (!isLoading) return;
     const interval = setInterval(() => setDots((d) => (d.length >= 3 ? "" : d + ".")), 400);
-    return () => clearInterval(interval);
-  }, [appState]);
+    return () => { clearInterval(interval); setDots(""); };
+  }, [isLoading]);
 
   const toggleDisponibilidad = (val: string) => {
     setDisponibilidad((prev) =>
@@ -233,7 +228,7 @@ export default function BuscarLocal() {
   // ── Paso 1: preflight (DB + saturación) ────────────────────────────────────
   const handleSubmit = async () => {
     if (descripcion.trim().length < 10) {
-      setError("Describe un poco más tu situación (mínimo 10 caracteres).");
+      setError("Please describe your situation a bit more (minimum 10 characters).");
       return;
     }
     setError(null);
@@ -252,11 +247,11 @@ export default function BuscarLocal() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error desconocido");
+      if (!res.ok) throw new Error(data.error || "Unknown error");
       setPreflight(data);
       setAppState("preflight");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al buscar matches. Intenta de nuevo.");
+      setError(e instanceof Error ? e.message : "Error finding matches. Please try again.");
       setAppState("input");
     }
   };
@@ -284,11 +279,11 @@ export default function BuscarLocal() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error desconocido");
+      if (!res.ok) throw new Error(data.error || "Unknown error");
       setResult(data);
       setAppState("result");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al analizar. Intenta de nuevo.");
+      setError(e instanceof Error ? e.message : "Error analyzing. Please try again.");
       setAppState("preflight");
     }
   };
@@ -300,7 +295,7 @@ export default function BuscarLocal() {
     setError(null);
     setDescripcion("");
     setZona(null);
-    setModalidad("rent");
+    setModalidad("any");
     setPresupuesto(8000);
     setDisponibilidad([]);
   };
@@ -334,24 +329,24 @@ export default function BuscarLocal() {
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.5px" }}>
                 Local<span style={{ color: "#00f5a0" }}>IQ</span>
               </Typography>
-              <Chip label="buscar · beta" size="small" sx={{ bgcolor: "#1a1a3a", border: "1px solid #2a2a5a", color: "#8888cc", fontFamily: "'DM Mono', monospace", height: 20, fontSize: 10 }} />
+              <Chip label="search · beta" size="small" sx={{ bgcolor: "#1a1a3a", border: "1px solid #2a2a5a", color: "#8888cc", fontFamily: "'DM Mono', monospace", height: 20, fontSize: 10 }} />
             </Box>
-            <Typography variant="body2" color="text.secondary">encuentra el espacio ideal para tu proyecto</Typography>
+            <Typography variant="body2" color="text.secondary">find the ideal space for your project</Typography>
           </Box>
 
           {/* ── ESTADO: INPUT ───────────────────────────────────────────── */}
           {appState === "input" && (
             <Card elevation={0} sx={{ border: "1px solid #1e1e3e", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }} className="fadein">
 
-              <Typography variant="h6" fontWeight={700} mb={1}>¿Qué quieres hacer?</Typography>
+              <Typography variant="h6" fontWeight={700} mb={1}>What do you want to do?</Typography>
               <Typography variant="body2" color="text.secondary" mb={4} sx={{ lineHeight: 1.7 }}>
-                Cuéntanos tu situación con tus propias palabras. La IA detectará qué tipo de negocio quieres montar, qué espacio necesitas y las mejores zonas de CDMX para ti.
+                Tell us your situation in your own words. AI will detect what type of business you want to start, what space you need, and the best areas for you.
               </Typography>
 
               {/* Textarea principal */}
               <Box mb={1}>
                 <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1 }}>
-                  DESCRIBE TU SITUACIÓN *
+                  DESCRIBE YOUR SITUATION *
                 </Typography>
                 <TextField
                   fullWidth
@@ -359,12 +354,12 @@ export default function BuscarLocal() {
                   rows={4}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
-                  placeholder="Ej: Tengo una cafetera industrial y equipo de repostería. Busco espacio los fines de semana para atender mis pedidos..."
+                  placeholder="Ex: I have an industrial espresso machine and pastry equipment. Looking for a weekend space to handle my orders..."
                   inputProps={{ maxLength: 600 }}
                 />
                 <Box display="flex" justifyContent="space-between" mt={0.5}>
                   <Typography variant="caption" color="text.secondary">
-                    Cuanto más detalles, mejor será el análisis
+                    More details = better analysis
                   </Typography>
                   <Typography variant="caption" color={descripcion.length > 500 ? "#f5c518" : "text.secondary"}>
                     {descripcion.length}/600
@@ -388,7 +383,7 @@ export default function BuscarLocal() {
               {/* Opciones adicionales */}
               <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, p: 3, mb: 4 }}>
                 <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#555577", letterSpacing: 1, fontSize: 11, display: "block", mb: 3 }}>
-                  OPCIONES ADICIONALES (opcional)
+                  ADDITIONAL OPTIONS (optional)
                 </Typography>
 
                 <Box display="flex" flexDirection="column" gap={3.5}>
@@ -403,7 +398,7 @@ export default function BuscarLocal() {
                   {/* Modalidad: renta / compra / cualquiera */}
                   <Box>
                     <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
-                      ¿RENTA O COMPRA?
+                      RENT OR BUY?
                     </Typography>
                     <ToggleButtonGroup
                       value={modalidad}
@@ -428,9 +423,9 @@ export default function BuscarLocal() {
                         },
                       }}
                     >
-                      <ToggleButton value="rent">Renta</ToggleButton>
-                      <ToggleButton value="sale">Compra</ToggleButton>
-                      <ToggleButton value="cualquiera">Cualquiera</ToggleButton>
+                      <ToggleButton value="rent">Rent</ToggleButton>
+                      <ToggleButton value="sale">Buy</ToggleButton>
+                      <ToggleButton value="any">Any</ToggleButton>
                     </ToggleButtonGroup>
                   </Box>
 
@@ -438,7 +433,7 @@ export default function BuscarLocal() {
                   <Box>
                     <Box display="flex" justifyContent="space-between" mb={1}>
                       <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13 }}>
-                        PRESUPUESTO MENSUAL DE RENTA
+                        MONTHLY RENT BUDGET
                       </Typography>
                       <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#00f5a0", fontWeight: 700 }}>
                         ${presupuesto.toLocaleString()} MXN
@@ -458,33 +453,6 @@ export default function BuscarLocal() {
                       ]}
                     />
                   </Box>
-
-                  {/* Disponibilidad */}
-                  <Box>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
-                      ¿CUÁNDO NECESITAS EL ESPACIO?
-                    </Typography>
-                    <FormGroup row sx={{ gap: 1 }}>
-                      {DISPONIBILIDAD_OPTS.map((opt) => (
-                        <FormControlLabel
-                          key={opt.value}
-                          control={
-                            <Checkbox
-                              checked={disponibilidad.includes(opt.value)}
-                              onChange={() => toggleDisponibilidad(opt.value)}
-                              size="small"
-                            />
-                          }
-                          label={
-                            <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
-                              {opt.label}
-                            </Typography>
-                          }
-                          sx={{ mr: 0 }}
-                        />
-                      ))}
-                    </FormGroup>
-                  </Box>
                 </Box>
               </Box>
 
@@ -496,7 +464,7 @@ export default function BuscarLocal() {
               )}
 
               <Button variant="contained" fullWidth size="large" onClick={handleSubmit}>
-                Analizar con IA →
+                Analyze with AI →
               </Button>
             </Card>
           )}
@@ -505,9 +473,9 @@ export default function BuscarLocal() {
           {appState === "preflight_loading" && (
             <Box textAlign="center" py={12} className="fadein">
               <CircularProgress size={64} sx={{ color: "#00f5a0", mb: 3 }} />
-              <Typography variant="h6" fontWeight={700}>Buscando matches{dots}</Typography>
+              <Typography variant="h6" fontWeight={700}>Searching matches{dots}</Typography>
               <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                detectando giro · revisando inventario · midiendo saturación
+                detecting category · checking inventory · measuring saturation
               </Typography>
             </Box>
           )}
@@ -516,9 +484,9 @@ export default function BuscarLocal() {
           {appState === "ai_loading" && (
             <Box textAlign="center" py={12} className="fadein">
               <CircularProgress size={64} sx={{ color: "#00f5a0", mb: 3 }} />
-              <Typography variant="h6" fontWeight={700}>Análisis IA en curso{dots}</Typography>
+              <Typography variant="h6" fontWeight={700}>AI Analysis in progress{dots}</Typography>
               <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                interpretando tu perfil · analizando zonas · generando consejos
+                interpreting your profile · analyzing zones · generating tips
               </Typography>
             </Box>
           )}
@@ -528,12 +496,12 @@ export default function BuscarLocal() {
             <Box className="fadein">
               <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3} flexWrap="wrap" gap={2}>
                 <Box>
-                  <Typography variant="h5" fontWeight={800}>Resultados rápidos</Typography>
+                  <Typography variant="h5" fontWeight={800}>Quick results</Typography>
                   <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                    matches en inventario · sin IA todavía
+                    inventory matches · no AI yet
                   </Typography>
                 </Box>
-                <Button variant="outlined" size="small" onClick={backToInput}>← editar búsqueda</Button>
+                <Button variant="outlined" size="small" onClick={backToInput}>← edit search</Button>
               </Box>
 
               {/* Giro detectado */}
@@ -543,14 +511,14 @@ export default function BuscarLocal() {
                     <Typography fontSize={26}>{preflight.giro_detectado.emoji}</Typography>
                     <Box flex={1}>
                       <Typography variant="caption" sx={{ color: "#00f5a0", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
-                        GIRO DETECTADO {preflight.giro_detectado.source === "ai" && "· vía ia"}
-                        {preflight.giro_detectado.source === "keyword" && "· vía keywords"}
+                        DETECTED CATEGORY {preflight.giro_detectado.source === "ai" && "· via AI"}
+                        {preflight.giro_detectado.source === "keyword" && "· via keywords"}
                       </Typography>
                       <Typography variant="h6" fontWeight={700}>{preflight.giro_detectado.label}</Typography>
                     </Box>
                     <Chip
                       size="small"
-                      label={preflight.modalidad_filtro === "rent" ? "Renta" : preflight.modalidad_filtro === "sale" ? "Compra" : "Cualquiera"}
+                      label={preflight.modalidad_filtro === "rent" ? "Rent" : preflight.modalidad_filtro === "sale" ? "Buy" : "Any"}
                       sx={{ bgcolor: "#12122a", border: "1px solid #2a2a4a", color: "#8888cc", fontFamily: "'DM Mono', monospace", fontSize: 11 }}
                     />
                   </Box>
@@ -561,8 +529,8 @@ export default function BuscarLocal() {
               <Box mb={3} p={2} borderRadius={2} bgcolor="#0a0a1e" border="1px solid #1e1e3e">
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
                   {preflight.geo_aplicado
-                    ? <>Encontramos <b style={{ color: "#00f5a0" }}>{preflight.properties_match.length}</b> local{preflight.properties_match.length !== 1 ? "es" : ""} en un radio de <b>{preflight.radio_km}km</b> de la zona elegida{preflight.modalidad_filtro !== "cualquiera" ? ` en modalidad ${preflight.modalidad_filtro === "rent" ? "renta" : "compra"}` : ""}.</>
-                    : <>Mostrando <b style={{ color: "#00f5a0" }}>{preflight.properties_match.length}</b> local{preflight.properties_match.length !== 1 ? "es" : ""} disponibles{preflight.modalidad_filtro !== "cualquiera" ? ` en modalidad ${preflight.modalidad_filtro === "rent" ? "renta" : "compra"}` : ""}. <i style={{ color: "#8888aa" }}>(no seleccionaste zona — sin filtro de distancia)</i></>
+                    ? <>Found <b style={{ color: "#00f5a0" }}>{preflight.properties_match.length}</b> space{preflight.properties_match.length !== 1 ? "s" : ""} within <b>{preflight.radio_km}km</b> of the selected area{preflight.modalidad_filtro !== "any" ? ` for ${preflight.modalidad_filtro === "rent" ? "rent" : "sale"}` : ""}.</>
+                    : <>Showing <b style={{ color: "#00f5a0" }}>{preflight.properties_match.length}</b> available space{preflight.properties_match.length !== 1 ? "s" : ""}{preflight.modalidad_filtro !== "any" ? ` for ${preflight.modalidad_filtro === "rent" ? "rent" : "sale"}` : ""}. <i style={{ color: "#8888aa" }}>(no zone selected — no distance filter)</i></>
                   }
                 </Typography>
               </Box>
@@ -572,16 +540,16 @@ export default function BuscarLocal() {
                 <Box mb={4} p={3} borderRadius={2} bgcolor="#1a0808" border="1px solid #3a1212" textAlign="center">
                   <Typography fontSize={32} mb={1}>📭</Typography>
                   <Typography variant="body2" color="#ff8888" fontWeight={700} mb={1}>
-                    Sin inventario que coincida.
+                    No matching inventory.
                   </Typography>
                   <Typography variant="caption" color="text.secondary" display="block" mb={2.5}>
                     {preflight.geo_aplicado
-                      ? "No hay locales registrados en esa zona con esa modalidad. Prueba ampliando la zona, cambiando renta↔compra, o pide el análisis IA para conocer mejores colonias para tu giro."
-                      : "Ningún local registrado coincide con esa modalidad. Cambia el filtro o pide el análisis IA."}
+                      ? "No spaces registered in that area with that filter. Try expanding the zone, switching rent↔buy, or request the AI analysis to discover better neighborhoods for your category."
+                      : "No registered space matches that filter. Change the filter or request the AI analysis."}
                   </Typography>
                   <Box display="flex" gap={1} justifyContent="center" flexWrap="wrap">
-                    <Button variant="outlined" size="small" onClick={backToInput}>Editar búsqueda</Button>
-                    <Button variant="contained" size="small" onClick={handleAiAnalysis}>Análisis IA →</Button>
+                    <Button variant="outlined" size="small" onClick={backToInput}>Edit search</Button>
+                    <Button variant="contained" size="small" onClick={handleAiAnalysis}>AI Analysis →</Button>
                   </Box>
                 </Box>
               )}
@@ -590,16 +558,16 @@ export default function BuscarLocal() {
               {preflight.properties_match.length > 0 && (
                 <Box mb={4}>
                   <Typography variant="caption" sx={{ color: "#8888aa", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
-                    🏠 LOCALES DISPONIBLES (ordenados por cercanía)
+                    🏠 AVAILABLE SPACES (sorted by proximity)
                   </Typography>
                   <Box display="flex" flexDirection="column" gap={2}>
                     {preflight.properties_match.map((p) => {
                       const sat = p.saturacion;
-                      const satCfg = sat.nivel === "alta"
-                        ? { bg: "#1a0808", border: "#3a1212", color: "#ff6b6b", icon: "⚠️", text: `Alta saturación: ${sat.competidores_500m} competidor${sat.competidores_500m !== 1 ? "es" : ""} a 500m, ${sat.competidores_2km} a 2km` }
-                        : sat.nivel === "media"
-                          ? { bg: "#1a1200", border: "#3a2800", color: "#ccaa44", icon: "⚡", text: `Saturación media: ${sat.competidores_500m} a 500m, ${sat.competidores_2km} a 2km` }
-                          : { bg: "#001a10", border: "#003820", color: "#44cc88", icon: "✓", text: sat.competidores_2km > 0 ? `Baja: solo ${sat.competidores_2km} competidor${sat.competidores_2km !== 1 ? "es" : ""} a 2km` : "Zona libre de competidores directos" };
+                      const satCfg = sat.nivel === "high"
+                        ? { bg: "#1a0808", border: "#3a1212", color: "#ff6b6b", icon: "⚠️", text: `High saturation: ${sat.competidores_500m} competitor${sat.competidores_500m !== 1 ? "s" : ""} within 500m, ${sat.competidores_2km} within 2km` }
+                        : sat.nivel === "medium"
+                          ? { bg: "#1a1200", border: "#3a2800", color: "#ccaa44", icon: "⚡", text: `Medium saturation: ${sat.competidores_500m} within 500m, ${sat.competidores_2km} within 2km` }
+                          : { bg: "#001a10", border: "#003820", color: "#44cc88", icon: "✓", text: sat.competidores_2km > 0 ? `Low: only ${sat.competidores_2km} competitor${sat.competidores_2km !== 1 ? "s" : ""} within 2km` : "No direct competitors in the area" };
 
                       return (
                         <a
@@ -670,13 +638,13 @@ export default function BuscarLocal() {
                                       borderRadius: 1, px: 1, py: 0.3,
                                     }}>
                                       <Typography sx={{ fontSize: 11, color: p.modalidad === "rent" ? "#00b4d8" : "#00f5a0", fontFamily: "'DM Mono', monospace" }}>
-                                        {p.modalidad === "rent" ? "Renta" : "Venta"}
+                                        {p.modalidad === "rent" ? "Rent" : "Sale"}
                                       </Typography>
                                     </Box>
                                   )}
                                   {p.budget_status === "over" && (
                                     <Box sx={{ background: "#1a1200", border: "1px solid #3a2800", borderRadius: 1, px: 1, py: 0.3 }}>
-                                      <Typography sx={{ fontSize: 11, color: "#ccaa44", fontFamily: "'DM Mono', monospace" }}>arriba de tu presupuesto</Typography>
+                                      <Typography sx={{ fontSize: 11, color: "#ccaa44", fontFamily: "'DM Mono', monospace" }}>above your budget</Typography>
                                     </Box>
                                   )}
                                 </Box>
@@ -700,7 +668,7 @@ export default function BuscarLocal() {
                                     {p.precio_inmueble ? `$${p.precio_inmueble.toLocaleString("en-US")} MXN` : "—"}
                                   </Typography>
                                   <Typography variant="caption" sx={{ color: "#00f5a0", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
-                                    Ver detalles →
+                                    View details →
                                   </Typography>
                                 </Box>
                               </Box>
@@ -713,13 +681,13 @@ export default function BuscarLocal() {
                 </Box>
               )}
 
-              {/* CTA: análisis IA completo */}
+              {/* CTA: full AI analysis */}
               <Box mt={3} p={2.5} borderRadius={2} bgcolor="#0c0c1e" border="1px solid #1a1a3a" textAlign="center">
                 <Typography variant="caption" color="text.secondary" display="block" mb={1.5}>
-                  ¿Quieres recomendaciones de colonias, requisitos del espacio y consejos personalizados?
+                  Want neighborhood recommendations, space requirements and personalized tips?
                 </Typography>
                 <Button variant="contained" onClick={handleAiAnalysis}>
-                  Análisis IA completo →
+                  Full AI Analysis →
                 </Button>
               </Box>
 
@@ -734,15 +702,15 @@ export default function BuscarLocal() {
           {/* ── ESTADO: RESULTADO ───────────────────────────────────────── */}
           {appState === "result" && result && (
             <Box className="fadein">
-              {/* Cabecera de resultado */}
+              {/* Result header */}
               <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={4} flexWrap="wrap" gap={2}>
                 <Box>
-                  <Typography variant="h5" fontWeight={800}>Tu análisis de espacio</Typography>
+                  <Typography variant="h5" fontWeight={800}>Your space analysis</Typography>
                   <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                    basado en tu descripción · orientativo
+                    based on your description · indicative
                   </Typography>
                 </Box>
-                <Button variant="outlined" size="small" onClick={reset}>← nueva búsqueda</Button>
+                <Button variant="outlined" size="small" onClick={reset}>← new search</Button>
               </Box>
 
               {/* Giro detectado */}
@@ -752,7 +720,7 @@ export default function BuscarLocal() {
                     <Typography fontSize={28}>🤖</Typography>
                     <Box>
                       <Typography variant="caption" sx={{ color: "#00f5a0", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
-                        GIRO DETECTADO
+                        DETECTED CATEGORY
                       </Typography>
                       <Typography variant="h6" fontWeight={700} mt={0.5} mb={1}>
                         {result.giro_detectado}
@@ -769,24 +737,24 @@ export default function BuscarLocal() {
               <Card elevation={0} sx={{ border: "1px solid #1e1e3e", borderRadius: 3, mb: 3 }}>
                 <CardContent sx={{ p: 3, pb: "24px !important" }}>
                   <Typography variant="caption" sx={{ color: "#00b4d8", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
-                    📐 REQUISITOS DEL ESPACIO
+                    📐 SPACE REQUIREMENTS
                   </Typography>
 
                   <Box display="flex" gap={3} mb={3} flexWrap="wrap">
                     <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, px: 2.5, py: 1.5, textAlign: "center" }}>
-                      <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>mínimo</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>minimum</Typography>
                       <Typography fontWeight={800} fontSize={22} color="#00b4d8">{result.requisitos_espacio.m2_minimo}</Typography>
                       <Typography variant="caption" color="text.secondary">m²</Typography>
                     </Box>
                     <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, px: 2.5, py: 1.5, textAlign: "center" }}>
-                      <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>ideal</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>ideal (recommended)</Typography>
                       <Typography fontWeight={800} fontSize={22} color="#00f5a0">{result.requisitos_espacio.m2_ideal}</Typography>
                       <Typography variant="caption" color="text.secondary">m²</Typography>
                     </Box>
                   </Box>
 
                   <Box mb={2}>
-                    <Typography variant="caption" color="text.secondary" display="block" mb={1}>Servicios necesarios</Typography>
+                    <Typography variant="caption" color="text.secondary" display="block" mb={1}>Required services</Typography>
                     <Box display="flex" gap={1} flexWrap="wrap">
                       {result.requisitos_espacio.servicios_necesarios.map((s, i) => (
                         <Chip key={i} label={s} size="small" sx={{ bgcolor: "#001a10", border: "1px solid #003820", color: "#44cc88", fontFamily: "'DM Mono', monospace", fontSize: 11 }} />
@@ -796,7 +764,7 @@ export default function BuscarLocal() {
 
                   {result.requisitos_espacio.caracteristicas_deseables.length > 0 && (
                     <Box>
-                      <Typography variant="caption" color="text.secondary" display="block" mb={1}>Deseables</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block" mb={1}>Desirable</Typography>
                       <Box display="flex" gap={1} flexWrap="wrap">
                         {result.requisitos_espacio.caracteristicas_deseables.map((c, i) => (
                           <Chip key={i} label={c} size="small" sx={{ bgcolor: "#12122a", border: "1px solid #2a2a4a", color: "#8888cc", fontFamily: "'DM Mono', monospace", fontSize: 11 }} />
@@ -817,7 +785,7 @@ export default function BuscarLocal() {
                   <Typography fontSize={20}>{result.presupuesto_viable ? "✅" : "⚠️"}</Typography>
                   <Box>
                     <Typography variant="caption" sx={{ color: result.presupuesto_viable ? "#228844" : "#cc4444", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
-                      PRESUPUESTO
+                      BUDGET
                     </Typography>
                     <Typography variant="body2" color={result.presupuesto_viable ? "#44cc88" : "#ff8888"} mt={0.5}>
                       {result.mensaje_presupuesto}
@@ -828,13 +796,13 @@ export default function BuscarLocal() {
 
               {/* Colonias recomendadas */}
               <Typography variant="caption" sx={{ color: "#8888aa", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
-                📍 COLONIAS RECOMENDADAS
+                📍 RECOMMENDED NEIGHBORHOODS
               </Typography>
               <Box display="flex" flexDirection="column" gap={2} mb={3}>
                 {result.colonias_recomendadas.map((col, i) => (
                   <Card key={i} elevation={0} sx={{ border: i === 0 ? "1px solid #00f5a044" : "1px solid #1e1e3e", borderRadius: 3, position: "relative", transition: "transform 0.2s", "&:hover": { transform: "translateY(-2px)" } }}>
                     {i === 0 && (
-                      <Chip label="MEJOR OPCIÓN" size="small" sx={{ position: "absolute", top: -10, right: 16, background: "linear-gradient(135deg, #00f5a0, #00b4d8)", color: "#0a0a14", fontWeight: 800, fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 1 }} />
+                      <Chip label="BEST OPTION" size="small" sx={{ position: "absolute", top: -10, right: 16, background: "linear-gradient(135deg, #00f5a0, #00b4d8)", color: "#0a0a14", fontWeight: 800, fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 1 }} />
                     )}
                     <CardContent sx={{ p: 3, pb: "24px !important" }}>
                       <Box display="flex" alignItems="flex-start" justifyContent="space-between" gap={2} mb={2}>
@@ -847,7 +815,7 @@ export default function BuscarLocal() {
                         {col.razon}
                       </Typography>
                       <Box display="flex" alignItems="center" gap={1.5}>
-                        <Typography variant="caption" color="text.secondary" sx={{ width: 90, flexShrink: 0 }}>oportunidad</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ width: 90, flexShrink: 0 }}>opportunity</Typography>
                         <ScoreBar score={col.nivel_oportunidad} color="#00f5a0" />
                         <Typography variant="caption" sx={{ color: "#00f5a0", width: 28, textAlign: "right", fontWeight: 700 }}>
                           {col.nivel_oportunidad}
@@ -862,7 +830,7 @@ export default function BuscarLocal() {
               {result.alertas.length > 0 && (
                 <Box mb={3} p={2.5} borderRadius={2} bgcolor="#1a1000" border="1px solid #3a2800">
                   <Typography variant="caption" sx={{ color: "#887722", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 1.5 }}>
-                    ⚠️ ALERTAS
+                    ⚠️ ALERTS
                   </Typography>
                   {result.alertas.map((a, i) => (
                     <Typography key={i} variant="body2" color="#ccaa44" sx={{ lineHeight: 1.7 }}>· {a}</Typography>
@@ -874,7 +842,7 @@ export default function BuscarLocal() {
               {result.consejos.length > 0 && (
                 <Box mb={4} p={2.5} borderRadius={2} bgcolor="#0a0a1e" border="1px solid #1e1e3e">
                   <Typography variant="caption" sx={{ color: "#00b4d8", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 1.5 }}>
-                    💡 CONSEJOS PRÁCTICOS
+                    💡 PRACTICAL TIPS
                   </Typography>
                   {result.consejos.map((c, i) => (
                     <Typography key={i} variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>· {c}</Typography>
@@ -887,10 +855,10 @@ export default function BuscarLocal() {
                 <Box mb={4}>
                   <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
                     <Typography variant="caption" sx={{ color: "#00f5a0", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
-                      🏠 LOCALES DISPONIBLES QUE HACEN MATCH
+                      🏠 AVAILABLE SPACES MATCHING YOUR SEARCH
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
-                      {result.matching_properties.length} encontrado{result.matching_properties.length !== 1 ? "s" : ""}
+                      {result.matching_properties.length} found
                     </Typography>
                   </Box>
 
@@ -913,7 +881,7 @@ export default function BuscarLocal() {
                           {i === 0 && (
                             <Box sx={{ background: "linear-gradient(135deg, #00f5a0, #00b4d8)", px: 2, py: 0.5 }}>
                               <Typography sx={{ fontSize: 10, fontWeight: 800, color: "#0a0a14", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>
-                                ✦ MEJOR MATCH
+                                ✦ BEST MATCH
                               </Typography>
                             </Box>
                           )}
@@ -994,7 +962,7 @@ export default function BuscarLocal() {
                                   {p.precio_inmueble ? `$${p.precio_inmueble.toLocaleString("en-US")} MXN` : "—"}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: "#00f5a0", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
-                                  Ver detalles →
+                                  View details →
                                 </Typography>
                               </Box>
                             </Box>
@@ -1007,7 +975,7 @@ export default function BuscarLocal() {
                   <Box mt={2} textAlign="center">
                     <a href="/propiedades" style={{ textDecoration: "none" }}>
                       <Typography variant="caption" sx={{ color: "#00b4d8", fontFamily: "'DM Mono', monospace", fontSize: 12, "&:hover": { textDecoration: "underline" } }}>
-                        Ver todos los locales disponibles →
+                        View all available spaces →
                       </Typography>
                     </a>
                   </Box>
@@ -1019,18 +987,18 @@ export default function BuscarLocal() {
                 <Box mb={4} p={2.5} borderRadius={2} bgcolor="#0a0a1e" border="1px solid #1e1e3e" textAlign="center">
                   <Typography fontSize={28} mb={1}>📭</Typography>
                   <Typography variant="body2" color="text.secondary" mb={1}>
-                    No hay locales registrados que coincidan con tu búsqueda todavía.
+                    No registered spaces match your search yet.
                   </Typography>
                   <a href="/propiedades" style={{ textDecoration: "none" }}>
                     <Typography variant="caption" sx={{ color: "#00f5a0", fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
-                      Ver todos los locales →
+                      View all spaces →
                     </Typography>
                   </a>
                 </Box>
               )}
 
               <Typography variant="caption" display="block" textAlign="center" color="#333355">
-                análisis generado por IA · datos orientativos · valida con investigación de campo
+                AI-generated analysis · indicative data · validate with field research
               </Typography>
             </Box>
           )}
