@@ -47,7 +47,7 @@ export default function PropiedadesPage() {
   const [sortBy, setSortBy] = useState<'precio-asc' | 'precio-desc' | 'm2-asc' | 'm2-desc'>('precio-asc');
 
   useEffect(() => {
-    fetch('/api/properties')
+    fetch('/api/properties?published=true')
       .then(r => r.json())
       .then((data: Property[]) => {
         setProperties(data ?? []);

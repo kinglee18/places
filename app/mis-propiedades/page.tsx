@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { supabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
+import PropertyActions from '@/components/PropertyActions';
 
 interface Property {
   id: string;
@@ -122,14 +123,14 @@ export default async function MisPropiedadesPage() {
                         {formatPrice(p.precio_inmueble)}
                       </span>
                       <Link href={`/propiedades/${p.id}`} style={{
-                        fontSize: 12, fontWeight: 700, color: '#00b4d8',
-                        border: '1px solid rgba(0,180,216,0.3)', borderRadius: 8,
+                        fontSize: 12, fontWeight: 700, color: '#9090b8',
+                        border: '1px solid rgba(144,144,184,0.25)', borderRadius: 8,
                         padding: '5px 12px', textDecoration: 'none',
-                        transition: 'background 0.15s',
                       }}>
                         Ver →
                       </Link>
                     </div>
+                    <PropertyActions id={p.id} isPublished={p.is_published} />
                   </div>
                 </div>
               ))}

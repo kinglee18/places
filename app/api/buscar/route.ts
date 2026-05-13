@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
     lat,
     lng,
     presupuesto,
-    disponibilidad,
     modalidad,
     giro_pre_detectado,
     preflight_property_ids,
@@ -73,7 +72,6 @@ export async function POST(req: NextRequest) {
     lat?: number | null;
     lng?: number | null;
     presupuesto?: number | null;
-    disponibilidad?: string[];
     modalidad?: 'rent' | 'sale' | 'cualquiera' | null;
     giro_pre_detectado?: string | null;
     preflight_property_ids?: string[];
@@ -99,8 +97,7 @@ Un emprendedor describe su situación así:
 
 ${zona ? `Zona / ciudad preferida: ${zona}` : ''}
 ${lat && lng ? `Coordenadas GPS seleccionadas en el mapa: ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` : ''}
-${presupuesto ? `Presupuesto de renta mensual: $${presupuesto} MXN` : ''}
-${disponibilidad && disponibilidad.length > 0 ? `Disponibilidad: ${(disponibilidad as string[]).join(', ')}` : ''}${giroAnchor}${modalidadHint}
+${presupuesto ? `Presupuesto de renta mensual: $${presupuesto} MXN` : ''}${giroAnchor}${modalidadHint}
 
 Analiza la situación y extrae:
 1. El giro de negocio implícito

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import {
   ThemeProvider, createTheme, Box, Typography, Button, TextField,
   Card, CardContent, Chip, CircularProgress, Slider, FormControl,
-  Checkbox, FormControlLabel, FormGroup, ToggleButton, ToggleButtonGroup,
+  ToggleButton, ToggleButtonGroup,
 } from "@mui/material";
 
 const ZonaPicker = dynamic(() => import("./ZonaPicker"), {
@@ -69,11 +69,6 @@ const darkTheme = createTheme({
           color: "#e0e0ff",
           "&:hover": { backgroundColor: "#1a1a2e", borderColor: "#444466" },
         },
-      },
-    },
-    MuiCheckbox: {
-      styleOverrides: {
-        root: { color: "#2a2a4a", "&.Mui-checked": { color: "#00f5a0" } },
       },
     },
     MuiSlider: {
@@ -204,7 +199,6 @@ export default function BuscarLocal() {
   const [zona, setZona] = useState<{ label: string; lat: number; lng: number } | null>(null);
   const [modalidad, setModalidad] = useState<Modalidad>("rent");
   const [presupuesto, setPresupuesto] = useState<number>(8000);
-  const [disponibilidad, setDisponibilidad] = useState<string[]>([]);
   const [preflight, setPreflight] = useState<PreflightResult | null>(null);
   const [result, setResult] = useState<BuscarResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -218,12 +212,6 @@ export default function BuscarLocal() {
     const interval = setInterval(() => setDots((d) => (d.length >= 3 ? "" : d + ".")), 400);
     return () => { clearInterval(interval); setDots(""); };
   }, [isLoading]);
-
-  const toggleDisponibilidad = (val: string) => {
-    setDisponibilidad((prev) =>
-      prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
-    );
-  };
 
   // ── Paso 1: preflight (DB + saturación) ────────────────────────────────────
   const handleSubmit = async () => {
@@ -271,7 +259,6 @@ export default function BuscarLocal() {
           lat: zona?.lat ?? null,
           lng: zona?.lng ?? null,
           presupuesto,
-          disponibilidad,
           modalidad,
           // Anclamos el análisis al giro ya detectado para mejor calidad y consistencia
           giro_pre_detectado: preflight?.giro_detectado.label ?? null,
@@ -297,7 +284,6 @@ export default function BuscarLocal() {
     setZona(null);
     setModalidad("rent");
     setPresupuesto(8000);
-    setDisponibilidad([]);
   };
 
   const backToInput = () => {

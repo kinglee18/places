@@ -302,6 +302,7 @@ export default function LocalIQ() {
     const { data: inserted, error } = await supabase
       .from('properties')
       .insert({
+        is_published: true,
         user_email: session?.user?.email ?? 'anonymous',
         colonia: pinAddress?.colonia ?? data.colonia,
         city:    pinAddress?.city    ?? null,
