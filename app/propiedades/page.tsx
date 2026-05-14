@@ -25,6 +25,8 @@ interface Property {
   estado_conservacion: string | null;
   uso_suelo: string | null;
   tipo_energia: string | null;
+  city: string | null;
+  state: string | null;
 }
 
 const TIPO_ICONS: Record<string, string> = {
@@ -259,7 +261,9 @@ export default function PropiedadesPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: '15px', color: '#f0f0f8' }}>{p.colonia}</div>
-                      {p.calle && <div style={{ fontSize: '12px', color: '#6b6b9a', marginTop: 2 }}>{p.calle} {p.numero}</div>}
+                      <div style={{ fontSize: '12px', color: '#6b6b9a', marginTop: 2 }}>
+                        {[p.calle && `${p.calle}${p.numero ? ` ${p.numero}` : ''}`, p.city, p.state].filter(Boolean).join(' · ')}
+                      </div>
                     </div>
                     <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(0,245,160,0.08)', border: '1px solid rgba(0,245,160,0.2)', color: '#00f5a0', padding: '4px 10px', borderRadius: '100px', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8 }}>
                       {p.m2} m²
