@@ -54,6 +54,16 @@ interface Property {
   lng: number | null;
   photo_urls: string[];
   competition_data: CompetitionData | null;
+  m2_construccion: number | null;
+  frente_m: number | null;
+  fondo_m: number | null;
+  altura_techo_m: number | null;
+  tipo_terreno: string | null;
+  estado_conservacion: string | null;
+  calidad_construccion: string | null;
+  tipo_energia: string | null;
+  uso_suelo: string | null;
+  servicios: string[] | null;
 }
 
 function formatPrice(val: number | null): string {
@@ -187,9 +197,18 @@ export default function PropertyDetailPage() {
   const photos = p.photo_urls?.length > 0 ? p.photo_urls : null;
 
   const stats = [
-    stat('📐', 'Size', `${p.m2} m²`),
+    stat('📐', 'Land area', `${p.m2} m²`),
+    stat('🏗️', 'Built area', p.m2_construccion ? `${p.m2_construccion} m²` : null),
+    stat('↔️', 'Frontage', p.frente_m ? `${p.frente_m} m` : null),
+    stat('↕️', 'Depth', p.fondo_m ? `${p.fondo_m} m` : null),
+    stat('⬆️', 'Ceiling height', p.altura_techo_m ? `${p.altura_techo_m} m` : null),
     stat('🏢', 'Floor', p.nivel_piso),
     stat('📅', 'Age', p.antiguedad ? `${p.antiguedad} years` : null),
+    stat('🔲', 'Lot type', p.tipo_terreno),
+    stat('🔧', 'Condition', p.estado_conservacion),
+    stat('🏆', 'Build quality', p.calidad_construccion),
+    stat('⚡', 'Electrical', p.tipo_energia),
+    stat('🗺️', 'Zoning', p.uso_suelo),
     stat('💧', 'Water / Drainage', p.agua_drenaje),
     stat('🚿', 'Bathrooms', p.banos || null),
     stat('🚪', 'Rooms', p.habitaciones || null),
@@ -314,6 +333,25 @@ export default function PropertyDetailPage() {
                 </div>
               ))}
             </div>
+
+            {/* Services */}
+            {p.servicios && p.servicios.length > 0 && (
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #1e1e35' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>Additional services</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {p.servicios.map(s => (
+                    <span key={s} style={{
+                      fontSize: 11, fontFamily: "'DM Mono', monospace",
+                      padding: '4px 10px', borderRadius: 7,
+                      background: 'rgba(0,245,160,0.07)', border: '1px solid rgba(0,245,160,0.22)',
+                      color: '#00f5a0',
+                    }}>
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Map link */}
             {mapsUrl && (
