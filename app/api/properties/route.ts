@@ -8,7 +8,27 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('properties')
-    .select('id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, agua_drenaje, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at')
+    .select(`
+      id,
+      colonia,
+      calle,
+      city,
+      state,
+      numero,
+      tipo_local,
+      m2,
+      banos,
+      habitaciones,
+      estacionamientos,
+      agua_drenaje,
+      modalidad,
+      precio_inmueble,
+      precio_mantenimiento,
+      descripcion,
+      photo_urls,
+      nivel_piso,
+      created_at`
+    )
     .order('created_at', { ascending: false });
 
   if (published === 'true') query = query.eq('is_published', true);
