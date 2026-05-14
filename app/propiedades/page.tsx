@@ -22,6 +22,9 @@ interface Property {
   photo_urls: string[];
   nivel_piso: string | null;
   created_at: string;
+  estado_conservacion: string | null;
+  uso_suelo: string | null;
+  tipo_energia: string | null;
 }
 
 const TIPO_ICONS: Record<string, string> = {
@@ -43,6 +46,10 @@ export default function PropiedadesPage() {
   const [loading, setLoading] = useState(true);
   const [coloniaFilter, setColoniaFilter] = useState('All');
   const [tipoFilter, setTipoFilter] = useState('All');
+  const [modalidadFilter, setModalidadFilter] = useState('All');
+  const [condicionFilter, setCondicionFilter] = useState('All');
+  const [zoningFilter, setZoningFilter] = useState('All');
+  const [energiaFilter, setEnergiaFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'precio-asc' | 'precio-desc' | 'm2-asc' | 'm2-desc'>('precio-asc');
 
@@ -55,12 +62,22 @@ export default function PropiedadesPage() {
       });
   }, []);
 
-  const colonias = ['All', ...Array.from(new Set(properties.map(p => p.colonia)))];
-  const tipos    = ['All', ...Array.from(new Set(properties.map(p => p.tipo_local)))];
+  const colonias   = ['All', ...Array.from(new Set(properties.map(p => p.colonia)))];
+  const tipos      = ['All', ...Array.from(new Set(properties.map(p => p.tipo_local)))];
+  const condiciones = ['All', ...Array.from(new Set(properties.map(p => p.estado_conservacion).filter(Boolean))) as string[]];
+  const zonings    = ['All', ...Array.from(new Set(properties.map(p => p.uso_suelo).filter(Boolean))) as string[]];
+  const energias   = ['All', ...Array.from(new Set(properties.map(p => p.tipo_energia).filter(Boolean))) as string[]];
+
+  const hasActiveFilters = search || coloniaFilter !== 'All' || tipoFilter !== 'All' ||
+    modalidadFilter !== 'All' || condicionFilter !== 'All' || zoningFilter !== 'All' || energiaFilter !== 'All';
 
   const filtered = properties
     .filter(p => coloniaFilter === 'All' || p.colonia === coloniaFilter)
     .filter(p => tipoFilter === 'All' || p.tipo_local === tipoFilter)
+    .filter(p => modalidadFilter === 'All' || p.modalidad === modalidadFilter)
+    .filter(p => condicionFilter === 'All' || p.estado_conservacion === condicionFilter)
+    .filter(p => zoningFilter === 'All' || p.uso_suelo === zoningFilter)
+    .filter(p => energiaFilter === 'All' || p.tipo_energia === energiaFilter)
     .filter(p => !search ||
       p.colonia.toLowerCase().includes(search.toLowerCase()) ||
       (p.descripcion ?? '').toLowerCase().includes(search.toLowerCase()) ||
@@ -104,45 +121,84 @@ export default function PropiedadesPage() {
         <div style={{
           background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: '16px',
           padding: '20px 24px', marginBottom: '36px',
-          display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'flex-end',
+          display: 'flex', flexDirection: 'column', gap: '14px',
         }}>
-          <div style={{ flex: '1 1 220px', minWidth: '200px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>SEARCH</label>
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Neighborhood, street, description..."
-              style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = '#00f5a0')}
-              onBlur={e => (e.target.style.borderColor = '#2a2a4a')} />
+          {/* Row 1: search + sort */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'flex-end' }}>
+            <div style={{ flex: '1 1 240px', minWidth: '200px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>SEARCH</label>
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Neighborhood, street, description..."
+                style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = '#00f5a0')}
+                onBlur={e => (e.target.style.borderColor = '#2a2a4a')} />
+            </div>
+            <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>SORT BY</label>
+              <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                <option value="precio-asc">Price: lowest first</option>
+                <option value="precio-desc">Price: highest first</option>
+                <option value="m2-asc">Size: smallest first</option>
+                <option value="m2-desc">Size: largest first</option>
+              </select>
+            </div>
           </div>
-          <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>NEIGHBORHOOD</label>
-            <select value={coloniaFilter} onChange={e => setColoniaFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              {colonias.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+
+          {/* Row 2: categorical filters */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'flex-end' }}>
+            <div style={{ flex: '1 1 140px', minWidth: '120px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>LISTING TYPE</label>
+              <select value={modalidadFilter} onChange={e => setModalidadFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                <option value="All">All</option>
+                <option value="rent">For rent</option>
+                <option value="sale">For sale</option>
+              </select>
+            </div>
+            <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>NEIGHBORHOOD</label>
+              <select value={coloniaFilter} onChange={e => setColoniaFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                {colonias.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div style={{ flex: '1 1 180px', minWidth: '160px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>PROPERTY TYPE</label>
+              <select value={tipoFilter} onChange={e => setTipoFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                {tipos.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            {condiciones.length > 1 && (
+              <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>CONDITION</label>
+                <select value={condicionFilter} onChange={e => setCondicionFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                  {condiciones.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            )}
+            {zonings.length > 1 && (
+              <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>ZONING</label>
+                <select value={zoningFilter} onChange={e => setZoningFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                  {zonings.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+              </div>
+            )}
+            {energias.length > 1 && (
+              <div style={{ flex: '1 1 150px', minWidth: '130px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>ELECTRICAL</label>
+                <select value={energiaFilter} onChange={e => setEnergiaFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                  {energias.map(e => <option key={e} value={e}>{e}</option>)}
+                </select>
+              </div>
+            )}
+            {hasActiveFilters && (
+              <button onClick={() => { setSearch(''); setColoniaFilter('All'); setTipoFilter('All'); setModalidadFilter('All'); setCondicionFilter('All'); setZoningFilter('All'); setEnergiaFilter('All'); }}
+                style={{ background: 'transparent', border: '1px solid #2a2a4a', borderRadius: '10px', color: '#6b6b9a', padding: '10px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#ff6b6b'; e.currentTarget.style.color = '#ff6b6b'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a4a'; e.currentTarget.style.color = '#6b6b9a'; }}>
+                ✕ Clear all
+              </button>
+            )}
           </div>
-          <div style={{ flex: '1 1 200px', minWidth: '180px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>PROPERTY TYPE</label>
-            <select value={tipoFilter} onChange={e => setTipoFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              {tipos.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div style={{ flex: '1 1 180px', minWidth: '160px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px' }}>SORT BY</label>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              <option value="precio-asc">Price: lowest first</option>
-              <option value="precio-desc">Price: highest first</option>
-              <option value="m2-asc">Size: smallest first</option>
-              <option value="m2-desc">Size: largest first</option>
-            </select>
-          </div>
-          {(search || coloniaFilter !== 'All' || tipoFilter !== 'All') && (
-            <button onClick={() => { setSearch(''); setColoniaFilter('All'); setTipoFilter('All'); }}
-              style={{ background: 'transparent', border: '1px solid #2a2a4a', borderRadius: '10px', color: '#6b6b9a', padding: '10px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#ff6b6b'; e.currentTarget.style.color = '#ff6b6b'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a4a'; e.currentTarget.style.color = '#6b6b9a'; }}>
-              ✕ Clear
-            </button>
-          )}
         </div>
 
         {/* Grid */}
