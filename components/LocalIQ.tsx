@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import {
   ThemeProvider, createTheme, Box, Typography, Button, Stepper, Step, StepLabel,
   TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, Card,
-  CircularProgress, IconButton, Autocomplete,
+  CircularProgress, IconButton, Autocomplete, Checkbox, FormGroup, FormControlLabel,
 } from "@mui/material";
 
 const MapPicker = dynamic(() => import("./MapPicker"), {
@@ -110,6 +110,13 @@ interface FormData {
   nivelPiso: string; usoAnterior: string;
   aguaDrenaje: string; habitaciones: number; banos: number; estacionamientos: number;
   modalidad: string; precioInmueble: string; precioMantenimiento: string;
+  // Century 21 fields
+  m2Construccion: number | '';
+  frenteM: number | ''; fondoM: number | '';
+  alturaTechoM: number | '';
+  tipoTerreno: string; estadoConservacion: string;
+  calidadConstruccion: string; tipoEnergia: string; usoSuelo: string;
+  servicios: string[];
 }
 
 const NIVELES_PISO = [
@@ -131,6 +138,13 @@ const USOS_ANTERIORES = [
   'Vacant (never used)',
   'Other',
 ];
+
+const TIPOS_TERRENO = ['Regular', 'Irregular', 'En esquina'];
+const ESTADOS_CONSERVACION = ['Nuevo', 'Excelente', 'Bueno', 'Regular', 'Necesita remodelación'];
+const CALIDADES_CONSTRUCCION = ['Alta', 'Media', 'Baja'];
+const TIPOS_ENERGIA = ['Monofásica', 'Trifásica', 'No especificado'];
+const USOS_SUELO = ['Comercial', 'Industrial', 'Mixto', 'Habitacional con comercio', 'No especificado'];
+const SERVICIOS_OPCIONES = ['Luz', 'Alumbrado exterior', 'Recepción', 'Buenos accesos'];
 
 interface PinLocation { lat: number; lng: number; }
 
@@ -229,6 +243,9 @@ export default function LocalIQ() {
       nivelPiso: '', usoAnterior: '',
       aguaDrenaje: '', habitaciones: 0, banos: 0, estacionamientos: 0,
       modalidad: '', precioInmueble: '', precioMantenimiento: '',
+      m2Construccion: '', frenteM: '', fondoM: '', alturaTechoM: '',
+      tipoTerreno: '', estadoConservacion: '', calidadConstruccion: '',
+      tipoEnergia: '', usoSuelo: '', servicios: [],
     },
     mode: 'onTouched'
   });
@@ -326,6 +343,16 @@ export default function LocalIQ() {
         lat: pinLocation?.lat ?? null,
         lng: pinLocation?.lng ?? null,
         photo_urls: photoUrls,
+        m2_construccion: data.m2Construccion !== '' ? Number(data.m2Construccion) : null,
+        frente_m: data.frenteM !== '' ? Number(data.frenteM) : null,
+        fondo_m: data.fondoM !== '' ? Number(data.fondoM) : null,
+        altura_techo_m: data.alturaTechoM !== '' ? Number(data.alturaTechoM) : null,
+        tipo_terreno: data.tipoTerreno || null,
+        estado_conservacion: data.estadoConservacion || null,
+        calidad_construccion: data.calidadConstruccion || null,
+        tipo_energia: data.tipoEnergia || null,
+        uso_suelo: data.usoSuelo || null,
+        servicios: data.servicios.length > 0 ? data.servicios : null,
       })
       .select('id')
       .single();
@@ -549,6 +576,101 @@ export default function LocalIQ() {
                         </Select>
                       </FormControl>
                     )} />
+
+                    {/* m2 construcción + frente */}
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="m2Construccion" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>CONSTRUCTION (m²) <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <TextField {...field} type="number" placeholder="Ex: 175" />
+                          </FormControl>
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="frenteM" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>FRONTAGE (m) <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <TextField {...field} type="number" placeholder="Ex: 7.2" />
+                          </FormControl>
+                        )} />
+                      </Grid>
+                    </Grid>
+
+                    {/* fondo + altura de techo */}
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="fondoM" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>DEPTH (m) <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <TextField {...field} type="number" placeholder="Ex: 25" />
+                          </FormControl>
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="alturaTechoM" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>CEILING HEIGHT (m) <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <TextField {...field} type="number" placeholder="Ex: 3" />
+                          </FormControl>
+                        )} />
+                      </Grid>
+                    </Grid>
+
+                    <Controller name="tipoTerreno" control={control} render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>LOT TYPE <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                        <Select {...field} displayEmpty>
+                          <MenuItem value="">Select lot type...</MenuItem>
+                          {TIPOS_TERRENO.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                    )} />
+
+                    <Controller name="estadoConservacion" control={control} render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>CONDITION <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                        <Select {...field} displayEmpty>
+                          <MenuItem value="">Select condition...</MenuItem>
+                          {ESTADOS_CONSERVACION.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                    )} />
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="calidadConstruccion" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>BUILD QUALITY <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <Select {...field} displayEmpty>
+                              <MenuItem value="">Select...</MenuItem>
+                              {CALIDADES_CONSTRUCCION.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                            </Select>
+                          </FormControl>
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="tipoEnergia" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>ELECTRICAL TYPE <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <Select {...field} displayEmpty>
+                              <MenuItem value="">Select...</MenuItem>
+                              {TIPOS_ENERGIA.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+                            </Select>
+                          </FormControl>
+                        )} />
+                      </Grid>
+                    </Grid>
+
+                    <Controller name="usoSuelo" control={control} render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>LAND USE ZONING <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                        <Select {...field} displayEmpty>
+                          <MenuItem value="">Select zoning...</MenuItem>
+                          {USOS_SUELO.map(u => <MenuItem key={u} value={u}>{u}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                    )} />
                   </Box>
 
                   {/* STEP 3: DETALLES */}
@@ -633,6 +755,34 @@ export default function LocalIQ() {
                           <MenuItem value="Drainage only">Drainage only</MenuItem>
                           <MenuItem value="No connections">No connections</MenuItem>
                         </Select>
+                      </FormControl>
+                    )} />
+
+                    {/* Servicios adicionales */}
+                    <Controller name="servicios" control={control} render={({ field }) => (
+                      <FormControl fullWidth component="fieldset">
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>ADDITIONAL SERVICES <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                        <FormGroup row sx={{ gap: 0.5, mt: 0.5 }}>
+                          {SERVICIOS_OPCIONES.map(s => (
+                            <FormControlLabel
+                              key={s}
+                              label={<Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: '#e0e0ff', fontSize: 13 }}>{s}</Typography>}
+                              control={
+                                <Checkbox
+                                  checked={field.value.includes(s)}
+                                  onChange={e => {
+                                    const next = e.target.checked
+                                      ? [...field.value, s]
+                                      : field.value.filter((v: string) => v !== s);
+                                    field.onChange(next);
+                                  }}
+                                  sx={{ color: '#2a2a4a', '&.Mui-checked': { color: '#00f5a0' }, p: 0.75 }}
+                                />
+                              }
+                              sx={{ m: 0, px: 1.5, py: 0.75, border: '1px solid #2a2a4a', borderRadius: 2, bgcolor: '#12122a' }}
+                            />
+                          ))}
+                        </FormGroup>
                       </FormControl>
                     )} />
 
