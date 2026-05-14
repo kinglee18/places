@@ -102,7 +102,7 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
                 opacity: deleting ? 0.6 : 1,
               }}
             >
-              {deleting ? "..." : "¿Confirmar?"}
+              {deleting ? "..." : "¿Confirm?"}
             </button>
             <button
               onClick={() => setConfirming(false)}
