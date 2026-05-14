@@ -139,12 +139,12 @@ const USOS_ANTERIORES = [
   'Other',
 ];
 
-const TIPOS_TERRENO = ['Regular', 'Irregular', 'En esquina'];
-const ESTADOS_CONSERVACION = ['Nuevo', 'Excelente', 'Bueno', 'Regular', 'Necesita remodelación'];
-const CALIDADES_CONSTRUCCION = ['Alta', 'Media', 'Baja'];
-const TIPOS_ENERGIA = ['Monofásica', 'Trifásica', 'No especificado'];
-const USOS_SUELO = ['Comercial', 'Industrial', 'Mixto', 'Habitacional con comercio', 'No especificado'];
-const SERVICIOS_OPCIONES = ['Luz', 'Alumbrado exterior', 'Recepción', 'Buenos accesos'];
+const TIPOS_TERRENO = ['Regular', 'Irregular', 'Corner lot'];
+const ESTADOS_CONSERVACION = ['New', 'Excellent', 'Good', 'Fair', 'Needs renovation'];
+const CALIDADES_CONSTRUCCION = ['High', 'Medium', 'Low'];
+const TIPOS_ENERGIA = ['Single-phase', 'Three-phase', 'Not specified'];
+const USOS_SUELO = ['Commercial', 'Industrial', 'Mixed-use', 'Residential with commercial', 'Not specified'];
+const SERVICIOS_OPCIONES = ['Electricity', 'Exterior lighting', 'Reception', 'Good access'];
 
 interface PinLocation { lat: number; lng: number; }
 
