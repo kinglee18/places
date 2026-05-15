@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabase } from '@/lib/supabase';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getSupabase } from '@/lib/supabase';
 
 interface AiResult {
   giro_detectado: string;
@@ -56,6 +54,7 @@ function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number): num
 }
 
 export async function POST(req: NextRequest) {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const body = await req.json();
   const {
     descripcion,
@@ -148,7 +147,7 @@ Respond ONLY with valid JSON without markdown, using this exact structure:
   // ── 2. Fetch properties ──────────────────────────────────────────────────
   // Si el preflight ya nos pasó IDs, usamos esos directamente. Si no, traemos
   // todos los publicados (con filtro de modalidad si aplica).
-  let propsQuery = supabase
+  let propsQuery = getSupabase()
     .from('properties')
     .select('id, colonia, calle, numero, tipo_local, m2, agua_drenaje, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, banos, estacionamientos, lat, lng')
     .eq('is_published', true);

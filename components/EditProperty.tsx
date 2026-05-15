@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useForm, Controller } from "react-hook-form";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import {
   ThemeProvider, createTheme, Box, Typography, Button, Stepper, Step, StepLabel,
   TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, Card,
@@ -265,7 +265,7 @@ export default function EditProperty({ property }: { property: PropertyData }) {
     for (const file of newPhotos) {
       const ext = file.name.split(".").pop();
       const storagePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await getSupabase().storage
         .from("property-photos")
         .upload(storagePath, file, { contentType: file.type });
       if (uploadError) {
@@ -273,7 +273,7 @@ export default function EditProperty({ property }: { property: PropertyData }) {
         setSaving(false);
         return;
       }
-      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(storagePath);
+      const { data: urlData } = getSupabase().storage.from("property-photos").getPublicUrl(storagePath);
       newUrls.push(urlData.publicUrl);
     }
 

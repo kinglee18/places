@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PropertyActions from '@/components/PropertyActions';
 
@@ -26,7 +26,7 @@ export default async function MisPropiedadesPage() {
   const session = await auth();
   if (!session?.user?.email) redirect('/login');
 
-  const { data: properties } = await supabase
+  const { data: properties } = await getSupabase()
     .from('properties')
     .select('id, colonia, tipo_local, m2, modalidad, precio_inmueble, photo_urls, is_published, created_at')
     .eq('user_email', session.user.email)
