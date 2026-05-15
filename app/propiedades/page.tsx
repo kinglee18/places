@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PropiedadesFilters from '@/components/PropiedadesFilters';
 import PropertyCard from '@/components/PropertyCard';
@@ -54,7 +54,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   const SELECT = 'id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at, city, state, estado_conservacion, uso_suelo, tipo_energia';
 
   // Main query with filters
-  let q = supabase.from('properties').select(SELECT, { count: 'exact' }).eq('is_published', true);
+  let q = getSupabase().from('properties').select(SELECT, { count: 'exact' }).eq('is_published', true);
 
   if (search)   q = q.or(`colonia.ilike.%${search}%,calle.ilike.%${search}%,descripcion.ilike.%${search}%`);
   if (colonia)  q = q.eq('colonia', colonia);
@@ -75,7 +75,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   // Filter options query (all published, no pagination)
   const [{ data: properties, count }, { data: allData }] = await Promise.all([
     q,
-    supabase.from('properties')
+    getSupabase().from('properties')
       .select('colonia, tipo_local, estado_conservacion, uso_suelo, tipo_energia')
       .eq('is_published', true),
   ]);

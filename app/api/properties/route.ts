@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 const SELECT = 'id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, agua_drenaje, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at, city, state, estado_conservacion, uso_suelo, tipo_energia';
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
 
-  let query = supabase.from('properties').select(SELECT).order('created_at', { ascending: false });
+  let query = getSupabase().from('properties').select(SELECT).order('created_at', { ascending: false });
 
   if (sp.get('published') === 'true') query = query.eq('is_published', true);
   if (sp.get('limit'))    query = query.limit(Number(sp.get('limit')));

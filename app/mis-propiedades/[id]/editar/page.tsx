@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import EditProperty, { type PropertyData } from '@/components/EditProperty';
 
@@ -14,7 +14,7 @@ export default async function EditarPropiedadPage({
 
   const { id } = await params;
 
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('properties')
     .select('id, colonia, calle, numero, lat, lng, tipo_local, m2, antiguedad, nivel_piso, uso_anterior, agua_drenaje, habitaciones, banos, estacionamientos, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, user_email')
     .eq('id', id)
