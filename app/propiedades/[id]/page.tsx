@@ -112,8 +112,14 @@ export default function PropertyDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ propertyId: id }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Analysis failed');
+      let json: { analysis?: Analysis; error?: string } = {};
+      try {
+        json = await res.json();
+      } catch {
+        throw new Error(`Server error (${res.status}) — check ANTHROPIC_API_KEY`);
+      }
+      if (!res.ok) throw new Error(json.error ?? `Request failed (${res.status})`);
+      if (!json.analysis) throw new Error('No analysis returned');
       setAnalysis(json.analysis);
     } catch (e) {
       setAnalyzeError(e instanceof Error ? e.message : 'Unknown error');
