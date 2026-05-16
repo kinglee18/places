@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import {
   detectGiroByKeywords,
   computeSaturation,
@@ -9,8 +9,6 @@ import {
   type GiroDef,
   type SaturationCount,
 } from '@/lib/giros';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 interface RawProperty {
   id: string;
@@ -63,6 +61,7 @@ function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number): num
  */
 async function detectGiroByAi(descripcion: string): Promise<GiroDef | null> {
   if (!process.env.ANTHROPIC_API_KEY) return null;
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const catalogo = GIROS.map((g) => `- ${g.id}: ${g.label}`).join('\n');
   const prompt = `Classify the following entrepreneur description into ONE of the business categories below (respond with only the id, nothing else; if none apply respond "ninguno"):
@@ -115,7 +114,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 2. Query a Supabase ──────────────────────────────────────────────────
-  let query = supabase
+  let query = getSupabase()
     .from('properties')
     .select('id, colonia, calle, numero, tipo_local, m2, agua_drenaje, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, banos, estacionamientos, lat, lng, competition_data')
     .eq('is_published', true);

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import {
   ThemeProvider, createTheme, Box, Typography, Button, Stepper, Step, StepLabel,
   TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, Card,
@@ -303,7 +303,7 @@ export default function LocalIQ() {
     for (const file of photos) {
       const ext = file.name.split('.').pop();
       const storagePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await getSupabase().storage
         .from('property-photos')
         .upload(storagePath, file, { contentType: file.type });
       if (uploadError) {
@@ -311,12 +311,12 @@ export default function LocalIQ() {
         setUploading(false);
         return;
       }
-      const { data: urlData } = supabase.storage.from('property-photos').getPublicUrl(storagePath);
+      const { data: urlData } = getSupabase().storage.from('property-photos').getPublicUrl(storagePath);
       photoUrls.push(urlData.publicUrl);
     }
 
     // ── 3. Insert property ────────────────────────────────────────────────
-    const { data: inserted, error } = await supabase
+    const { data: inserted, error } = await getSupabase()
       .from('properties')
       .insert({
         is_published: true,
@@ -379,7 +379,7 @@ export default function LocalIQ() {
         if (nearbyRes.ok) {
           const competition = await nearbyRes.json() as CompetitionData;
           if (inserted?.id) {
-            await supabase
+            await getSupabase()
               .from('properties')
               .update({ competition_data: competition })
               .eq('id', inserted.id);

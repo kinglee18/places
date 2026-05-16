@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getSupabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const session = await auth();
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -16,7 +15,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'propertyId required' }, { status: 400 });
   }
 
-  const { data: property, error } = await supabase
+  const { data: property, error } = await getSupabase()
     .from('properties')
     .select('tipo_local, m2, colonia, descripcion, modalidad, competition_data, precio_inmueble')
     .eq('id', propertyId)

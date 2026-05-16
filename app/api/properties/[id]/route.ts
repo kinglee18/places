@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // Admin client se crea solo cuando se necesita (DELETE) para no crashear el módulo completo
@@ -19,7 +19,7 @@ const EDITABLE_FIELDS = [
 ];
 
 async function verifyOwnership(id: string, email: string) {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('properties')
     .select('user_email, photo_urls')
     .eq('id', id)
@@ -34,7 +34,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('properties')
     .select('*')
     .eq('id', id)
@@ -67,7 +67,7 @@ export async function PATCH(
     Object.entries(body).filter(([k]) => EDITABLE_FIELDS.includes(k))
   );
 
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('properties')
     .update(updates)
     .eq('id', id);
@@ -112,7 +112,7 @@ export async function DELETE(
     // pero el registro se elimina igual
   }
 
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('properties')
     .delete()
     .eq('id', id);

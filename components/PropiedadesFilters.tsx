@@ -34,7 +34,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
   const get = (key: string) => searchParams.get(key) ?? '';
   const [localSearch, setLocalSearch] = useState(get('search'));
 
-  // Sync localSearch if browser back/forward changes URL
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setLocalSearch(get('search')); }, [searchParams]);
 
   const setParam = (key: string, value: string) => {
