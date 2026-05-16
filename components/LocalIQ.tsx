@@ -352,7 +352,7 @@ export default function LocalIQ() {
         calidad_construccion: data.calidadConstruccion || null,
         tipo_energia: data.tipoEnergia || null,
         uso_suelo: data.usoSuelo || null,
-        servicios: data.servicios.length > 0 ? data.servicios : null,
+        servicios: data.servicios ?? [],
       })
       .select('id')
       .single();

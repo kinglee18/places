@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import NavHeader from '@/components/NavHeader';
 
 const features = [
   {
@@ -76,8 +77,8 @@ export default function Home() {
   const [loadingProps, setLoadingProps] = useState(true);
 
   useEffect(() => {
-    fetch('/api/properties?limit=6')
-      .then(r => r.json())
+    fetch('/api/properties?limit=6&published=true')
+      .then(r =>  r.json())
       .then((data: Property[]) => {
         setLatestProperties(data ?? []);
         setLoadingProps(false);
@@ -89,57 +90,7 @@ export default function Home() {
       {/* Noise texture overlay */}
       <div className="noise-overlay" />
 
-      {/* ────────────────── HEADER ────────────────── */}
-      <header style={{
-        padding: '20px 48px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '1px solid var(--surface-border)',
-        background: 'rgba(6, 6, 15, 0.85)',
-        backdropFilter: 'blur(20px)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-      }}>
-        <div style={{ fontWeight: 800, fontSize: '22px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: 36, height: 36,
-            background: 'linear-gradient(135deg, var(--accent), var(--accent-secondary))',
-            borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18,
-            boxShadow: '0 4px 16px rgba(0,245,160,0.3)',
-          }}>📍</div>
-          <span>Local<span style={{ color: 'var(--accent)' }}>IQ</span></span>
-        </div>
-
-        <nav style={{ display: 'flex', gap: '28px', alignItems: 'center' }}>
-          <Link href="/propiedades" style={{ fontWeight: 500, opacity: 0.7, transition: 'opacity 0.2s', fontSize: '15px' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}>
-            Properties
-          </Link>
-          <a href="#how-it-works" style={{ fontWeight: 500, opacity: 0.7, transition: 'opacity 0.2s', fontSize: '15px' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}>
-            How it works
-          </a>
-          <Link href="/upgrade" style={{ fontWeight: 500, opacity: 0.7, transition: 'opacity 0.2s', fontSize: '15px' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}>
-            Pro Plan
-          </Link>
-          <Link href="/buscar" style={{ fontWeight: 500, opacity: 0.7, transition: 'opacity 0.2s', fontSize: '15px' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}>
-            Find a Space
-          </Link>
-          <Link href="/registro" className="btn-primary" style={{ padding: '10px 24px', fontSize: '15px', borderRadius: '10px' }}>
-            Register Property
-          </Link>
-        </nav>
-      </header>
+      <NavHeader activePage="home" />
 
       {/* ────────────────── HERO ────────────────── */}
       <section style={{
@@ -518,11 +469,11 @@ export default function Home() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em' }}>
+                  <div style={{ fontSize: '36px', fontWeight: 900, letterSpacing: '-0.02em' }}>
                     <span className="gradient-text-accent">Coming soon</span>
                   </div>
                 </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>One-time payment per analysis</div>
+                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>One-time payment per analysis — pricing TBD</div>
               </div>
 
               <div style={{ borderTop: '1px solid rgba(124,58,237,0.25)', paddingTop: '28px', marginBottom: '36px' }}>
@@ -552,20 +503,13 @@ export default function Home() {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
-                <Link href="/upgrade" className="btn-secondary" style={{
-                  display: 'block', textAlign: 'center', width: '100%',
-                  padding: '12px', borderRadius: '12px', fontSize: '14px',
-                  borderColor: 'rgba(124,58,237,0.3)',
-                }}>
-                  Learn more ↗
-                </Link>
-                <Link href="/registro?plan=pro" className="btn-primary" style={{
+                <Link href="/upgrade" className="btn-primary" style={{
                   display: 'block', textAlign: 'center', width: '100%',
                   padding: '14px', borderRadius: '12px', fontSize: '15px',
                   background: 'linear-gradient(135deg, #7c3aed, #00b4d8)',
                   boxShadow: '0 8px 30px rgba(124,58,237,0.35)',
                 }}>
-                  Register with Pro →
+                  Learn more about Pro ↗
                 </Link>
               </div>
             </div>
@@ -618,7 +562,7 @@ export default function Home() {
           Local<span style={{ color: 'var(--accent)' }}>IQ</span>
         </div>
         <p>© {new Date().getFullYear()} LocalIQ Platform. All rights reserved.</p>
-        <div style={{ display: 'flex', gap: '24px' }}>
+        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           <Link href="/propiedades" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
             onMouseLeave={e => (e.currentTarget.style.color = '')}>Properties</Link>
@@ -631,6 +575,12 @@ export default function Home() {
           <Link href="/registro" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
             onMouseLeave={e => (e.currentTarget.style.color = '')}>Register</Link>
+          <Link href="/terms" style={{ transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>Terms</Link>
+          <Link href="/privacy" style={{ transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>Privacy</Link>
         </div>
       </footer>
     </main>

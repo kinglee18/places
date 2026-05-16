@@ -4,9 +4,19 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 
-export default function NavHeader({ activePage }: { activePage?: 'propiedades' | 'home' }) {
+type ActivePage = 'home' | 'propiedades' | 'upgrade' | 'buscar';
+
+export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks: { label: string; href: string; id: ActivePage | null }[] = [
+    { label: 'Properties', href: '/propiedades', id: 'propiedades' },
+    { label: 'How it works', href: activePage === 'home' ? '#how-it-works' : '/#how-it-works', id: null },
+    { label: 'Pro Plan', href: '/upgrade', id: 'upgrade' },
+    { label: 'Find a Space', href: '/buscar', id: 'buscar' },
+  ];
 
   return (
     <header style={{
@@ -24,23 +34,28 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
         Local<span style={{ color: '#00f5a0' }}>IQ</span>
       </Link>
 
-      {/* Nav links */}
-      <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-        <Link href="/propiedades" style={{
-          fontSize: '14px', fontWeight: activePage === 'propiedades' ? 600 : 500,
-          color: activePage === 'propiedades' ? '#00f5a0' : '#9090b8',
-          textDecoration: 'none', transition: 'color 0.2s',
-          borderBottom: activePage === 'propiedades' ? '1px solid #00f5a0' : 'none',
-          paddingBottom: '2px',
-        }}>
-          Properties
-        </Link>
+      {/* Desktop nav */}
+      <nav className="nav-desktop">
+        {navLinks.map(link => (
+          <Link key={link.href} href={link.href} style={{
+            fontSize: '14px',
+            fontWeight: activePage === link.id ? 600 : 500,
+            color: activePage === link.id ? '#00f5a0' : '#9090b8',
+            textDecoration: 'none', transition: 'color 0.2s',
+            borderBottom: activePage === link.id ? '1px solid #00f5a0' : 'none',
+            paddingBottom: '2px',
+          }}
+            onMouseEnter={e => { if (activePage !== link.id) e.currentTarget.style.color = '#f0f0f8'; }}
+            onMouseLeave={e => { if (activePage !== link.id) e.currentTarget.style.color = '#9090b8'; }}
+          >
+            {link.label}
+          </Link>
+        ))}
 
         {/* Auth section */}
         {status === 'loading' ? (
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1e1e35', animation: 'pulse 1.5s infinite' }} />
         ) : session?.user ? (
-          /* Logged in: avatar + dropdown */
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setMenuOpen(o => !o)}
@@ -55,6 +70,7 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
               onMouseLeave={e => (e.currentTarget.style.borderColor = '#2a2a4a')}
             >
               {session.user.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={session.user.image} alt="avatar" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#06060f', fontWeight: 700 }}>
@@ -67,7 +83,6 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
               <span style={{ fontSize: '10px', color: '#6b6b9a' }}>▾</span>
             </button>
 
-            {/* Dropdown */}
             {menuOpen && (
               <div style={{
                 position: 'absolute', top: 'calc(100% + 8px)', right: 0,
@@ -76,12 +91,10 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
                 boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
                 overflow: 'hidden', zIndex: 100,
               }}>
-                {/* User info */}
                 <div style={{ padding: '14px 16px', borderBottom: '1px solid #1e1e35' }}>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0f0f8', marginBottom: '2px' }}>{session.user.name}</div>
                   <div style={{ fontSize: '11px', color: '#6b6b9a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.user.email}</div>
                 </div>
-                {/* Actions */}
                 <div style={{ padding: '8px' }}>
                   <Link href="/registro" onClick={() => setMenuOpen(false)} style={{
                     display: 'block', padding: '9px 12px', borderRadius: '8px',
@@ -122,7 +135,6 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
             )}
           </div>
         ) : (
-          /* Not logged in */
           <Link href="/registro" style={{
             background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
             color: '#06060f', padding: '9px 22px', borderRadius: '10px',
@@ -133,10 +145,53 @@ export default function NavHeader({ activePage }: { activePage?: 'propiedades' |
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,245,160,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,245,160,0.25)'; }}
           >
-            + Publicar
+            Register Property
           </Link>
         )}
       </nav>
+
+      {/* Mobile hamburger */}
+      <button
+        className="nav-hamburger"
+        aria-label="Open menu"
+        onClick={() => setMobileOpen(o => !o)}
+      >
+        {mobileOpen ? '✕' : '☰'}
+      </button>
+
+      {/* Mobile drawer */}
+      <div className={`nav-mobile-drawer${mobileOpen ? ' open' : ''}`} style={{ position: 'absolute', top: '100%' }}>
+        {navLinks.map(link => (
+          <Link key={link.href} href={link.href}
+            className={`nav-mobile-link${activePage === link.id ? ' active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            {link.label}
+          </Link>
+        ))}
+        {session?.user ? (
+          <>
+            <Link href="/registro" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>📝 Publish property</Link>
+            <Link href="/mis-propiedades" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>🏠 My properties</Link>
+            <button
+              onClick={() => { setMobileOpen(false); signOut({ callbackUrl: '/' }); }}
+              style={{
+                display: 'block', width: '100%', textAlign: 'left',
+                padding: '11px 12px', borderRadius: '10px', background: 'none', border: 'none',
+                fontSize: '15px', fontWeight: 600, color: '#ff6b6b',
+                cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                marginTop: '4px',
+              }}
+            >
+              🚪 Sign out
+            </button>
+          </>
+        ) : (
+          <Link href="/registro" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>
+            Register Property
+          </Link>
+        )}
+      </div>
     </header>
   );
 }
