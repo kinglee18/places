@@ -60,11 +60,17 @@ Respond in JSON format with this exact structure:
   "advertencia": "Main risk or important consideration (or null if none)"
 }`;
 
-  const message = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 600,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  let message;
+  try {
+    message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 600,
+      messages: [{ role: 'user', content: prompt }],
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Anthropic API error';
+    return NextResponse.json({ error: msg }, { status: 502 });
+  }
 
   const text = message.content[0].type === 'text' ? message.content[0].text : '';
 
@@ -74,6 +80,12 @@ Respond in JSON format with this exact structure:
     return NextResponse.json({ error: 'Could not generate analysis' }, { status: 500 });
   }
 
-  const analysis = JSON.parse(jsonMatch[0]);
+  let analysis;
+  try {
+    analysis = JSON.parse(jsonMatch[0]);
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON from AI response' }, { status: 500 });
+  }
+
   return NextResponse.json({ analysis });
 }
