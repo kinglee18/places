@@ -76,8 +76,8 @@ export default function Home() {
   const [loadingProps, setLoadingProps] = useState(true);
 
   useEffect(() => {
-    fetch('/api/properties?limit=6')
-      .then(r => r.json())
+    fetch('/api/properties?limit=6&published=true')
+      .then(r =>  r.json())
       .then((data: Property[]) => {
         setLatestProperties(data ?? []);
         setLoadingProps(false);
