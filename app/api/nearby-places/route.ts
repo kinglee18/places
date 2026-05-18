@@ -34,7 +34,7 @@ const INCLUDED_TYPES = Object.keys(TYPE_TO_CATEGORY);
 // Google Places v2 types that signal a tourist zone
 const TOURIST_TYPES = [
   'tourist_attraction', 'museum', 'art_gallery', 'historical_landmark',
-  'monument', 'hotel', 'lodging', 'amusement_park', 'park', 'zoo',
+  'monument', 'amusement_park', 'park', 'zoo',
   'church', 'hindu_temple', 'mosque', 'synagogue', 'stadium', 'performing_arts_theater',
 ];
 
@@ -45,8 +45,6 @@ const TOURIST_CATEGORY_MAP: Record<string, string> = {
   art_gallery: 'Art gallery',
   historical_landmark: 'Historical landmark',
   monument: 'Monument',
-  hotel: 'Hotel',
-  lodging: 'Lodging',
   amusement_park: 'Amusement park',
   park: 'Park',
   zoo: 'Zoo',
@@ -56,6 +54,19 @@ const TOURIST_CATEGORY_MAP: Record<string, string> = {
   synagogue: 'Synagogue',
   stadium: 'Stadium',
   performing_arts_theater: 'Theater',
+};
+
+const TRANSIT_TYPES = [
+  'transit_station', 'subway_station', 'bus_station',
+  'light_rail_station', 'train_station',
+];
+
+const TRANSIT_ICON: Record<string, string> = {
+  subway_station: '🚇',
+  train_station: '🚂',
+  light_rail_station: '🚊',
+  bus_station: '🚌',
+  transit_station: '🚉',
 };
 
 type ZoneType = 'cultural' | 'religious' | 'entertainment' | 'nature' | 'lodging' | 'mixed';
@@ -156,6 +167,7 @@ interface PlacesV2Result {
   types?: string[];
   formattedAddress?: string;
   rating?: number;
+  location?: { latitude: number; longitude: number };
 }
 
 function categoryOf(types: string[]): string | null {
@@ -174,8 +186,31 @@ function countByCategory(places: PlacesV2Result[]): Record<string, number> {
   return counts;
 }
 
+function metersAway(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const φ1 = (lat1 * Math.PI) / 180, φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lng2 - lng1) * Math.PI) / 180;
+  const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Places people specifically travel to visit — the gateway for tourist zone classification.
+// Only use types Google assigns exclusively to real tourist destinations.
+// historical_landmark and monument are too broad — Google applies them to minor local sites.
+const GENUINE_ATTRACTOR_TYPES = new Set([
+  'tourist_attraction',
+  'museum',
+  'art_gallery',
+]);
+
 function detectTouristContext(places: PlacesV2Result[]): TouristContext | null {
   if (places.length < 2) return null;
+
+  const hasGenuineAttractor = places.some(p =>
+    (p.types ?? []).some(t => GENUINE_ATTRACTOR_TYPES.has(t))
+  );
+  if (!hasGenuineAttractor) return null;
 
   // Count by tourist zone type
   const zoneCounts: Record<ZoneType, number> = {
@@ -192,8 +227,6 @@ function detectTouristContext(places: PlacesV2Result[]): TouristContext | null {
       zoneCounts.entertainment++;
     if (types.some(t => ['park', 'zoo'].includes(t)))
       zoneCounts.nature++;
-    if (types.some(t => ['hotel', 'lodging'].includes(t)))
-      zoneCounts.lodging++;
   }
 
   // Find dominant zone(s)
@@ -257,6 +290,7 @@ async function fetchNearbyV2(
   radius: number,
   key: string,
   includedTypes = INCLUDED_TYPES,
+  fieldMask = 'places.displayName,places.types,places.formattedAddress,places.rating',
 ): Promise<PlacesV2Result[]> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
   const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
@@ -264,7 +298,7 @@ async function fetchNearbyV2(
     headers: {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': key,
-      'X-Goog-FieldMask': 'places.displayName,places.types,places.formattedAddress,places.rating',
+      'X-Goog-FieldMask': fieldMask,
       'Referer': appUrl,
     },
     body: JSON.stringify({
@@ -301,12 +335,13 @@ export async function POST(req: NextRequest) {
   if (!key) return NextResponse.json({ error: 'Google API key not configured' }, { status: 500 });
   if (lat == null || lng == null) return NextResponse.json({ error: 'lat and lng are required' }, { status: 400 });
 
-  let r500: PlacesV2Result[], r5000: PlacesV2Result[], rTourist: PlacesV2Result[];
+  let r500: PlacesV2Result[], r5000: PlacesV2Result[], rTourist: PlacesV2Result[], rTransit: PlacesV2Result[];
   try {
-    [r500, r5000, rTourist] = await Promise.all([
+    [r500, r5000, rTourist, rTransit] = await Promise.all([
       fetchNearbyV2(lat, lng, 500, key),
       fetchNearbyV2(lat, lng, 5000, key),
       fetchNearbyV2(lat, lng, 1000, key, TOURIST_TYPES),
+      fetchNearbyV2(lat, lng, 1500, key, TRANSIT_TYPES, 'places.displayName,places.types,places.location'),
     ]);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error querying Google Places';
@@ -327,7 +362,20 @@ export async function POST(req: NextRequest) {
   const { opportunities, saturated } = analyzeOpportunities(within_500m, within_2km, tipoLocal ?? null);
   const tourist_context = detectTouristContext(rTourist);
 
-  const result = { within_500m, within_2km, top_nearby, opportunities, saturated, tourist_context };
+  const nearby_transit = rTransit.slice(0, 5).map(p => {
+    const typeKey = (p.types ?? []).find(t => TRANSIT_ICON[t]) ?? 'transit_station';
+    const dist = p.location
+      ? metersAway(lat, lng, p.location.latitude, p.location.longitude)
+      : null;
+    return {
+      name: p.displayName?.text ?? 'Unknown',
+      type: typeKey,
+      icon: TRANSIT_ICON[typeKey] ?? '🚉',
+      distance_m: dist !== null ? Math.round(dist) : null,
+    };
+  }).sort((a, b) => (a.distance_m ?? Infinity) - (b.distance_m ?? Infinity));
+
+  const result = { within_500m, within_2km, top_nearby, opportunities, saturated, tourist_context, nearby_transit };
 
   return NextResponse.json(result);
 }
