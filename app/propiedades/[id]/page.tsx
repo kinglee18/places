@@ -16,6 +16,12 @@ const MapView = dynamic(() => import('@/components/MapView'), {
   ),
 });
 
+interface IsochroneFeature {
+  type: 'Feature';
+  properties: { value: number };
+  geometry: { type: 'Polygon'; coordinates: number[][][] };
+}
+
 interface CompetitionEntry {
   name: string;
   category: string | null;
@@ -116,6 +122,7 @@ export default function PropertyDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
 
+  const [isochrones, setIsochrones] = useState<IsochroneFeature[]>([]);
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
@@ -186,6 +193,16 @@ export default function PropertyDetailPage() {
           setProperty(data as Property);
           if (data.competition_data?.ai_analysis) {
             setAnalysis(data.competition_data.ai_analysis as AiAnalysis);
+          }
+          if (data.lat && data.lng) {
+            fetch('/api/isochrone', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ lat: data.lat, lng: data.lng }),
+            })
+              .then(r => r.json())
+              .then(d => { if (Array.isArray(d.features)) setIsochrones(d.features); })
+              .catch(() => {});
           }
         }
         setLoading(false);
@@ -403,19 +420,28 @@ export default function PropertyDetailPage() {
             {/* Embedded map */}
             {p.lat && p.lng && (
               <div style={{ marginTop: 20 }}>
-                <MapView lat={p.lat} lng={p.lng} />
-                {mapsUrl && (
-                  <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10,
-                    fontSize: 12, fontWeight: 600, color: '#00b4d8', textDecoration: 'none',
-                    opacity: 0.8, transition: 'opacity 0.15s',
-                  }}
-                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                    onMouseLeave={e => (e.currentTarget.style.opacity = '0.8')}
-                  >
-                    🗺️ Open in Google Maps →
-                  </a>
-                )}
+                <MapView lat={p.lat} lng={p.lng} isochrones={isochrones} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                  {isochrones.length > 0 && (
+                    <div style={{ display: 'flex', gap: 14, fontSize: 11, color: '#9090b8' }}>
+                      <span><span style={{ color: '#00f5a0' }}>●</span> 5 min walk</span>
+                      <span><span style={{ color: '#00b4d8' }}>●</span> 10 min walk</span>
+                      <span><span style={{ color: '#7c6bff' }}>●</span> 15 min walk</span>
+                    </div>
+                  )}
+                  {mapsUrl && (
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      fontSize: 12, fontWeight: 600, color: '#00b4d8', textDecoration: 'none',
+                      opacity: 0.8, transition: 'opacity 0.15s',
+                    }}
+                      onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                      onMouseLeave={e => (e.currentTarget.style.opacity = '0.8')}
+                    >
+                      🗺️ Open in Google Maps →
+                    </a>
+                  )}
+                </div>
               </div>
             )}
           </div>
