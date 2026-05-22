@@ -110,6 +110,7 @@ interface FormData {
   nivelPiso: string; usoAnterior: string;
   aguaDrenaje: string; habitaciones: number; banos: number; estacionamientos: number;
   modalidad: string; precioInmueble: string; precioMantenimiento: string;
+  tipoContrato: string; fechaDisponible: string;
   // Century 21 fields
   m2Construccion: number | '';
   frenteM: number | ''; fondoM: number | '';
@@ -243,6 +244,7 @@ export default function LocalIQ() {
       nivelPiso: '', usoAnterior: '',
       aguaDrenaje: '', habitaciones: 0, banos: 0, estacionamientos: 0,
       modalidad: '', precioInmueble: '', precioMantenimiento: '',
+      tipoContrato: '', fechaDisponible: '',
       m2Construccion: '', frenteM: '', fondoM: '', alturaTechoM: '',
       tipoTerreno: '', estadoConservacion: '', calidadConstruccion: '',
       tipoEnergia: '', usoSuelo: '', servicios: [],
@@ -353,6 +355,8 @@ export default function LocalIQ() {
         tipo_energia: data.tipoEnergia || null,
         uso_suelo: data.usoSuelo || null,
         servicios: data.servicios ?? [],
+        tipo_contrato: data.tipoContrato || null,
+        fecha_disponible: data.fechaDisponible || null,
       })
       .select('id')
       .single();
@@ -367,8 +371,8 @@ export default function LocalIQ() {
     // Show success immediately; run competition analysis in background
     setSubmitted(true);
 
-    // ── 4. Nearby competition analysis ────────────────────────────────────
-    if (pinLocation) {
+    // ── 4. Nearby competition analysis + AI analysis ──────────────────────
+    if (pinLocation && inserted?.id) {
       setAnalyzingLocation(true);
       try {
         const nearbyRes = await fetch('/api/nearby-places', {
@@ -378,12 +382,17 @@ export default function LocalIQ() {
         });
         if (nearbyRes.ok) {
           const competition = await nearbyRes.json() as CompetitionData;
-          if (inserted?.id) {
-            await getSupabase()
-              .from('properties')
-              .update({ competition_data: competition })
-              .eq('id', inserted.id);
-          }
+          await getSupabase()
+            .from('properties')
+            .update({ competition_data: competition })
+            .eq('id', inserted.id);
+
+          // Auto-generate AI analysis now that competition_data is saved
+          await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ propertyId: inserted.id }),
+          });
         }
       } catch { /* analysis is non-blocking */ }
       setAnalyzingLocation(false);
@@ -816,6 +825,30 @@ export default function LocalIQ() {
                         </Select>
                       </FormControl>
                     )} />
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="tipoContrato" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>CONTRACT TYPE <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <Select {...field} displayEmpty>
+                              <MenuItem value=""><em>Select...</em></MenuItem>
+                              <MenuItem value="Gross">Gross — landlord covers expenses</MenuItem>
+                              <MenuItem value="NNN">NNN — tenant covers taxes, insurance & maintenance</MenuItem>
+                              <MenuItem value="Semi-Gross">Semi-Gross — expenses split</MenuItem>
+                            </Select>
+                          </FormControl>
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="fechaDisponible" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>AVAILABLE DATE <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography></InputLabel>
+                            <TextField {...field} type="date" InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                          </FormControl>
+                        )} />
+                      </Grid>
+                    </Grid>
 
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>

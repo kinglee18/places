@@ -86,5 +86,12 @@ Respond in JSON format with this exact structure:
     return NextResponse.json({ error: 'Invalid JSON from AI response' }, { status: 500 });
   }
 
+  // Persist ai_analysis into competition_data without overwriting zone data
+  const existing = (property.competition_data ?? {}) as Record<string, unknown>;
+  await getSupabase()
+    .from('properties')
+    .update({ competition_data: { ...existing, ai_analysis: analysis } })
+    .eq('id', propertyId);
+
   return NextResponse.json({ analysis });
 }

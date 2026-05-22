@@ -4,13 +4,36 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import NavHeader from '@/components/NavHeader';
+
+const MapView = dynamic(() => import('@/components/MapView'), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: 300, borderRadius: 12, background: '#0d0d1a', border: '1px solid #2a2a4a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ color: '#555', fontSize: 13 }}>Loading map...</span>
+    </div>
+  ),
+});
+
+interface IsochroneFeature {
+  type: 'Feature';
+  properties: { value: number };
+  geometry: { type: 'Polygon'; coordinates: number[][][] };
+}
 
 interface CompetitionEntry {
   name: string;
   category: string | null;
   vicinity: string;
   rating: number | null;
+}
+
+interface AiAnalysis {
+  nivel_competencia: 'low' | 'medium' | 'high';
+  oportunidad: string;
+  usos_recomendados: { uso: string; razon: string }[];
+  advertencia: string | null;
 }
 
 interface CompetitionData {
@@ -25,6 +48,13 @@ interface CompetitionData {
     nearby_attractions: Array<{ name: string; type: string }>;
     suggestions: Array<{ category: string; reason: string }>;
   } | null;
+  ai_analysis?: AiAnalysis;
+  nearby_transit?: Array<{
+    name: string;
+    type: string;
+    icon: string;
+    distance_m: number | null;
+  }>;
 }
 
 interface Property {
@@ -48,6 +78,8 @@ interface Property {
   banos: number;
   estacionamientos: number;
   modalidad: string | null;
+  tipo_contrato: string | null;
+  fecha_disponible: string | null;
   precio_inmueble: number | null;
   precio_mantenimiento: number | null;
   lat: number | null;
@@ -90,13 +122,8 @@ export default function PropertyDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
 
-  type Analysis = {
-    nivel_competencia: 'low' | 'medium' | 'high';
-    oportunidad: string;
-    usos_recomendados: { uso: string; razon: string }[];
-    advertencia: string | null;
-  };
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [isochrones, setIsochrones] = useState<IsochroneFeature[]>([]);
+  const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [runningZone, setRunningZone] = useState(false);
@@ -124,6 +151,7 @@ export default function PropertyDetailPage() {
         body: JSON.stringify({ propertyId: id }),
       });
       let json: { analysis?: Analysis; error?: string } = {};
+
       try {
         json = await res.json();
       } catch {
@@ -176,14 +204,16 @@ export default function PropertyDetailPage() {
       if (!nearbyRes.ok) throw new Error('Error fetching zone data');
       const competition_data = await nearbyRes.json();
 
+      // Preserve existing ai_analysis when overwriting zone data
+      const merged = { ...competition_data, ai_analysis: property?.competition_data?.ai_analysis };
       const saveRes = await fetch(`/api/properties/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ competition_data }),
+        body: JSON.stringify({ competition_data: merged }),
       });
       if (!saveRes.ok) throw new Error('Error saving the analysis');
 
-      setProperty(prev => prev ? { ...prev, competition_data } : prev);
+      setProperty(prev => prev ? { ...prev, competition_data: merged } : prev);
     } catch (e) {
       setZoneError(e instanceof Error ? e.message : 'Unknown error');
     }
@@ -196,7 +226,22 @@ export default function PropertyDetailPage() {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) setNotFound(true);
-        else setProperty(data as Property);
+        else {
+          setProperty(data as Property);
+          if (data.competition_data?.ai_analysis) {
+            setAnalysis(data.competition_data.ai_analysis as AiAnalysis);
+          }
+          if (data.lat && data.lng) {
+            fetch('/api/isochrone', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ lat: data.lat, lng: data.lng }),
+            })
+              .then(r => r.json())
+              .then(d => { if (Array.isArray(d.features)) setIsochrones(d.features); })
+              .catch(() => {});
+          }
+        }
         setLoading(false);
       });
   }, [id]);
@@ -358,6 +403,20 @@ export default function PropertyDetailPage() {
                 Maintenance: {formatPrice(p.precio_mantenimiento)}/mo
               </div>
             )}
+            {(p.tipo_contrato || p.fecha_disponible) && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12, justifyContent: 'flex-end' }}>
+                {p.tipo_contrato && (
+                  <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 9px', background: 'rgba(0,245,160,0.07)', border: '1px solid rgba(0,245,160,0.2)', color: '#00f5a0' }}>
+                    {p.tipo_contrato}
+                  </span>
+                )}
+                {p.fecha_disponible && (
+                  <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 9px', background: 'rgba(107,107,154,0.12)', border: '1px solid rgba(107,107,154,0.25)', color: '#9090b8' }}>
+                    Available {new Date(p.fecha_disponible).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -395,19 +454,32 @@ export default function PropertyDetailPage() {
               </div>
             )}
 
-            {/* Map link */}
-            {mapsUrl && (
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 20,
-                fontSize: 13, fontWeight: 600, color: '#00b4d8', textDecoration: 'none',
-                border: '1px solid rgba(0,180,216,0.3)', borderRadius: 8, padding: '8px 14px',
-                transition: 'background 0.15s',
-              }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,180,216,0.08)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              >
-                🗺️ View on Google Maps
-              </a>
+            {/* Embedded map */}
+            {p.lat && p.lng && (
+              <div style={{ marginTop: 20 }}>
+                <MapView lat={p.lat} lng={p.lng} isochrones={isochrones} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                  {isochrones.length > 0 && (
+                    <div style={{ display: 'flex', gap: 14, fontSize: 11, color: '#9090b8' }}>
+                      <span><span style={{ color: '#00f5a0' }}>●</span> 5 min walk</span>
+                      <span><span style={{ color: '#00b4d8' }}>●</span> 10 min walk</span>
+                      <span><span style={{ color: '#7c6bff' }}>●</span> 15 min walk</span>
+                    </div>
+                  )}
+                  {mapsUrl && (
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      fontSize: 12, fontWeight: 600, color: '#00b4d8', textDecoration: 'none',
+                      opacity: 0.8, transition: 'opacity 0.15s',
+                    }}
+                      onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                      onMouseLeave={e => (e.currentTarget.style.opacity = '0.8')}
+                    >
+                      🗺️ Open in Google Maps →
+                    </a>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 
@@ -456,7 +528,6 @@ export default function PropertyDetailPage() {
                     religious: 'Religious',
                     entertainment: 'Entertainment',
                     nature: 'Nature',
-                    lodging: 'Hotel / Lodging',
                     mixed: 'Mixed tourist',
                   };
                   return (
@@ -567,6 +638,28 @@ export default function PropertyDetailPage() {
                 ))}
                 {competition.top_nearby.filter(b => b.category).length === 0 && (
                   <p style={{ fontSize: 12, color: '#6b6b9a' }}>No businesses registered within 500m.</p>
+                )}
+
+                {/* Transit section */}
+                {competition.nearby_transit && competition.nearby_transit.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', margin: '20px 0 10px', textTransform: 'uppercase' }}>
+                      Nearby transit
+                    </p>
+                    {competition.nearby_transit.map((t, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #1e1e35' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 16 }}>{t.icon}</span>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>{t.name}</div>
+                        </div>
+                        {t.distance_m !== null && (
+                          <span style={{ fontSize: 12, color: '#6b6b9a', fontFamily: "'DM Mono', monospace", flexShrink: 0 }}>
+                            {t.distance_m < 1000 ? `${t.distance_m} m` : `${(t.distance_m / 1000).toFixed(1)} km`}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </>
                 )}
               </>
             )}
