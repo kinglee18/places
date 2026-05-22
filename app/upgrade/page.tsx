@@ -11,12 +11,6 @@ const proFeatures = [
     detail: 'Real-time data on nearby competitors with distance, ratings, and category breakdown.',
   },
   {
-    icon: '📈',
-    title: 'Consumption Trends',
-    desc: 'See what products and services are being purchased most in your area.',
-    detail: 'Data-driven insights to identify the most profitable business opportunities.',
-  },
-  {
     icon: '🤖',
     title: 'AI Recommendations',
     desc: 'Get personalized business type suggestions based on your property and location.',
@@ -92,13 +86,11 @@ const testimonials = [
 
 const comparisonTable = [
   { feature: 'Property Registration', basic: true, pro: true },
-  { feature: 'Digital Property Sheet', basic: true, pro: true },
   { feature: 'Photos (up to 5)', basic: true, pro: true },
   { feature: 'Map Location', basic: true, pro: true },
   { feature: 'Price & Amenities', basic: true, pro: true },
   { feature: 'Competitor Analysis (500m)', basic: false, pro: true },
   { feature: 'Full 2km Map View', basic: false, pro: true },
-  { feature: 'Consumption Trends', basic: false, pro: true },
   { feature: 'AI Business Recommendations', basic: false, pro: true },
   { feature: 'Rental Potential Estimation', basic: false, pro: true },
   { feature: 'Downloadable Report', basic: false, pro: true },
@@ -214,8 +206,7 @@ export default function UpgradePage() {
             margin: '0 auto 52px auto',
             lineHeight: 1.7,
           }}>
-            Maximize your property value with Pro plan. Get competitor analysis,
-            <strong style={{ color: 'var(--foreground)' }}> consumption trends</strong>, and{' '}
+            Maximize your property value with Pro plan. Get competitor analysis and{' '}
             <strong style={{ color: 'var(--foreground)' }}>AI recommendations</strong> tailored to your location.
           </p>
 
