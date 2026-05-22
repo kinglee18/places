@@ -23,8 +23,8 @@ function PublicadoContent() {
           Listing published!
         </h1>
         <p style={{ color: '#8888aa', fontFamily: "'DM Mono', monospace", fontSize: 14, lineHeight: 1.8, marginBottom: 32 }}>
-          Your property is now visible on the marketplace with verified badge,<br />
-          competition analysis and downloadable report active.
+          Your property is now visible on the marketplace with verified badge<br />
+          and competition analysis active.
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>

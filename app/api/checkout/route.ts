@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
           currency: 'mxn',
           product_data: {
             name: 'Publish listing on LocalIQ',
-            description: 'Public visibility · Verified badge · 2km competition analysis · Downloadable report',
+            description: 'Public visibility · Verified badge · 2km competition analysis · AI recommendations',
           },
           unit_amount: 29900, // $299 MXN in centavos
         },

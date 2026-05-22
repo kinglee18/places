@@ -23,12 +23,6 @@ const proFeatures = [
     detail: 'Market-driven pricing data to maximize your rental income.',
   },
   {
-    icon: '📋',
-    title: 'Professional Report',
-    desc: 'Downloadable PDF report ready to share with potential tenants and investors.',
-    detail: 'High-quality, branded report with all analysis, photos, and insights.',
-  },
-  {
     icon: '⚡',
     title: 'Priority Support',
     desc: 'Direct support channel for any questions about your analysis.',
@@ -52,10 +46,6 @@ const faqItems = [
   {
     q: 'Do I get the full 2km analysis map?',
     a: 'Yes, Pro includes full competitor visualization within a 2km radius with detailed filtering options.',
-  },
-  {
-    q: 'Can I share my analysis report?',
-    a: 'Absolutely! The downloadable report can be shared with anyone. It\'s yours to use for marketing.',
   },
   {
     q: 'What if I already registered my property?',
@@ -93,7 +83,6 @@ const comparisonTable = [
   { feature: 'Full 2km Map View', basic: false, pro: true },
   { feature: 'AI Business Recommendations', basic: false, pro: true },
   { feature: 'Rental Potential Estimation', basic: false, pro: true },
-  { feature: 'Downloadable Report', basic: false, pro: true },
   { feature: 'Priority Support', basic: false, pro: true },
 ];
 

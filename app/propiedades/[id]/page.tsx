@@ -102,6 +102,17 @@ export default function PropertyDetailPage() {
   const [runningZone, setRunningZone] = useState(false);
   const [zoneError, setZoneError] = useState<string | null>(null);
 
+  type RentalEstimate = {
+    estimated_min: number;
+    estimated_max: number;
+    price_per_m2: number;
+    confidence: 'high' | 'medium' | 'low';
+    summary: string;
+  };
+  const [rental, setRental] = useState<RentalEstimate | null>(null);
+  const [loadingRental, setLoadingRental] = useState(false);
+  const [rentalError, setRentalError] = useState<string | null>(null);
+
   const handleAnalyze = async () => {
     if (!id) return;
     setAnalyzing(true);
@@ -125,6 +136,31 @@ export default function PropertyDetailPage() {
       setAnalyzeError(e instanceof Error ? e.message : 'Unknown error');
     }
     setAnalyzing(false);
+  };
+
+  const handleRentalPotential = async () => {
+    if (!id) return;
+    setLoadingRental(true);
+    setRentalError(null);
+    try {
+      const res = await fetch('/api/rental-potential', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId: id }),
+      });
+      let json: { rental?: RentalEstimate; error?: string } = {};
+      try {
+        json = await res.json();
+      } catch {
+        throw new Error(`Server error (${res.status}) — check ANTHROPIC_API_KEY`);
+      }
+      if (!res.ok) throw new Error(json.error ?? `Request failed (${res.status})`);
+      if (!json.rental) throw new Error('No estimate returned');
+      setRental(json.rental);
+    } catch (e) {
+      setRentalError(e instanceof Error ? e.message : 'Unknown error');
+    }
+    setLoadingRental(false);
   };
 
   const handleAnalyzeZone = async () => {
@@ -622,6 +658,86 @@ export default function PropertyDetailPage() {
             )}
 
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
+
+        {/* ── Rental Potential ── */}
+        {session?.user && (
+          <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px', marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 4, textTransform: 'uppercase' }}>Rental Potential</p>
+                <p style={{ fontSize: 13, color: '#9090b8' }}>AI-estimated monthly rent range for this property</p>
+              </div>
+              {!rental && (
+                <button
+                  onClick={handleRentalPotential}
+                  disabled={loadingRental}
+                  style={{
+                    background: loadingRental ? 'rgba(0,180,216,0.08)' : 'linear-gradient(135deg, #00b4d8, #7c3aed)',
+                    color: loadingRental ? '#00b4d8' : '#f0f0f8',
+                    border: loadingRental ? '1px solid rgba(0,180,216,0.3)' : 'none',
+                    padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
+                    cursor: loadingRental ? 'default' : 'pointer',
+                    fontFamily: "'Inter', sans-serif",
+                    transition: 'opacity 0.2s',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                  }}
+                >
+                  {loadingRental ? (
+                    <>
+                      <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid #00b4d8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                      Estimating...
+                    </>
+                  ) : '💰 Estimate Rental Potential'}
+                </button>
+              )}
+            </div>
+
+            {rentalError && (
+              <p style={{ fontSize: 13, color: '#ff6b6b', fontFamily: "'DM Mono', monospace" }}>{rentalError}</p>
+            )}
+
+            {rental && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Confidence badge */}
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
+                    background: rental.confidence === 'high' ? 'rgba(0,245,160,0.1)' : rental.confidence === 'medium' ? 'rgba(251,191,36,0.1)' : 'rgba(124,58,237,0.1)',
+                    border: `1px solid ${rental.confidence === 'high' ? 'rgba(0,245,160,0.4)' : rental.confidence === 'medium' ? 'rgba(251,191,36,0.4)' : 'rgba(124,58,237,0.4)'}`,
+                    color: rental.confidence === 'high' ? '#00f5a0' : rental.confidence === 'medium' ? '#fbbf24' : '#a78bfa',
+                  }}>
+                    {rental.confidence === 'high' ? '✓ High confidence' : rental.confidence === 'medium' ? '~ Medium confidence' : '? Low confidence'}
+                  </span>
+                  <span style={{ fontSize: 12, color: '#6b6b9a', fontFamily: "'DM Mono', monospace" }}>
+                    ${rental.price_per_m2.toLocaleString('en-US')} MXN/m²/mo
+                  </span>
+                </div>
+
+                {/* Price range */}
+                <div style={{ background: '#12122a', border: '1px solid #1e1e35', borderRadius: 12, padding: '20px 24px' }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>Estimated monthly rent</p>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: '#00b4d8', letterSpacing: '-0.02em' }}>
+                      ${rental.estimated_min.toLocaleString('en-US')}
+                    </span>
+                    <span style={{ fontSize: 18, color: '#6b6b9a' }}>—</span>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: '#00b4d8', letterSpacing: '-0.02em' }}>
+                      ${rental.estimated_max.toLocaleString('en-US')}
+                    </span>
+                    <span style={{ fontSize: 14, color: '#6b6b9a' }}>MXN/mo</span>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <p style={{ fontSize: 14, color: '#c8c8e8', lineHeight: 1.6 }}>{rental.summary}</p>
+
+                <button onClick={() => setRental(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#6b6b9a', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                  Recalculate
+                </button>
+              </div>
+            )}
           </div>
         )}
 
