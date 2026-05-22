@@ -45,7 +45,7 @@ const steps = [
   {
     number: '03',
     title: 'Get your analysis',
-    desc: 'With the Pro plan you will get a detailed report of competition and area trends in minutes.',
+    desc: 'With the Pro plan you will get a complete analysis of competition and AI-powered recommendations for your area.',
   },
 ];
 
@@ -470,9 +470,7 @@ export default function Home() {
                   {[
                     { text: 'Everything in the basic plan', isPro: false },
                     { text: 'Competitor business analysis within 2 km', isPro: true },
-                    { text: 'Trends: what is being bought most in your area', isPro: true },
                     { text: 'Recommendations for the most promising business types', isPro: true },
-                    { text: 'Downloadable professional report', isPro: true },
                     { text: 'Rental potential estimation', isPro: true },
                   ].map((item, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
