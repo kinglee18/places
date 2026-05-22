@@ -12,12 +12,6 @@ const features = [
     plan: 'pro',
   },
   {
-    icon: '📈',
-    title: 'Consumption Trends',
-    desc: 'We detect which products and services are being purchased most in your area so you can make informed decisions.',
-    plan: 'pro',
-  },
-  {
     icon: '📍',
     title: 'Property Registration',
     desc: 'Publish your property with all the details: exact location, price, amenities and full description.',
@@ -34,12 +28,6 @@ const features = [
     title: 'Rental Potential',
     desc: 'Know the estimated rental value for your property based on similar properties in your area.',
     plan: 'pro',
-  },
-  {
-    icon: '📋',
-    title: 'Property Sheet',
-    desc: 'Get a professional digital property sheet ready to share with potential renters.',
-    plan: 'basic',
   },
 ];
 
@@ -155,7 +143,7 @@ export default function Home() {
           }}>
             Publish your commercial property in minutes or unlock complete analysis
             of <strong style={{ color: 'var(--foreground)' }}>nearby competition</strong> and{' '}
-            <strong style={{ color: 'var(--foreground)' }}>consumption trends</strong> in your area.
+            <strong style={{ color: 'var(--foreground)' }}>AI-powered recommendations</strong> for your area.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -405,7 +393,6 @@ export default function Home() {
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {[
                     'Complete property registration',
-                    'Digital property sheet',
                     'Map location selection',
                     'Details: price, size and amenities',
                     'Free description field',
@@ -417,7 +404,6 @@ export default function Home() {
                   ))}
                   {[
                     'Nearby competition analysis',
-                    'Consumption trends',
                     'AI recommendations',
                   ].map((item, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px', opacity: 0.35 }}>
