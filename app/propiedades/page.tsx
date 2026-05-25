@@ -1,9 +1,29 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PropiedadesFilters from '@/components/PropiedadesFilters';
 import PropertyCard from '@/components/PropertyCard';
+
+const PropertiesListMap = dynamic(() => import('@/components/PropertiesListMap'), {
+  ssr: true,
+  loading: () => (
+    <div
+      style={{
+        height: 560,
+        borderRadius: 16,
+        background: '#edf0f8',
+        border: '1px solid #d5daea',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <span style={{ color: '#9099b8', fontSize: 13 }}>Loading map…</span>
+    </div>
+  ),
+});
 
 const PAGE_SIZE = 12;
 
@@ -29,6 +49,8 @@ interface Property {
   estado_conservacion: string | null;
   uso_suelo: string | null;
   tipo_energia: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -38,67 +60,81 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
   const str = (k: string) => (Array.isArray(params[k]) ? params[k][0] : params[k] ?? '') as string;
 
-  const search   = str('search');
-  const colonia  = str('colonia');
-  const tipo     = str('tipo');
+  const search    = str('search');
+  const colonia   = str('colonia');
+  const tipo      = str('tipo');
   const modalidad = str('modalidad');
   const condicion = str('condicion');
-  const zoning   = str('zoning');
-  const energia  = str('energia');
-  const sort     = str('sort') || 'recent';
-  const page     = Math.max(1, Number(str('page')) || 1);
+  const zoning    = str('zoning');
+  const energia   = str('energia');
+  const sort      = str('sort') || 'recent';
+  const page      = Math.max(1, Number(str('page')) || 1);
 
   const from = (page - 1) * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
-  const SELECT = 'id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at, city, state, estado_conservacion, uso_suelo, tipo_energia';
+  const SELECT =
+    'id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, modalidad, ' +
+    'precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at, ' +
+    'city, state, estado_conservacion, uso_suelo, tipo_energia, lat, lng';
 
-  // Only show listings that haven't expired (null = legacy/never expires)
-  const nowIso = new Date().toISOString();
+  const nowIso    = new Date().toISOString();
   const notExpired = `expires_at.is.null,expires_at.gt.${nowIso}`;
 
-  // Main query with filters
-  let q = getSupabase().from('properties').select(SELECT, { count: 'exact' }).eq('is_published', true).or(notExpired);
+  let q = getSupabase()
+    .from('properties')
+    .select(SELECT, { count: 'exact' })
+    .eq('is_published', true)
+    .or(notExpired);
 
-  if (search)   q = q.or(`colonia.ilike.%${search}%,calle.ilike.%${search}%,descripcion.ilike.%${search}%`);
-  if (colonia)  q = q.eq('colonia', colonia);
-  if (tipo)     q = q.eq('tipo_local', tipo);
+  if (search)    q = q.or(`colonia.ilike.%${search}%,calle.ilike.%${search}%,descripcion.ilike.%${search}%`);
+  if (colonia)   q = q.eq('colonia', colonia);
+  if (tipo)      q = q.eq('tipo_local', tipo);
   if (modalidad) q = q.eq('modalidad', modalidad);
   if (condicion) q = q.eq('estado_conservacion', condicion);
-  if (zoning)   q = q.eq('uso_suelo', zoning);
-  if (energia)  q = q.eq('tipo_energia', energia);
+  if (zoning)    q = q.eq('uso_suelo', zoning);
+  if (energia)   q = q.eq('tipo_energia', energia);
 
   if (sort === 'precio-asc')  q = q.order('precio_inmueble', { ascending: true,  nullsFirst: false });
   else if (sort === 'precio-desc') q = q.order('precio_inmueble', { ascending: false, nullsFirst: false });
   else if (sort === 'm2-asc')  q = q.order('m2', { ascending: true });
   else if (sort === 'm2-desc') q = q.order('m2', { ascending: false });
-  else                         q = q.order('created_at', { ascending: false });
+  else                          q = q.order('created_at', { ascending: false });
 
   q = q.range(from, to);
 
-  // Filter options query (all published, no pagination)
   const [{ data: properties, count }, { data: allData }] = await Promise.all([
     q,
-    getSupabase().from('properties')
+    getSupabase()
+      .from('properties')
       .select('colonia, tipo_local, estado_conservacion, uso_suelo, tipo_energia')
-      .eq('is_published', true).or(notExpired),
+      .eq('is_published', true)
+      .or(notExpired),
   ]);
 
   const unique = <T,>(arr: (T | null | undefined)[]): T[] =>
     [...new Set(arr.filter((v): v is T => v != null && v !== ''))];
 
   const filterOptions = {
-    colonias:   unique(allData?.map(p => p.colonia) ?? []),
-    tipos:      unique(allData?.map(p => p.tipo_local) ?? []),
+    colonias:    unique(allData?.map(p => p.colonia) ?? []),
+    tipos:       unique(allData?.map(p => p.tipo_local) ?? []),
     condiciones: unique(allData?.map(p => p.estado_conservacion) ?? []),
-    zonings:    unique(allData?.map(p => p.uso_suelo) ?? []),
-    energias:   unique(allData?.map(p => p.tipo_energia) ?? []),
+    zonings:     unique(allData?.map(p => p.uso_suelo) ?? []),
+    energias:    unique(allData?.map(p => p.tipo_energia) ?? []),
   };
 
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
   const items = (properties ?? []) as Property[];
 
-  // Build a URL helper that preserves current params
+  const mapPins = items
+    .filter(p => p.lat != null && p.lng != null)
+    .map(p => ({
+      id: p.id,
+      lat: p.lat!,
+      lng: p.lng!,
+      label: `${p.tipo_local} · ${p.colonia}`,
+    }));
+
   const pageUrl = (p: number) => {
     const ps = new URLSearchParams();
     if (search)    ps.set('search', search);
@@ -115,81 +151,190 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   };
 
   return (
-    <main style={{ minHeight: '100vh', background: 'oklch(0.985 0.005 240)', color: '#181e38', fontFamily: "'Inter', sans-serif" }}>
+    <main
+      style={{
+        minHeight: '100vh',
+        background: 'oklch(0.985 0.005 240)',
+        color: '#181e38',
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
       <NavHeader activePage="propiedades" />
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '48px 24px' }}>
+      {/* Responsive helpers */}
+      <style>{`
+        @media (max-width: 900px) {
+          .props-map-col { display: none !important; }
+          .props-split   { display: block !important; }
+        }
+      `}</style>
 
-        {/* Title */}
-        <div style={{ marginBottom: '40px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.55 0.11 250)', display: 'block', marginBottom: '10px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 80px' }}>
+
+        {/* ── Header ── */}
+        <div style={{ marginBottom: 32 }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              color: 'oklch(0.55 0.11 250)',
+              display: 'block',
+              marginBottom: 8,
+            }}
+          >
             Platform
           </span>
-          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, lineHeight: 1.1, marginBottom: '10px', letterSpacing: '-0.02em', color: '#181e38' }}>
+          <h1
+            style={{
+              fontSize: 'clamp(26px, 4vw, 40px)',
+              fontWeight: 900,
+              lineHeight: 1.1,
+              marginBottom: 8,
+              letterSpacing: '-0.02em',
+              color: '#181e38',
+            }}
+          >
             Available properties
           </h1>
-          <p style={{ color: '#5a6288', fontSize: '16px' }}>
+          <p style={{ color: '#5a6288', fontSize: 15 }}>
             {count ?? 0} {(count ?? 0) === 1 ? 'property found' : 'properties found'}
+            {' · '}Opportunity scores update as our AI finishes analyzing each location.
           </p>
         </div>
 
-        {/* Filters — client component inside Suspense for useSearchParams */}
-        <Suspense fallback={<div style={{ height: 120, background: '#edf0f8', borderRadius: 16, marginBottom: 36, border: '1px solid #d5daea' }} />}>
+        {/* ── Filters ── */}
+        <Suspense
+          fallback={
+            <div
+              style={{
+                height: 120,
+                background: '#edf0f8',
+                borderRadius: 16,
+                marginBottom: 28,
+                border: '1px solid #d5daea',
+              }}
+            />
+          }
+        >
           <PropiedadesFilters filterOptions={filterOptions} />
         </Suspense>
 
-        {/* Grid */}
-        {items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 24px', color: '#5a6288' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: '#181e38' }}>No results</p>
-            <p style={{ fontSize: '15px' }}>Try adjusting your filters</p>
+        {/* ── Split layout: Map left · List right ── */}
+        <div
+          className="props-split"
+          style={{ display: 'flex', gap: 24, alignItems: 'start' }}
+        >
+          {/* Left — sticky map */}
+          <div
+            className="props-map-col"
+            style={{ width: 420, flexShrink: 0, position: 'sticky', top: 80 }}
+          >
+            <PropertiesListMap pins={mapPins} />
+            {mapPins.length === 0 && (
+              <p
+                style={{
+                  marginTop: 10,
+                  textAlign: 'center',
+                  fontSize: 12,
+                  color: '#9099b8',
+                }}
+              >
+                No location data available for current results.
+              </p>
+            )}
           </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
-            {items.map(p => (
-              <PropertyCard key={p.id} {...p} />
-            ))}
-          </div>
-        )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 48 }}>
-            {page > 1 && (
-              <Link href={pageUrl(page - 1)} style={pageBtnStyle(false)}>← Prev</Link>
+          {/* Right — scrollable list */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {items.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '80px 24px', color: '#5a6288' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+                <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: '#181e38' }}>
+                  No results
+                </p>
+                <p style={{ fontSize: 15 }}>Try adjusting your filters</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {items.map(p => (
+                  <PropertyCard key={p.id} {...p} />
+                ))}
+              </div>
             )}
-            {buildPageRange(page, totalPages).map((p, i) =>
-              p === '…' ? (
-                <span key={`ellipsis-${i}`} style={{ color: '#5a6288', padding: '0 4px' }}>…</span>
-              ) : (
-                <Link key={p} href={pageUrl(p as number)} style={pageBtnStyle(p === page)}>{p}</Link>
-              )
-            )}
-            {page < totalPages && (
-              <Link href={pageUrl(page + 1)} style={pageBtnStyle(false)}>Next →</Link>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 40,
+                }}
+              >
+                {page > 1 && (
+                  <Link href={pageUrl(page - 1)} style={pageBtnStyle(false)}>
+                    ← Prev
+                  </Link>
+                )}
+                {buildPageRange(page, totalPages).map((p, i) =>
+                  p === '…' ? (
+                    <span key={`ellipsis-${i}`} style={{ color: '#5a6288', padding: '0 4px' }}>
+                      …
+                    </span>
+                  ) : (
+                    <Link key={p} href={pageUrl(p as number)} style={pageBtnStyle(p === page)}>
+                      {p}
+                    </Link>
+                  )
+                )}
+                {page < totalPages && (
+                  <Link href={pageUrl(page + 1)} style={pageBtnStyle(false)}>
+                    Next →
+                  </Link>
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
 
-        {/* CTA */}
-        <div style={{
-          marginTop: '64px', padding: '40px 36px',
-          background: 'linear-gradient(135deg, rgba(15,27,61,0.04), rgba(59,111,160,0.06))',
-          border: '1px solid rgba(59,111,160,0.18)', borderRadius: '20px', textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '28px', marginBottom: '12px' }}>🏢</div>
-          <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: '#181e38' }}>Do you have a property?</h2>
-          <p style={{ color: '#5a6288', fontSize: '15px', marginBottom: '24px' }}>Publish it for free or unlock the Pro area analysis.</p>
-          <Link href="/registro" style={{
-            background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)', color: '#ffffff',
-            padding: '13px 32px', borderRadius: '12px', fontWeight: 700, fontSize: '15px',
-            display: 'inline-block', boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
-          }}>
+        {/* ── CTA ── */}
+        <div
+          style={{
+            marginTop: 64,
+            padding: '40px 36px',
+            background: 'linear-gradient(135deg, rgba(15,27,61,0.04), rgba(59,111,160,0.06))',
+            border: '1px solid rgba(59,111,160,0.18)',
+            borderRadius: 20,
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 28, marginBottom: 12 }}>🏢</div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, color: '#181e38' }}>
+            Do you have a property?
+          </h2>
+          <p style={{ color: '#5a6288', fontSize: 15, marginBottom: 24 }}>
+            Publish it for free or unlock the Pro area analysis.
+          </p>
+          <Link
+            href="/registro"
+            style={{
+              background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+              color: '#ffffff',
+              padding: '13px 32px',
+              borderRadius: 12,
+              fontWeight: 700,
+              fontSize: 15,
+              display: 'inline-block',
+              boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
+            }}
+          >
             Publish my property →
           </Link>
         </div>
-
       </div>
     </main>
   );
@@ -197,9 +342,15 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
 function pageBtnStyle(active: boolean): React.CSSProperties {
   return {
-    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    minWidth: 38, height: 38, padding: '0 12px',
-    borderRadius: 10, fontSize: 13, fontWeight: active ? 700 : 500,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 38,
+    height: 38,
+    padding: '0 12px',
+    borderRadius: 10,
+    fontSize: 13,
+    fontWeight: active ? 700 : 500,
     textDecoration: 'none',
     background: active ? 'linear-gradient(135deg, #0f1b3d, #3b6fa0)' : '#ffffff',
     color: active ? '#ffffff' : '#5a6288',

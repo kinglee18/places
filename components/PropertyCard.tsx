@@ -10,6 +10,14 @@ const TIPO_ICONS: Record<string, string> = {
   'Market stall': '🛒',
 };
 
+const SHORT_TIPO: Record<string, string> = {
+  'Street-facing (with storefront)': 'Storefront',
+  'Inside commercial plaza': 'Plaza unit',
+  'Corner unit': 'Corner unit',
+  'Basement / Semi-basement': 'Basement space',
+  'Market stall': 'Market stall',
+};
+
 function formatPrice(val: number | null, modalidad?: string | null): string {
   if (!val) return '—';
   return `$${val.toLocaleString('en-US')} MXN${modalidad === 'rent' ? '/mo' : ''}`;
@@ -27,111 +35,220 @@ export interface PropertyCardProps {
   estacionamientos: number;
   modalidad: string | null;
   precio_inmueble: number | null;
+  precio_mantenimiento: number | null;
   descripcion: string | null;
   photo_urls: string[];
   nivel_piso: string | null;
   city: string | null;
   state: string | null;
+  estado_conservacion?: string | null;
 }
 
 export default function PropertyCard(p: PropertyCardProps) {
+  const shortType = SHORT_TIPO[p.tipo_local] ?? p.tipo_local;
+  const title = `${shortType} in ${p.colonia}`;
+
+  const addressParts = [
+    p.calle ? `${p.calle}${p.numero ? ` ${p.numero}` : ''}` : null,
+    p.city ?? p.colonia,
+  ].filter(Boolean);
+  const address = addressParts.join(', ');
+
+  const displayPrice = p.modalidad === 'rent'
+    ? (p.precio_mantenimiento ?? p.precio_inmueble)
+    : p.precio_inmueble;
+
   return (
-    <Link href={`/propiedades/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
+    <Link href={`/propiedades/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
       <article
         style={{
-          background: 'var(--surface)', border: '1px solid var(--surface-border)', borderRadius: '20px',
-          overflow: 'hidden', transition: 'transform 0.25s, box-shadow 0.25s, border-color 0.25s',
-          cursor: 'pointer', height: '100%',
+          display: 'flex',
+          background: '#ffffff',
+          border: '1px solid #e4e7f4',
+          borderRadius: 16,
+          overflow: 'hidden',
+          transition: 'box-shadow 0.2s, transform 0.2s, border-color 0.2s',
+          cursor: 'pointer',
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.boxShadow = '0 20px 60px oklch(0.18 0.04 260 / 0.12)';
-          e.currentTarget.style.borderColor = 'oklch(0.55 0.11 250 / 0.35)';
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(15,27,61,0.1)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.borderColor = 'oklch(0.72 0.06 250)';
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.transform = '';
           e.currentTarget.style.boxShadow = '';
-          e.currentTarget.style.borderColor = 'var(--surface-border)';
+          e.currentTarget.style.transform = '';
+          e.currentTarget.style.borderColor = '#e4e7f4';
         }}
       >
-        {/* Cover photo */}
-        <div style={{ height: 180, background: 'var(--surface-2)', position: 'relative', overflow: 'hidden' }}>
+        {/* Thumbnail */}
+        <div
+          style={{
+            width: 190,
+            minWidth: 190,
+            background: '#edf0f8',
+            position: 'relative',
+            overflow: 'hidden',
+            flexShrink: 0,
+            alignSelf: 'stretch',
+          }}
+        >
           {p.photo_urls?.length > 0 ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={p.photo_urls[0]} alt={p.colonia} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img
+              src={p.photo_urls[0]}
+              alt={p.colonia}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
           ) : (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, opacity: 0.2 }}>
+            <div
+              style={{
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 38,
+                opacity: 0.22,
+              }}
+            >
               {TIPO_ICONS[p.tipo_local] ?? '🏬'}
             </div>
           )}
           {p.photo_urls?.length > 1 && (
-            <span style={{ position: 'absolute', bottom: 10, right: 10, background: 'oklch(0.985 0.005 240 / 0.85)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '3px 8px', fontSize: 11, color: 'var(--muted)' }}>
+            <span
+              style={{
+                position: 'absolute', bottom: 8, right: 8,
+                background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(4px)',
+                borderRadius: 6, padding: '2px 7px', fontSize: 10, color: '#5a6288', fontWeight: 600,
+              }}
+            >
               +{p.photo_urls.length - 1} photos
-            </span>
-          )}
-          {p.modalidad && (
-            <span style={{
-              position: 'absolute', top: 10, left: 10,
-              background: p.modalidad === 'rent' ? 'oklch(0.60 0.12 240 / 0.12)' : 'oklch(0.55 0.11 250 / 0.1)',
-              border: `1px solid ${p.modalidad === 'rent' ? 'oklch(0.60 0.12 240 / 0.4)' : 'oklch(0.55 0.11 250 / 0.3)'}`,
-              color: p.modalidad === 'rent' ? 'oklch(0.45 0.12 240)' : 'oklch(0.40 0.10 250)',
-              borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 700,
-            }}>
-              {p.modalidad === 'rent' ? 'For rent' : 'For sale'}
             </span>
           )}
         </div>
 
-        <div style={{ padding: '20px 22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--foreground)' }}>{p.colonia}</div>
-              <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: 2 }}>
-                {[p.calle && `${p.calle}${p.numero ? ` ${p.numero}` : ''}`, p.city, p.state].filter(Boolean).join(' · ')}
-              </div>
-            </div>
-            <span style={{ fontSize: '11px', fontWeight: 700, background: 'oklch(0.55 0.11 250 / 0.08)', border: '1px solid oklch(0.55 0.11 250 / 0.25)', color: 'var(--brand)', padding: '4px 10px', borderRadius: '100px', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8 }}>
-              {p.m2} m²
+        {/* Content */}
+        <div
+          style={{
+            flex: 1,
+            padding: '18px 22px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 9,
+            minWidth: 0,
+            justifyContent: 'center',
+          }}
+        >
+          {/* Row 1: title + modality badge */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: 15,
+                color: '#181e38',
+                lineHeight: 1.35,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              {title}
             </span>
+            {p.modalidad && (
+              <span
+                style={{
+                  flexShrink: 0,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase',
+                  background:
+                    p.modalidad === 'rent'
+                      ? 'oklch(0.94 0.04 240)'
+                      : 'oklch(0.94 0.03 250)',
+                  color:
+                    p.modalidad === 'rent'
+                      ? 'oklch(0.42 0.12 240)'
+                      : 'oklch(0.38 0.10 250)',
+                  border: `1px solid ${
+                    p.modalidad === 'rent'
+                      ? 'oklch(0.82 0.08 240)'
+                      : 'oklch(0.82 0.06 250)'
+                  }`,
+                  borderRadius: 6,
+                  padding: '4px 9px',
+                }}
+              >
+                {p.modalidad === 'rent' ? 'For rent' : 'For sale'}
+              </span>
+            )}
           </div>
 
-          <span style={{ fontSize: '12px', color: 'var(--muted)', background: 'var(--surface-2)', border: '1px solid var(--surface-border)', padding: '3px 10px', borderRadius: '8px', display: 'inline-block', marginBottom: '12px' }}>
-            {p.tipo_local}
-          </span>
+          {/* Row 2: address */}
+          <p style={{ fontSize: 12, color: '#9099b8', display: 'flex', alignItems: 'center', gap: 4, margin: 0 }}>
+            <span style={{ fontSize: 11 }}>📍</span>
+            {address}
+          </p>
 
-          {p.descripcion && (
-            <p style={{ color: 'var(--muted)', fontSize: '13px', lineHeight: 1.6, marginBottom: '14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {/* Row 3: stats */}
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: '#5a6288', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span>📐</span> {p.m2} m²
+            </span>
+            {displayPrice && (
+              <span style={{ fontSize: 12, color: '#5a6288', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span>💰</span> {formatPrice(displayPrice, p.modalidad)}
+              </span>
+            )}
+            {p.banos > 0 && (
+              <span style={{ fontSize: 12, color: '#9099b8' }}>🚿 {p.banos}</span>
+            )}
+            {p.habitaciones > 0 && (
+              <span style={{ fontSize: 12, color: '#9099b8' }}>🚪 {p.habitaciones}</span>
+            )}
+            {p.estacionamientos > 0 && (
+              <span style={{ fontSize: 12, color: '#9099b8' }}>🅿️ {p.estacionamientos}</span>
+            )}
+            {p.nivel_piso && (
+              <span style={{ fontSize: 12, color: '#9099b8' }}>🏢 {p.nivel_piso}</span>
+            )}
+          </div>
+
+          {/* Row 4: description */}
+          {p.descripcion ? (
+            <p
+              style={{
+                fontSize: 12,
+                color: '#5a6288',
+                lineHeight: 1.55,
+                margin: 0,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
               {p.descripcion}
             </p>
+          ) : (
+            <p style={{ fontSize: 12, color: '#b0b8d4', fontStyle: 'italic', margin: 0 }}>
+              No description added yet.
+            </p>
           )}
+        </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            {p.banos > 0 && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>🚿 {p.banos}</span>}
-            {p.habitaciones > 0 && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>🚪 {p.habitaciones}</span>}
-            {p.estacionamientos > 0 && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>🅿️ {p.estacionamientos}</span>}
-            {p.nivel_piso && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>🏢 {p.nivel_piso}</span>}
-          </div>
-
-          <div style={{ height: 1, background: 'var(--surface-border)', marginBottom: '14px' }} />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: 2, fontWeight: 600, letterSpacing: '0.06em' }}>
-                {p.modalidad === 'rent' ? 'MONTHLY RENT' : 'PRICE'}
-              </div>
-              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--foreground)' }}>
-                {formatPrice(p.precio_inmueble, p.modalidad)}
-              </div>
-            </div>
-            <span style={{
-              background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
-              borderRadius: '10px', color: 'oklch(0.985 0.005 240)',
-              fontWeight: 700, fontSize: '13px', padding: '10px 18px',
-              boxShadow: '0 4px 16px oklch(0.235 0.07 265 / 0.2)',
-            }}>
-              View details →
-            </span>
-          </div>
+        {/* Right arrow — subtle CTA */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 18px',
+            color: '#9099b8',
+            fontSize: 18,
+            flexShrink: 0,
+          }}
+        >
+          →
         </div>
       </article>
     </Link>
