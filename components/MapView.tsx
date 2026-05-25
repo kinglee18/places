@@ -15,9 +15,9 @@ interface MapViewProps {
 }
 
 const RING_STYLE: Record<number, { color: string; fillOpacity: number }> = {
-  300: { color: "oklch(0.55 0.11 250)", fillOpacity: 0.18 },
-  600: { color: "oklch(0.60 0.12 240)", fillOpacity: 0.13 },
-  900: { color: "#7c6bff", fillOpacity: 0.08 },
+  300: { color: "oklch(0.45 0.12 250)", fillOpacity: 0.15 },
+  600: { color: "oklch(0.55 0.1 240)",  fillOpacity: 0.10 },
+  900: { color: "#6b5ce7",              fillOpacity: 0.06 },
 };
 
 export default function MapView({ lat, lng, isochrones }: MapViewProps) {
@@ -47,18 +47,18 @@ export default function MapView({ lat, lng, isochrones }: MapViewProps) {
         scrollWheelZoom: false,
       });
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      // Light tile layer (CartoDB Positron)
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
         subdomains: "abcd",
         maxZoom: 20,
       }).addTo(map);
 
       if (isochrones && isochrones.length > 0) {
-        // Render outermost ring first so inner rings paint on top
         [...isochrones]
           .sort((a, b) => b.properties.value - a.properties.value)
           .forEach((feature) => {
-            const style = RING_STYLE[feature.properties.value] ?? { color: "#888", fillOpacity: 0.1 };
+            const style = RING_STYLE[feature.properties.value] ?? { color: "#888", fillOpacity: 0.08 };
             L.geoJSON(feature as any, {
               style: {
                 color: style.color,
@@ -71,7 +71,7 @@ export default function MapView({ lat, lng, isochrones }: MapViewProps) {
       }
 
       const icon = L.divIcon({
-        html: `<div style="width:32px;height:32px;background:linear-gradient(135deg,#00f5a0,#00b4d8);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #ffffff33;box-shadow:0 0 12px rgba(0,245,160,0.6),0 2px 8px rgba(0,0,0,0.5);"></div>`,
+        html: `<div style="width:32px;height:32px;background:linear-gradient(135deg,#0f1b3d,#3b6fa0);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.6);box-shadow:0 2px 10px rgba(15,27,61,0.35),0 2px 8px rgba(0,0,0,0.15);"></div>`,
         className: "",
         iconSize: [32, 32],
         iconAnchor: [16, 32],
@@ -93,7 +93,7 @@ export default function MapView({ lat, lng, isochrones }: MapViewProps) {
   }, [lat, lng, isochrones]);
 
   return (
-    <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1px solid #2a2a4a" }}>
+    <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1px solid #d5daea" }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <div ref={mapRef} style={{ width: "100%", height: 300 }} />
     </div>

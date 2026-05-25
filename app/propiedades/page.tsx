@@ -115,7 +115,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   };
 
   return (
-    <main style={{ minHeight: '100vh', background: '#06060f', color: '#f0f0f8', fontFamily: "'Inter', sans-serif" }}>
+    <main style={{ minHeight: '100vh', background: 'oklch(0.985 0.005 240)', color: '#181e38', fontFamily: "'Inter', sans-serif" }}>
       <NavHeader activePage="propiedades" />
 
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '48px 24px' }}>
@@ -125,24 +125,24 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
           <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.55 0.11 250)', display: 'block', marginBottom: '10px' }}>
             Platform
           </span>
-          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, lineHeight: 1.1, marginBottom: '10px', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, lineHeight: 1.1, marginBottom: '10px', letterSpacing: '-0.02em', color: '#181e38' }}>
             Available properties
           </h1>
-          <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: '16px' }}>
+          <p style={{ color: '#5a6288', fontSize: '16px' }}>
             {count ?? 0} {(count ?? 0) === 1 ? 'property found' : 'properties found'}
           </p>
         </div>
 
         {/* Filters — client component inside Suspense for useSearchParams */}
-        <Suspense fallback={<div style={{ height: 120, background: '#0d0d1a', borderRadius: 16, marginBottom: 36 }} />}>
+        <Suspense fallback={<div style={{ height: 120, background: '#edf0f8', borderRadius: 16, marginBottom: 36, border: '1px solid #d5daea' }} />}>
           <PropiedadesFilters filterOptions={filterOptions} />
         </Suspense>
 
         {/* Grid */}
         {items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'oklch(0.45 0.03 260)' }}>
+          <div style={{ textAlign: 'center', padding: '80px 24px', color: '#5a6288' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: '#9090b8' }}>No results</p>
+            <p style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: '#181e38' }}>No results</p>
             <p style={{ fontSize: '15px' }}>Try adjusting your filters</p>
           </div>
         ) : (
@@ -161,7 +161,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
             )}
             {buildPageRange(page, totalPages).map((p, i) =>
               p === '…' ? (
-                <span key={`ellipsis-${i}`} style={{ color: 'oklch(0.45 0.03 260)', padding: '0 4px' }}>…</span>
+                <span key={`ellipsis-${i}`} style={{ color: '#5a6288', padding: '0 4px' }}>…</span>
               ) : (
                 <Link key={p} href={pageUrl(p as number)} style={pageBtnStyle(p === page)}>{p}</Link>
               )
@@ -175,16 +175,16 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
         {/* CTA */}
         <div style={{
           marginTop: '64px', padding: '40px 36px',
-          background: 'linear-gradient(135deg, rgba(0,245,160,0.05), rgba(0,180,216,0.05))',
-          border: '1px solid rgba(0,245,160,0.15)', borderRadius: '20px', textAlign: 'center',
+          background: 'linear-gradient(135deg, rgba(15,27,61,0.04), rgba(59,111,160,0.06))',
+          border: '1px solid rgba(59,111,160,0.18)', borderRadius: '20px', textAlign: 'center',
         }}>
           <div style={{ fontSize: '28px', marginBottom: '12px' }}>🏢</div>
-          <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px' }}>Do you have a property?</h2>
-          <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: '15px', marginBottom: '24px' }}>Publish it for free or unlock the Pro area analysis.</p>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: '#181e38' }}>Do you have a property?</h2>
+          <p style={{ color: '#5a6288', fontSize: '15px', marginBottom: '24px' }}>Publish it for free or unlock the Pro area analysis.</p>
           <Link href="/registro" style={{
-            background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', color: '#06060f',
+            background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)', color: '#ffffff',
             padding: '13px 32px', borderRadius: '12px', fontWeight: 700, fontSize: '15px',
-            display: 'inline-block', boxShadow: '0 6px 24px rgba(0,245,160,0.25)',
+            display: 'inline-block', boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
           }}>
             Publish my property →
           </Link>
@@ -201,9 +201,9 @@ function pageBtnStyle(active: boolean): React.CSSProperties {
     minWidth: 38, height: 38, padding: '0 12px',
     borderRadius: 10, fontSize: 13, fontWeight: active ? 700 : 500,
     textDecoration: 'none',
-    background: active ? 'linear-gradient(135deg, #00f5a0, #00b4d8)' : '#0d0d1a',
-    color: active ? '#06060f' : '#9090b8',
-    border: active ? 'none' : '1px solid #1e1e35',
+    background: active ? 'linear-gradient(135deg, #0f1b3d, #3b6fa0)' : '#ffffff',
+    color: active ? '#ffffff' : '#5a6288',
+    border: active ? 'none' : '1px solid #d5daea',
     transition: 'all 0.15s',
   };
 }

@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
     .gte('created_at', startOfMonth);
 
   if (countError) {
-    console.error('Count error:', countError);
-    return NextResponse.json({ error: countError }, { status: 500 });
+    console.error('Count query error:', countError.code, countError.message, countError.details);
+    return NextResponse.json({ error: countError.message || countError.code || 'Count query failed' }, { status: 500 });
   }
 
   const requiresPayment = (count ?? 0) >= 1;

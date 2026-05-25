@@ -62,8 +62,8 @@ export default function MapPicker({ onLocationSelect, initialLat, initialLng, fl
         zoomControl: true,
       });
 
-      // Dark-style tile layer (CartoDB Dark Matter)
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      // Light tile layer (CartoDB Positron)
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
         subdomains: "abcd",
         maxZoom: 20,
@@ -166,7 +166,7 @@ export default function MapPicker({ onLocationSelect, initialLat, initialLng, fl
   }, [flyTo]);
 
   return (
-    <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1px solid #2a2a4a" }}>
+    <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1px solid #d5daea" }}>
       {/* Leaflet CSS */}
       <link
         rel="stylesheet"
@@ -183,16 +183,17 @@ export default function MapPicker({ onLocationSelect, initialLat, initialLng, fl
             bottom: 12,
             left: "50%",
             transform: "translateX(-50%)",
-            background: "rgba(10,10,20,0.85)",
-            border: "1px solid #2a2a4a",
+            background: "rgba(255,255,255,0.92)",
+            border: "1px solid #d5daea",
             borderRadius: 8,
             padding: "6px 14px",
             pointerEvents: "none",
             whiteSpace: "nowrap",
+            backdropFilter: "blur(4px)",
           }}
         >
           <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "oklch(0.45 0.03 260)" }}>
-            📍 Toca el mapa para colocar tu pin
+            📍 Click the map to place your pin
           </span>
         </div>
       )}
