@@ -21,10 +21,10 @@ const ZonaPicker = dynamic(() => import("./ZonaPicker"), {
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
-    primary: { main: "oklch(0.55 0.11 250)" },
-    secondary: { main: "oklch(0.60 0.12 240)" },
-    background: { default: "oklch(0.985 0.005 240)", paper: "oklch(0.96 0.01 250)" },
-    text: { primary: "oklch(0.18 0.04 260)", secondary: "oklch(0.45 0.03 260)" },
+    primary: { main: "#3b6fa0" },
+    secondary: { main: "#4080b4" },
+    background: { default: "#f7f8fd", paper: "#edf0f8" },
+    text: { primary: "#181e38", secondary: "#5a6288" },
     error: { main: "#e53935" },
   },
   typography: {
@@ -43,16 +43,16 @@ const darkTheme = createTheme({
         root: {
           fontFamily: "'DM Mono', monospace",
           borderRadius: 8,
-          backgroundColor: "oklch(0.96 0.01 250)",
-          "& fieldset": { borderColor: "oklch(0.9 0.015 250)" },
+          backgroundColor: "#edf0f8",
+          "& fieldset": { borderColor: "#d5daea" },
           "&:hover fieldset": { borderColor: "#444466" },
-          "&.Mui-focused fieldset": { borderColor: "oklch(0.55 0.11 250)" },
+          "&.Mui-focused fieldset": { borderColor: "#3b6fa0" },
         },
       },
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: { fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", fontSize: "14px" },
+        root: { fontFamily: "'DM Mono', monospace", color: "#5a6288", fontSize: "14px" },
       },
     },
     MuiButton: {
@@ -60,23 +60,23 @@ const darkTheme = createTheme({
         root: { borderRadius: 10, padding: "12px 24px" },
         containedPrimary: {
           background: "linear-gradient(135deg, #00f5a0, #00b4d8)",
-          color: "oklch(0.985 0.005 240)",
+          color: "#f7f8fd",
           "&:hover": { opacity: 0.9, transform: "scale(1.02)" },
           transition: "all 0.2s",
         },
         outlined: {
-          borderColor: "oklch(0.9 0.015 250)",
-          color: "oklch(0.18 0.04 260)",
-          "&:hover": { backgroundColor: "oklch(0.96 0.01 250)", borderColor: "oklch(0.75 0.04 250)" },
+          borderColor: "#d5daea",
+          color: "#181e38",
+          "&:hover": { backgroundColor: "#edf0f8", borderColor: "#a4b4d2" },
         },
       },
     },
     MuiSlider: {
       styleOverrides: {
-        root: { color: "oklch(0.55 0.11 250)" },
-        rail: { backgroundColor: "oklch(0.9 0.015 250)" },
-        mark: { backgroundColor: "oklch(0.9 0.015 250)" },
-        markLabel: { fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", fontSize: 11 },
+        root: { color: "#3b6fa0" },
+        rail: { backgroundColor: "#d5daea" },
+        mark: { backgroundColor: "#d5daea" },
+        markLabel: { fontFamily: "'DM Mono', monospace", color: "#5a6288", fontSize: 11 },
       },
     },
   },
