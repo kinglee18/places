@@ -183,11 +183,10 @@ const compConfig = {
   high:   { bg: "oklch(0.96 0.06 25)", border: "oklch(0.83 0.12 25)", color: "oklch(0.50 0.18 25)", label: "high competition" },
 };
 
-// ─── Ejemplos de descripción ─────────────────────────────────────────────────
-const EJEMPLOS = [
-  "I have an industrial espresso machine, refrigerated display cases and pastry equipment. Looking for a weekend space to fulfill my orders.",
-  "I'm a hairstylist with my own scissors, chair and mirrors. I need a weekday space to see clients.",
-  "I have sewing machines and fabric for custom clothing. Looking for a quiet space with good natural light.",
+// ─── Quick category chips ─────────────────────────────────────────────────────
+const QUICK_CHIPS = [
+  'Chinese food', 'Coffee shop', 'Yoga studio',
+  'Bookstore', 'Bakery', 'Gym',
 ];
 
 // ─── Componente principal ────────────────────────────────────────────────────
@@ -196,6 +195,9 @@ type AppState = "input" | "preflight_loading" | "preflight" | "ai_loading" | "re
 export default function BuscarLocal() {
   const [appState, setAppState] = useState<AppState>("input");
   const [descripcion, setDescripcion] = useState("");
+  const [location, setLocation] = useState("");
+  const [businessType, setBusinessType] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [zona, setZona] = useState<{ label: string; lat: number; lng: number } | null>(null);
   const [modalidad, setModalidad] = useState<Modalidad>("any");
   const [presupuesto, setPresupuesto] = useState<number>(8000);
@@ -215,11 +217,14 @@ export default function BuscarLocal() {
 
 
   // ── Paso 1: preflight (DB + saturación) ────────────────────────────────────
-  const handleSubmit = async () => {
-    if (descripcion.trim().length < 10) {
-      setError("Please describe your situation a bit more (minimum 10 characters).");
+  const handleSubmitWith = async (bt: string, loc: string) => {
+    const parts = [bt.trim(), loc.trim() ? `in ${loc.trim()}` : ""].filter(Boolean);
+    const combined = parts.join(" ") || descripcion.trim();
+    if (combined.length < 3) {
+      setError("Please enter a business type or location.");
       return;
     }
+    setDescripcion(combined);
     setError(null);
     setAppState("preflight_loading");
 
@@ -228,7 +233,7 @@ export default function BuscarLocal() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          descripcion,
+          descripcion: combined,
           lat: zona?.lat ?? null,
           lng: zona?.lng ?? null,
           modalidad,
@@ -244,6 +249,8 @@ export default function BuscarLocal() {
       setAppState("input");
     }
   };
+
+  const handleSubmit = () => handleSubmitWith(businessType, location);
 
   // ── Paso 2: análisis IA completo (opcional) ────────────────────────────────
   const handleAiAnalysis = async () => {
@@ -282,6 +289,9 @@ export default function BuscarLocal() {
     setPreflight(null);
     setError(null);
     setDescripcion("");
+    setLocation("");
+    setBusinessType("");
+    setShowAdvanced(false);
     setZona(null);
     setModalidad("any");
     setPresupuesto(8000);
@@ -323,125 +333,206 @@ export default function BuscarLocal() {
 
           {/* ── ESTADO: INPUT ───────────────────────────────────────────── */}
           {appState === "input" && (
-            <Card elevation={0} sx={{ border: "1px solid var(--surface-border)", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }} className="fadein">
-
-              <Typography variant="h6" fontWeight={700} mb={1}>What do you want to do?</Typography>
-              <Typography variant="body2" color="text.secondary" mb={4} sx={{ lineHeight: 1.7 }}>
-                Tell us your situation in your own words. AI will detect what type of business you want to start, what space you need, and the best areas for you.
-              </Typography>
-
-              {/* Textarea principal */}
-              <Box mb={1}>
-                <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1 }}>
-                  DESCRIBE YOUR SITUATION *
+            <Box className="fadein">
+              {/* Hero heading */}
+              <Box textAlign="center" mb={5}>
+                <Typography variant="h4" fontWeight={800} sx={{ color: "#e0e0ff", lineHeight: 1.2, mb: 2 }}>
+                  Find the perfect{" "}
+                  <span style={{ color: "#00f5a0" }}>commercial space</span>
+                  {" "}for your next business.
                 </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  placeholder="Ex: I have an industrial espresso machine and pastry equipment. Looking for a weekend space to handle my orders..."
-                  inputProps={{ maxLength: 600 }}
-                />
-                <Box display="flex" justifyContent="space-between" mt={0.5}>
-                  <Typography variant="caption" color="text.secondary">
-                    More details = better analysis
-                  </Typography>
-                  <Typography variant="caption" color={descripcion.length > 500 ? "#f5c518" : "text.secondary"}>
-                    {descripcion.length}/600
-                  </Typography>
-                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 520, mx: "auto", lineHeight: 1.8 }}>
+                  We analyze nearby competition, foot traffic and demand to recommend exactly which business will thrive in each available space.
+                </Typography>
               </Box>
 
-              {/* Ejemplos rápidos */}
-              <Box mb={4} display="flex" gap={1} flexWrap="wrap">
-                {EJEMPLOS.map((ej, i) => (
+              {/* Search bar */}
+              <Box sx={{
+                bgcolor: "#12122a",
+                border: "1px solid #2a2a4a",
+                borderRadius: 40,
+                display: "flex",
+                alignItems: "center",
+                px: 1,
+                mb: 2,
+                gap: 0,
+                transition: "border-color 0.2s",
+                "&:focus-within": { borderColor: "#444466" },
+              }}>
+                {/* Location input */}
+                <Box sx={{ display: "flex", alignItems: "center", flex: 1, px: 2, py: 0.5 }}>
+                  <Typography sx={{ color: "#8888aa", fontSize: 16, mr: 1, flexShrink: 0 }}>📍</Typography>
+                  <input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+                    placeholder="Neighborhood or city (e.g. Condesa, CDMX)"
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      color: "#e0e0ff",
+                      fontFamily: "'DM Mono', monospace",
+                      fontSize: 14,
+                      width: "100%",
+                    }}
+                  />
+                </Box>
+
+                {/* Divider */}
+                <Box sx={{ width: "1px", height: 36, bgcolor: "#2a2a4a", flexShrink: 0 }} />
+
+                {/* Business type input */}
+                <Box sx={{ display: "flex", alignItems: "center", flex: 1, px: 2, py: 0.5 }}>
+                  <Typography sx={{ color: "#8888aa", fontSize: 14, mr: 1, flexShrink: 0 }}>↗</Typography>
+                  <input
+                    value={businessType}
+                    onChange={(e) => setBusinessType(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+                    placeholder="Optional: what do you want to open?"
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      color: "#e0e0ff",
+                      fontFamily: "'DM Mono', monospace",
+                      fontSize: 14,
+                      width: "100%",
+                    }}
+                  />
+                </Box>
+
+                {/* CTA button */}
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  sx={{ borderRadius: 40, px: 3, py: 1.5, flexShrink: 0, whiteSpace: "nowrap" }}
+                >
+                  Find spaces →
+                </Button>
+              </Box>
+
+              {/* Quick chips */}
+              <Box display="flex" alignItems="center" gap={1} flexWrap="wrap" mb={4} justifyContent="center">
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
+                  Try:
+                </Typography>
+                {QUICK_CHIPS.map((chip) => (
                   <Chip
-                    key={i}
-                    label={`Ejemplo ${i + 1}`}
+                    key={chip}
+                    label={chip}
                     size="small"
-                    onClick={() => setDescripcion(ej)}
-                    sx={{ bgcolor: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", color: "#8888cc", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, "&:hover": { borderColor: "oklch(0.55 0.11 250)", color: "oklch(0.55 0.11 250)" }, transition: "all 0.2s" }}
+                    onClick={() => {
+                      setBusinessType(chip);
+                      handleSubmitWith(chip, location);
+                    }}
+                    sx={{
+                      bgcolor: "#12122a",
+                      border: "1px solid #2a2a4a",
+                      color: "#8888cc",
+                      cursor: "pointer",
+                      fontFamily: "'DM Mono', monospace",
+                      fontSize: 12,
+                      "&:hover": { borderColor: "#00f5a0", color: "#00f5a0" },
+                      transition: "all 0.2s",
+                    }}
                   />
                 ))}
               </Box>
 
-              {/* Opciones adicionales */}
-              <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, p: 3, mb: 4 }}>
-                <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 11, display: "block", mb: 3 }}>
-                  ADDITIONAL OPTIONS (optional)
+              {/* Advanced options (collapsible) */}
+              <Box textAlign="center" mb={2}>
+                <Typography
+                  variant="caption"
+                  onClick={() => setShowAdvanced((v) => !v)}
+                  sx={{
+                    color: "#555577",
+                    cursor: "pointer",
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: 12,
+                    "&:hover": { color: "#8888aa" },
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {showAdvanced ? "▲ Hide filters" : "⚙ Advanced filters"}
                 </Typography>
+              </Box>
 
-                <Box display="flex" flexDirection="column" gap={3.5}>
-                  {/* Zona */}
-                  <FormControl fullWidth>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
-                      PREFERRED ZONE
-                    </Typography>
-                    <ZonaPicker onChange={setZona} />
-                  </FormControl>
+              {showAdvanced && (
+                <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 3, p: 3, mb: 4 }} className="fadein">
+                  <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#555577", letterSpacing: 1, fontSize: 11, display: "block", mb: 3 }}>
+                    ADDITIONAL OPTIONS
+                  </Typography>
+                  <Box display="flex" flexDirection="column" gap={3.5}>
+                    {/* Zona */}
+                    <FormControl fullWidth>
+                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
+                        PREFERRED ZONE (map)
+                      </Typography>
+                      <ZonaPicker onChange={setZona} />
+                    </FormControl>
 
-                  {/* Modalidad: renta / compra / cualquiera */}
-                  <Box>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
-                      RENT OR BUY?
-                    </Typography>
-                    <ToggleButtonGroup
-                      value={modalidad}
-                      exclusive
-                      onChange={(_, v) => { if (v) setModalidad(v as Modalidad); }}
-                      size="small"
-                      sx={{
-                        "& .MuiToggleButton-root": {
-                          fontFamily: "'DM Mono', monospace",
-                          fontSize: 12,
-                          color: "oklch(0.45 0.03 260)",
-                          borderColor: "oklch(0.9 0.015 250)",
-                          textTransform: "none",
-                          px: 2,
-                          py: 0.7,
-                          "&.Mui-selected": {
-                            background: "rgba(0, 245, 160, 0.08)",
-                            color: "oklch(0.55 0.11 250)",
-                            borderColor: "rgba(0, 245, 160, 0.4)",
-                            "&:hover": { background: "rgba(0, 245, 160, 0.12)" },
+                    {/* Modalidad */}
+                    <Box>
+                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
+                        RENT OR BUY?
+                      </Typography>
+                      <ToggleButtonGroup
+                        value={modalidad}
+                        exclusive
+                        onChange={(_, v) => { if (v) setModalidad(v as Modalidad); }}
+                        size="small"
+                        sx={{
+                          "& .MuiToggleButton-root": {
+                            fontFamily: "'DM Mono', monospace",
+                            fontSize: 12,
+                            color: "#8888aa",
+                            borderColor: "#2a2a4a",
+                            textTransform: "none",
+                            px: 2,
+                            py: 0.7,
+                            "&.Mui-selected": {
+                              background: "rgba(0, 245, 160, 0.08)",
+                              color: "#00f5a0",
+                              borderColor: "rgba(0, 245, 160, 0.4)",
+                              "&:hover": { background: "rgba(0, 245, 160, 0.12)" },
+                            },
                           },
-                        },
-                      }}
-                    >
-                      <ToggleButton value="rent">Rent</ToggleButton>
-                      <ToggleButton value="sale">Buy</ToggleButton>
-                      <ToggleButton value="any">Any</ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-
-                  {/* Presupuesto */}
-                  <Box>
-                    <Box display="flex" justifyContent="space-between" mb={1}>
-                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13 }}>
-                        MONTHLY RENT BUDGET
-                      </Typography>
-                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.55 0.11 250)", fontWeight: 700 }}>
-                        ${presupuesto.toLocaleString()} MXN
-                      </Typography>
+                        }}
+                      >
+                        <ToggleButton value="rent">Rent</ToggleButton>
+                        <ToggleButton value="sale">Buy</ToggleButton>
+                        <ToggleButton value="any">Any</ToggleButton>
+                      </ToggleButtonGroup>
                     </Box>
-                    <Slider
-                      value={presupuesto}
-                      onChange={(_, v) => setPresupuesto(v as number)}
-                      min={2000}
-                      max={50000}
-                      step={500}
-                      marks={[
-                        { value: 2000, label: "$2k" },
-                        { value: 15000, label: "$15k" },
-                        { value: 30000, label: "$30k" },
-                        { value: 50000, label: "$50k" },
-                      ]}
-                    />
+
+                    {/* Presupuesto */}
+                    <Box>
+                      <Box display="flex" justifyContent="space-between" mb={1}>
+                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13 }}>
+                          MONTHLY RENT BUDGET
+                        </Typography>
+                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#00f5a0", fontWeight: 700 }}>
+                          ${presupuesto.toLocaleString()} MXN
+                        </Typography>
+                      </Box>
+                      <Slider
+                        value={presupuesto}
+                        onChange={(_, v) => setPresupuesto(v as number)}
+                        min={2000}
+                        max={50000}
+                        step={500}
+                        marks={[
+                          { value: 2000, label: "$2k" },
+                          { value: 15000, label: "$15k" },
+                          { value: 30000, label: "$30k" },
+                          { value: 50000, label: "$50k" },
+                        ]}
+                      />
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
+              )}
 
               {/* Error */}
               {error && (
@@ -449,11 +540,7 @@ export default function BuscarLocal() {
                   <Typography variant="caption" color="error.main">⚠ {error}</Typography>
                 </Box>
               )}
-
-              <Button variant="contained" fullWidth size="large" onClick={handleSubmit}>
-                Analyze with AI →
-              </Button>
-            </Card>
+            </Box>
           )}
 
           {/* ── ESTADO: PREFLIGHT LOADING ───────────────────────────────── */}
