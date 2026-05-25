@@ -24,10 +24,10 @@ const MapPicker = dynamic(() => import("./MapPicker"), {
 const darkTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: 'oklch(0.235 0.07 265)' },
-    secondary: { main: 'oklch(0.55 0.11 250)' },
-    background: { default: 'oklch(0.985 0.005 240)', paper: 'oklch(1 0 0)' },
-    text: { primary: 'oklch(0.18 0.04 260)', secondary: 'oklch(0.45 0.03 260)' },
+    primary: { main: '#0f1b3d' },
+    secondary: { main: '#3b6fa0' },
+    background: { default: '#f7f8fd', paper: '#ffffff' },
+    text: { primary: '#181e38', secondary: '#5a6288' },
     error: { main: '#e53935' },
   },
   typography: {
@@ -46,49 +46,49 @@ const darkTheme = createTheme({
         root: {
           fontFamily: "'DM Mono', monospace",
           borderRadius: 8,
-          backgroundColor: 'oklch(0.96 0.01 250)',
-          '& fieldset': { borderColor: 'oklch(0.9 0.015 250)' },
-          '&:hover fieldset': { borderColor: 'oklch(0.75 0.04 250)' },
-          '&.Mui-focused fieldset': { borderColor: 'oklch(0.55 0.11 250)' },
+          backgroundColor: '#edf0f8',
+          '& fieldset': { borderColor: '#d5daea' },
+          '&:hover fieldset': { borderColor: '#a4b4d2' },
+          '&.Mui-focused fieldset': { borderColor: '#3b6fa0' },
         }
       }
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: { fontFamily: "'DM Mono', monospace", color: 'oklch(0.45 0.03 260)', fontSize: '14px' }
+        root: { fontFamily: "'DM Mono', monospace", color: '#5a6288', fontSize: '14px' }
       }
     },
     MuiButton: {
       styleOverrides: {
         root: { borderRadius: 10, padding: '12px 24px' },
         containedPrimary: {
-          background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
-          color: 'oklch(0.985 0.005 240)',
+          background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+          color: '#f7f8fd',
           '&:hover': { opacity: 0.9, transform: 'scale(1.02)' },
           transition: 'all 0.2s',
         },
         outlined: {
-          borderColor: 'oklch(0.9 0.015 250)',
-          color: 'oklch(0.18 0.04 260)',
-          '&:hover': { backgroundColor: 'oklch(0.96 0.01 250)', borderColor: 'oklch(0.75 0.04 250)' }
+          borderColor: '#d5daea',
+          color: '#181e38',
+          '&:hover': { backgroundColor: '#edf0f8', borderColor: '#a4b4d2' }
         }
       }
     },
     MuiStepIcon: {
       styleOverrides: {
         root: {
-          color: 'oklch(0.9 0.015 250)',
-          border: '2px solid oklch(0.85 0.02 250)',
+          color: '#d5daea',
+          border: '2px solid #cad2e4',
           borderRadius: '50%',
-          '&.Mui-active': { color: 'oklch(0.985 0.005 240)', border: '2px solid oklch(0.55 0.11 250)', backgroundColor: 'oklch(0.235 0.07 265)' },
-          '&.Mui-completed': { color: 'oklch(0.55 0.11 250)', border: 'none' }
+          '&.Mui-active': { color: '#f7f8fd', border: '2px solid #3b6fa0', backgroundColor: '#0f1b3d' },
+          '&.Mui-completed': { color: '#3b6fa0', border: 'none' }
         },
-        text: { fill: 'oklch(0.45 0.03 260)', fontFamily: "'Syne', sans-serif", fontWeight: 800 },
+        text: { fill: '#5a6288', fontFamily: "'Syne', sans-serif", fontWeight: 800 },
       }
     },
     MuiStepLabel: {
       styleOverrides: {
-        label: { fontFamily: "'DM Mono', monospace", color: 'oklch(0.55 0.03 260)', '&.Mui-active': { color: 'oklch(0.18 0.04 260)', fontWeight: 700 } }
+        label: { fontFamily: "'DM Mono', monospace", color: '#787ea0', '&.Mui-active': { color: '#181e38', fontWeight: 700 } }
       }
     }
   }
