@@ -13,8 +13,9 @@ export default function RegistroPage() {
         padding: '24px 48px',
         display: 'flex',
         alignItems: 'center',
-        borderBottom: '1px solid #1e1e2d',
-        background: 'rgba(10, 10, 15, 0.8)',
+        borderBottom: '1px solid var(--surface-border)',
+        background: 'oklch(0.985 0.005 240 / 0.92)',
+        backdropFilter: 'blur(16px)',
         zIndex: 50
       }}>
         <Link href="/" style={{
