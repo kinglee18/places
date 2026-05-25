@@ -51,7 +51,7 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
         style={{
           width: "100%", marginBottom: 8,
           fontSize: 12, fontWeight: 700,
-          color: published ? "#9090b8" : "#00f5a0",
+          color: published ? "#9090b8" : "oklch(0.55 0.11 250)",
           border: `1px solid ${published ? "rgba(144,144,184,0.25)" : "rgba(0,245,160,0.35)"}`,
           borderRadius: 8, padding: "6px 12px",
           background: published ? "transparent" : "rgba(0,245,160,0.06)",
@@ -69,7 +69,7 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
           href={`/mis-propiedades/${id}/editar`}
           style={{
             flex: 1, textAlign: "center",
-            fontSize: 12, fontWeight: 700, color: "#00b4d8",
+            fontSize: 12, fontWeight: 700, color: "oklch(0.60 0.12 240)",
             border: "1px solid rgba(0,180,216,0.3)", borderRadius: 8,
             padding: "6px 12px", textDecoration: "none",
           }}
@@ -81,7 +81,7 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
           <button
             onClick={() => setConfirming(true)}
             style={{
-              flex: 1, fontSize: 12, fontWeight: 700, color: "#ff6b6b",
+              flex: 1, fontSize: 12, fontWeight: 700, color: "#e53935",
               border: "1px solid rgba(255,107,107,0.3)", borderRadius: 8,
               padding: "6px 12px", background: "transparent", cursor: "pointer",
               fontFamily: "inherit",
@@ -95,7 +95,7 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
               onClick={handleDelete}
               disabled={deleting}
               style={{
-                flex: 1, fontSize: 11, fontWeight: 700, color: "#ff6b6b",
+                flex: 1, fontSize: 11, fontWeight: 700, color: "#e53935",
                 border: "1px solid rgba(255,107,107,0.5)", borderRadius: 8,
                 padding: "6px 8px", background: "rgba(255,107,107,0.1)",
                 cursor: deleting ? "not-allowed" : "pointer", fontFamily: "inherit",
@@ -121,7 +121,7 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
       </div>
 
       {error && (
-        <p style={{ fontSize: 11, color: "#ff6b6b", marginTop: 6, marginBottom: 0 }}>
+        <p style={{ fontSize: 11, color: "#e53935", marginTop: 6, marginBottom: 0 }}>
           {error}
         </p>
       )}

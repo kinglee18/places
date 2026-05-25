@@ -96,19 +96,19 @@ export default function Home() {
         <div style={{
           position: 'absolute', top: '10%', left: '50%', transform: 'translate(-50%, 0)',
           width: '900px', height: '700px',
-          background: 'radial-gradient(ellipse, rgba(0,245,160,0.07) 0%, transparent 65%)',
+          background: 'radial-gradient(ellipse, oklch(0.55 0.11 250 / 0.07) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', bottom: '0%', left: '10%',
           width: '500px', height: '500px',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, oklch(0.52 0.18 295 / 0.06) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', bottom: '10%', right: '5%',
           width: '400px', height: '400px',
-          background: 'radial-gradient(circle, rgba(0,180,216,0.07) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, oklch(0.235 0.07 265 / 0.05) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
 
@@ -225,7 +225,7 @@ export default function Home() {
                 <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer', transition: 'border-color 0.2s' }}>
                   {/* Photo */}
                   <div style={{
-                    height: 180, background: '#0e0e22',
+                    height: 180, background: 'oklch(0.96 0.01 250)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0, position: 'relative', overflow: 'hidden',
                   }}>
@@ -490,8 +490,8 @@ export default function Home() {
                 <Link href="/upgrade" className="btn-primary" style={{
                   display: 'block', textAlign: 'center', width: '100%',
                   padding: '14px', borderRadius: '12px', fontSize: '15px',
-                  background: 'linear-gradient(135deg, #7c3aed, #00b4d8)',
-                  boxShadow: '0 8px 30px rgba(124,58,237,0.35)',
+                  background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
+                  boxShadow: '0 8px 30px oklch(0.235 0.07 265 / 0.3)',
                 }}>
                   Learn more about Pro ↗
                 </Link>

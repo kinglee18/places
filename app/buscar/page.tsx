@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function BuscarPage() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#0a0a14' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'oklch(0.985 0.005 240)' }}>
       <header style={{
         padding: '20px 48px',
         display: 'flex',

@@ -191,7 +191,7 @@ export default function MapPicker({ onLocationSelect, initialLat, initialLng, fl
             whiteSpace: "nowrap",
           }}
         >
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#8888aa" }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "oklch(0.45 0.03 260)" }}>
             📍 Toca el mapa para colocar tu pin
           </span>
         </div>
@@ -214,7 +214,7 @@ export default function MapPicker({ onLocationSelect, initialLat, initialLng, fl
             backdropFilter: "blur(4px)",
           }}
         >
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#00f5a0" }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "oklch(0.55 0.11 250)" }}>
             ✓ {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
           </span>
         </div>

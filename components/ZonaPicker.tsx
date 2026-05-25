@@ -192,7 +192,7 @@ export default function ZonaPicker({ onChange }: ZonaPickerProps) {
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loading ? <CircularProgress size={16} sx={{ color: "#00f5a0" }} /> : null}
+                  {loading ? <CircularProgress size={16} sx={{ color: "oklch(0.55 0.11 250)" }} /> : null}
                   {params.InputProps.endAdornment}
                 </>
               ),
@@ -212,7 +212,7 @@ export default function ZonaPicker({ onChange }: ZonaPickerProps) {
             background: "rgba(10,10,20,0.85)", border: "1px solid #2a2a4a",
             borderRadius: 8, padding: "6px 14px", pointerEvents: "none", whiteSpace: "nowrap",
           }}>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#8888aa" }}>
+            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "oklch(0.45 0.03 260)" }}>
               📍 Search above or click the map to place your pin
             </span>
           </div>
@@ -226,7 +226,7 @@ export default function ZonaPicker({ onChange }: ZonaPickerProps) {
             borderRadius: 8, padding: "5px 12px", pointerEvents: "none", whiteSpace: "nowrap",
             backdropFilter: "blur(4px)",
           }}>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#00f5a0" }}>
+            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "oklch(0.55 0.11 250)" }}>
               ✓ {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
             </span>
           </div>
