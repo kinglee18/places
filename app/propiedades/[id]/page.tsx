@@ -85,6 +85,7 @@ interface Property {
   lat: number | null;
   lng: number | null;
   photo_urls: string[];
+  expires_at: string | null;
   competition_data: CompetitionData | null;
   m2_construccion: number | null;
   frente_m: number | null;
@@ -121,6 +122,7 @@ export default function PropertyDetailPage() {
   const [loading, setLoading]   = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [nowTs] = useState<number>(() => Date.now());
 
   const [isochrones, setIsochrones] = useState<IsochroneFeature[]>([]);
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
@@ -139,6 +141,25 @@ export default function PropertyDetailPage() {
   const [rental, setRental] = useState<RentalEstimate | null>(null);
   const [loadingRental, setLoadingRental] = useState(false);
   const [rentalError, setRentalError] = useState<string | null>(null);
+
+  const [extending, setExtending] = useState(false);
+
+  const handleExtend = async () => {
+    if (!id) return;
+    setExtending(true);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId: id, kind: 'extend' }),
+      });
+      const { url } = await res.json();
+      if (url) { window.location.href = url as string; return; }
+      throw new Error();
+    } catch {
+      setExtending(false);
+    }
+  };
 
   const handleAnalyze = async () => {
     if (!id) return;
@@ -305,6 +326,9 @@ export default function PropertyDetailPage() {
 
   const competition = p.competition_data;
   const isOwner = session?.user?.email === p.user_email;
+  const expiresAt = p.expires_at ? new Date(p.expires_at) : null;
+  const isExpired = expiresAt ? expiresAt.getTime() <= nowTs : false;
+  const daysLeft = expiresAt ? Math.ceil((expiresAt.getTime() - nowTs) / 86_400_000) : null;
   const mapsUrl = p.lat && p.lng
     ? `https://www.google.com/maps?q=${p.lat},${p.lng}`
     : p.calle
@@ -323,6 +347,32 @@ export default function PropertyDetailPage() {
           onMouseLeave={e => (e.currentTarget.style.color = '#6b6b9a')}>
           ← All properties
         </Link>
+
+        {/* ── Owner: listing expiry / extend ── */}
+        {isOwner && expiresAt && (
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+            background: isExpired ? 'rgba(255,107,107,0.08)' : 'rgba(0,245,160,0.06)',
+            border: `1px solid ${isExpired ? 'rgba(255,107,107,0.3)' : 'rgba(0,245,160,0.25)'}`,
+            borderRadius: 12, padding: '14px 18px', marginBottom: 28,
+          }}>
+            <div style={{ fontSize: 14, color: '#c8c8e0' }}>
+              {isExpired
+                ? '⚠️ This listing has expired and is no longer visible on the marketplace.'
+                : `🟢 Active listing · ${daysLeft} day${daysLeft === 1 ? '' : 's'} left (until ${expiresAt.toLocaleDateString('es-MX')})`}
+            </div>
+            <button
+              onClick={handleExtend}
+              disabled={extending}
+              style={{
+                background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', color: '#06060f',
+                padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13,
+                border: 'none', cursor: extending ? 'wait' : 'pointer', whiteSpace: 'nowrap',
+              }}>
+              {extending ? 'Redirecting…' : isExpired ? 'Republish 30 days · $99' : 'Extend 30 days · $99'}
+            </button>
+          </div>
+        )}
 
         {/* ── Photo gallery ── */}
         {photos ? (

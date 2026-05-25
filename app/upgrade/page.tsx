@@ -32,24 +32,24 @@ const proFeatures = [
 
 const faqItems = [
   {
-    q: 'How much does the Pro plan cost?',
-    a: 'Pro analysis is a one-time payment per property. Pricing will be announced soon.',
+    q: 'How much does it cost to publish?',
+    a: 'Your first listing each month is free and stays live for 30 days, with the full market analysis included. Additional listings in the same month are $149 MXN each, and you can keep any listing live another 30 days for $99 MXN.',
   },
   {
-    q: 'Can I downgrade from Pro?',
-    a: 'Yes, you can cancel Pro at any time. Your property remains published with basic features.',
+    q: 'Is the competitor analysis included for free?',
+    a: 'Yes. Every listing — including the free one — gets the 2 km competitor analysis and AI recommendations at no extra cost.',
   },
   {
-    q: 'How often is the competition data updated?',
-    a: 'Competition data is analyzed when you purchase the Pro plan. We recommend reviewing quarterly for the most current insights.',
+    q: 'What happens after 30 days?',
+    a: 'The listing expires and stops showing on the marketplace. You can republish it for another 30 days for $99 MXN from the property detail page.',
   },
   {
-    q: 'Do I get the full 2km analysis map?',
-    a: 'Yes, Pro includes full competitor visualization within a 2km radius with detailed filtering options.',
+    q: 'How many free listings can I publish?',
+    a: 'One free listing per calendar month during this trial stage. Any additional listing that month is $149 MXN.',
   },
   {
-    q: 'What if I already registered my property?',
-    a: 'You can upgrade any of your basic properties to Pro at any time from the property detail page.',
+    q: 'How is the data kept current?',
+    a: 'The competitor analysis runs when you publish. We recommend reviewing it periodically as the area changes.',
   },
 ];
 
@@ -79,11 +79,11 @@ const comparisonTable = [
   { feature: 'Photos (up to 5)', basic: true, pro: true },
   { feature: 'Map Location', basic: true, pro: true },
   { feature: 'Price & Amenities', basic: true, pro: true },
-  { feature: 'Competitor Analysis (500m)', basic: false, pro: true },
-  { feature: 'Full 2km Map View', basic: false, pro: true },
-  { feature: 'AI Business Recommendations', basic: false, pro: true },
-  { feature: 'Rental Potential Estimation', basic: false, pro: true },
-  { feature: 'Priority Support', basic: false, pro: true },
+  { feature: 'Competitor Analysis (2 km)', basic: true, pro: true },
+  { feature: 'AI Business Recommendations', basic: true, pro: true },
+  { feature: 'Rental Potential Estimation', basic: true, pro: true },
+  { feature: 'Extra listing same month ($149)', basic: false, pro: true },
+  { feature: 'Keep live beyond 30 days ($99)', basic: false, pro: true },
 ];
 
 export default function UpgradePage() {
@@ -195,13 +195,13 @@ export default function UpgradePage() {
             margin: '0 auto 52px auto',
             lineHeight: 1.7,
           }}>
-            Maximize your property value with Pro plan. Get competitor analysis and{' '}
-            <strong style={{ color: 'var(--foreground)' }}>AI recommendations</strong> tailored to your location.
+            Your first listing each month is free for 30 days — competitor analysis and{' '}
+            <strong style={{ color: 'var(--foreground)' }}>AI recommendations</strong> included. Pay only for extra listings or longer runtime.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/registro?plan=pro" className="btn-primary" style={{ fontSize: '16px', padding: '16px 40px' }}>
-              Upgrade to Pro →
+            <Link href="/registro" className="btn-primary" style={{ fontSize: '16px', padding: '16px 40px' }}>
+              Publish a free listing →
             </Link>
             <a href="#features" className="btn-secondary">
               See all features
@@ -217,9 +217,9 @@ export default function UpgradePage() {
             flexWrap: 'wrap',
           }}>
             {[
-              { value: 'Coming soon', label: 'Transparent pricing' },
+              { value: 'Free', label: '1 listing / month' },
               { value: '2 km+', label: 'Analysis radius' },
-              { value: '1x', label: 'Payment per property' },
+              { value: '30 days', label: 'Live per listing' },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--accent)' }}>{s.value}</div>
@@ -312,7 +312,7 @@ export default function UpgradePage() {
           <div style={{ textAlign: 'center', marginBottom: '72px' }}>
             <span className="section-label">Comparison</span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2 }}>
-              Basic vs Pro
+              Free vs Pay-as-you-go
             </h2>
           </div>
 
@@ -326,8 +326,8 @@ export default function UpgradePage() {
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--surface-border)' }}>
                   <th style={{ textAlign: 'left', padding: '20px', fontWeight: 700, color: 'var(--muted)' }}>Feature</th>
-                  <th style={{ textAlign: 'center', padding: '20px', fontWeight: 700 }}>Basic</th>
-                  <th style={{ textAlign: 'center', padding: '20px', fontWeight: 700 }}>Pro</th>
+                  <th style={{ textAlign: 'center', padding: '20px', fontWeight: 700 }}>Free</th>
+                  <th style={{ textAlign: 'center', padding: '20px', fontWeight: 700 }}>Paid</th>
                 </tr>
               </thead>
               <tbody>
@@ -445,7 +445,7 @@ export default function UpgradePage() {
               and unlock your property&quot;s potential
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: '18px', marginBottom: '44px', lineHeight: 1.7 }}>
-              Start with a free basic registration, then upgrade your property to Pro for complete market analysis.
+              Publish your first listing free each month — full market analysis included. Pay only when you need more.
             </p>
           </div>
 
@@ -471,28 +471,28 @@ export default function UpgradePage() {
             }} />
 
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <span className="tag tag-pro" style={{ marginBottom: '24px' }}>⚡ PRO PLAN</span>
+              <span className="tag tag-pro" style={{ marginBottom: '24px' }}>⚡ PAY AS YOU GO</span>
               <div style={{
                 fontSize: '56px', fontWeight: 900, letterSpacing: '-0.02em',
                 marginBottom: '12px', background: 'linear-gradient(135deg, #7c3aed, #00b4d8)', backgroundClip: 'text',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               }}>
-                Coming soon
+                $149
               </div>
               <p style={{ color: 'var(--muted)', fontSize: '16px', marginBottom: '36px' }}>
-                One-time payment. Unlock 6 premium features.
+                per additional listing · $99 to extend any listing +30 days
               </p>
 
-              <Link href="/registro?plan=pro" className="btn-primary" style={{
+              <Link href="/registro" className="btn-primary" style={{
                 fontSize: '16px', padding: '18px 48px',
                 background: 'linear-gradient(135deg, #7c3aed, #00b4d8)',
                 boxShadow: '0 12px 40px rgba(124,58,237,0.4)',
               }}>
-                Register a property & upgrade →
+                Publish a free listing →
               </Link>
 
               <p style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '24px' }}>
-                Already registered? Upgrade any property from its detail page.
+                Your first listing each month is free for 30 days — analysis included.
               </p>
             </div>
           </div>

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   // Use service role key so webhook can bypass RLS
@@ -25,12 +27,38 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const propertyId = session.metadata?.propertyId;
+    const kind = session.metadata?.kind ?? 'extra';
 
     if (propertyId) {
-      await supabaseAdmin
-        .from('properties')
-        .update({ is_published: true })
-        .eq('id', propertyId);
+      const now = Date.now();
+
+      if (kind === 'extend') {
+        // Push expiry forward by 30 days from whichever is later: now or current expiry.
+        const { data: current } = await supabaseAdmin
+          .from('properties')
+          .select('expires_at')
+          .eq('id', propertyId)
+          .single();
+
+        const base = current?.expires_at
+          ? Math.max(new Date(current.expires_at).getTime(), now)
+          : now;
+        const newExpiry = new Date(base + THIRTY_DAYS_MS).toISOString();
+
+        await supabaseAdmin
+          .from('properties')
+          .update({ is_published: true, expires_at: newExpiry })
+          .eq('id', propertyId);
+      } else {
+        // Paid additional listing: publish it for 30 days.
+        await supabaseAdmin
+          .from('properties')
+          .update({
+            is_published: true,
+            expires_at: new Date(now + THIRTY_DAYS_MS).toISOString(),
+          })
+          .eq('id', propertyId);
+      }
     }
   }
 

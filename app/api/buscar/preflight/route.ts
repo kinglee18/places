@@ -117,7 +117,8 @@ export async function POST(req: NextRequest) {
   let query = getSupabase()
     .from('properties')
     .select('id, colonia, calle, numero, tipo_local, m2, agua_drenaje, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, banos, estacionamientos, lat, lng, competition_data')
-    .eq('is_published', true);
+    .eq('is_published', true)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
   if (modalidad === 'rent' || modalidad === 'sale') {
     query = query.eq('modalidad', modalidad);

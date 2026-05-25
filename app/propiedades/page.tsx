@@ -53,8 +53,12 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
   const SELECT = 'id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at, city, state, estado_conservacion, uso_suelo, tipo_energia';
 
+  // Only show listings that haven't expired (null = legacy/never expires)
+  const nowIso = new Date().toISOString();
+  const notExpired = `expires_at.is.null,expires_at.gt.${nowIso}`;
+
   // Main query with filters
-  let q = getSupabase().from('properties').select(SELECT, { count: 'exact' }).eq('is_published', true);
+  let q = getSupabase().from('properties').select(SELECT, { count: 'exact' }).eq('is_published', true).or(notExpired);
 
   if (search)   q = q.or(`colonia.ilike.%${search}%,calle.ilike.%${search}%,descripcion.ilike.%${search}%`);
   if (colonia)  q = q.eq('colonia', colonia);
@@ -77,7 +81,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     q,
     getSupabase().from('properties')
       .select('colonia, tipo_local, estado_conservacion, uso_suelo, tipo_energia')
-      .eq('is_published', true),
+      .eq('is_published', true).or(notExpired),
   ]);
 
   const unique = <T,>(arr: (T | null | undefined)[]): T[] =>

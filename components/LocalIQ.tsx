@@ -298,6 +298,12 @@ export default function LocalIQ() {
     }
     setPhotoError(null);
     setSubmitError(null);
+
+    if (!session?.user?.email) {
+      setSubmitError('Please sign in to publish a listing.');
+      return;
+    }
+
     setUploading(true);
 
     // ── 1. Upload photos ──────────────────────────────────────────────────
@@ -317,62 +323,87 @@ export default function LocalIQ() {
       photoUrls.push(urlData.publicUrl);
     }
 
-    // ── 3. Insert property ────────────────────────────────────────────────
-    const { data: inserted, error } = await getSupabase()
-      .from('properties')
-      .insert({
-        is_published: true,
-        user_email: session?.user?.email ?? 'anonymous',
-        colonia: pinAddress?.colonia ?? data.colonia,
-        city:    pinAddress?.city    ?? null,
-        state:   pinAddress?.state   ?? null,
-        country: pinAddress?.country ?? null,
-        calle: data.calle || null,
-        numero: data.numero || null,
-        descripcion: data.descripcion || null,
-        tipo_local: data.tipoLocal,
-        m2: Number(data.m2),
-        antiguedad: data.antiguedad !== '' ? Number(data.antiguedad) : null,
-        nivel_piso: data.nivelPiso || null,
-        uso_anterior: data.usoAnterior || null,
-        agua_drenaje: data.aguaDrenaje || null,
-        habitaciones: data.habitaciones,
-        banos: data.banos,
-        estacionamientos: data.estacionamientos,
-        modalidad: data.modalidad || null,
-        precio_inmueble: data.precioInmueble !== '' ? Number(data.precioInmueble) : null,
-        precio_mantenimiento: data.precioMantenimiento !== '' ? Number(data.precioMantenimiento) : null,
-        lat: pinLocation?.lat ?? null,
-        lng: pinLocation?.lng ?? null,
-        photo_urls: photoUrls,
-        m2_construccion: data.m2Construccion !== '' ? Number(data.m2Construccion) : null,
-        frente_m: data.frenteM !== '' ? Number(data.frenteM) : null,
-        fondo_m: data.fondoM !== '' ? Number(data.fondoM) : null,
-        altura_techo_m: data.alturaTechoM !== '' ? Number(data.alturaTechoM) : null,
-        tipo_terreno: data.tipoTerreno || null,
-        estado_conservacion: data.estadoConservacion || null,
-        calidad_construccion: data.calidadConstruccion || null,
-        tipo_energia: data.tipoEnergia || null,
-        uso_suelo: data.usoSuelo || null,
-        servicios: data.servicios ?? [],
-        tipo_contrato: data.tipoContrato || null,
-        fecha_disponible: data.fechaDisponible || null,
-      })
-      .select('id')
-      .single();
+    // ── 3. Create property via API ────────────────────────────────────────
+    // The API enforces the freemium rule: 1 free listing per user per calendar
+    // month (published 30 days, with full analysis). Any extra listing this
+    // month comes back with requiresPayment = true and stays unpublished until
+    // the user completes Stripe checkout.
+    const payload = {
+      colonia: pinAddress?.colonia ?? data.colonia,
+      city:    pinAddress?.city    ?? null,
+      state:   pinAddress?.state   ?? null,
+      country: pinAddress?.country ?? null,
+      calle: data.calle || null,
+      numero: data.numero || null,
+      descripcion: data.descripcion || null,
+      tipo_local: data.tipoLocal,
+      m2: Number(data.m2),
+      antiguedad: data.antiguedad !== '' ? Number(data.antiguedad) : null,
+      nivel_piso: data.nivelPiso || null,
+      uso_anterior: data.usoAnterior || null,
+      agua_drenaje: data.aguaDrenaje || null,
+      habitaciones: data.habitaciones,
+      banos: data.banos,
+      estacionamientos: data.estacionamientos,
+      modalidad: data.modalidad || null,
+      precio_inmueble: data.precioInmueble !== '' ? Number(data.precioInmueble) : null,
+      precio_mantenimiento: data.precioMantenimiento !== '' ? Number(data.precioMantenimiento) : null,
+      lat: pinLocation?.lat ?? null,
+      lng: pinLocation?.lng ?? null,
+      photo_urls: photoUrls,
+      m2_construccion: data.m2Construccion !== '' ? Number(data.m2Construccion) : null,
+      frente_m: data.frenteM !== '' ? Number(data.frenteM) : null,
+      fondo_m: data.fondoM !== '' ? Number(data.fondoM) : null,
+      altura_techo_m: data.alturaTechoM !== '' ? Number(data.alturaTechoM) : null,
+      tipo_terreno: data.tipoTerreno || null,
+      estado_conservacion: data.estadoConservacion || null,
+      calidad_construccion: data.calidadConstruccion || null,
+      tipo_energia: data.tipoEnergia || null,
+      uso_suelo: data.usoSuelo || null,
+      servicios: data.servicios ?? [],
+      tipo_contrato: data.tipoContrato || null,
+      fecha_disponible: data.fechaDisponible || null,
+    };
 
-    setUploading(false);
-
-    if (error) {
+    let created: { id: string; requiresPayment: boolean };
+    try {
+      const res = await fetch('/api/properties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error();
+      created = await res.json();
+    } catch {
+      setUploading(false);
       setSubmitError('Could not save the property. Please try again.');
       return;
     }
 
-    // Show success immediately; run competition analysis in background
+    // ── 4. Extra listing this month → pay before publishing ───────────────
+    if (created.requiresPayment) {
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ propertyId: created.id, kind: 'extra' }),
+        });
+        const { url } = await res.json();
+        if (url) { window.location.href = url as string; return; }
+        throw new Error();
+      } catch {
+        setUploading(false);
+        setSubmitError('Could not start checkout. Please try again.');
+        return;
+      }
+    }
+
+    setUploading(false);
+
+    // ── 5. Free listing is live. Run competition + AI analysis (included). ─
     setSubmitted(true);
 
-    // ── 4. Nearby competition analysis + AI analysis ──────────────────────
-    if (pinLocation && inserted?.id) {
+    if (pinLocation && created.id) {
       setAnalyzingLocation(true);
       try {
         const nearbyRes = await fetch('/api/nearby-places', {
@@ -382,23 +413,23 @@ export default function LocalIQ() {
         });
         if (nearbyRes.ok) {
           const competition = await nearbyRes.json() as CompetitionData;
-          await getSupabase()
-            .from('properties')
-            .update({ competition_data: competition })
-            .eq('id', inserted.id);
-
+          await fetch(`/api/properties/${created.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ competition_data: competition }),
+          });
           // Auto-generate AI analysis now that competition_data is saved
           await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ propertyId: inserted.id }),
+            body: JSON.stringify({ propertyId: created.id }),
           });
         }
       } catch { /* analysis is non-blocking */ }
       setAnalyzingLocation(false);
     }
 
-    router.push(`/propiedades/${inserted.id}`);
+    router.push(`/propiedades/${created.id}`);
   };
 
   return (

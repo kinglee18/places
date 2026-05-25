@@ -359,7 +359,7 @@ export default function Home() {
               Choose the plan that<br />fits your needs
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: '17px', maxWidth: '480px', margin: '0 auto' }}>
-              Start free with basic registration or unlock complete analysis with the Pro plan.
+              Publish one listing free every month — full analysis included. Pay only for extra listings or longer runtime.
             </p>
           </div>
 
@@ -383,32 +383,25 @@ export default function Home() {
                 <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '4px' }}>
                   Free
                 </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>No cost. Always.</div>
+                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>1 listing / month · live 30 days</div>
               </div>
 
               <div style={{ borderTop: '1px solid var(--plan-basic-border)', paddingTop: '28px', marginBottom: '36px' }}>
                 <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '24px', lineHeight: 1.6 }}>
-                  Ideal for owners who want to publish their property without additional analysis.
+                  Publish one commercial property each month — full market analysis included, live for 30 days.
                 </p>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {[
                     'Complete property registration',
                     'Map location selection',
                     'Details: price, size and amenities',
-                    'Free description field',
+                    'Competitor analysis within 2 km',
+                    'AI business recommendations',
+                    'Rental potential estimate',
                   ].map((item, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
                       <span style={{ color: 'var(--accent)', fontSize: '16px', flexShrink: 0, marginTop: '2px' }}>✓</span>
                       <span style={{ color: 'var(--foreground)' }}>{item}</span>
-                    </li>
-                  ))}
-                  {[
-                    'Nearby competition analysis',
-                    'AI recommendations',
-                  ].map((item, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px', opacity: 0.35 }}>
-                      <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '2px' }}>✗</span>
-                      <span style={{ textDecoration: 'line-through' }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -446,32 +439,28 @@ export default function Home() {
 
               <div style={{ marginBottom: '32px', position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <span className="tag tag-pro">⚡ PRO</span>
-                  <span style={{
-                    fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: '#fbbf24',
-                    background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.3)',
-                    padding: '4px 10px', borderRadius: '100px',
-                  }}>RECOMMENDED</span>
+                  <span className="tag tag-pro">⚡ PAY AS YOU GO</span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ fontSize: '36px', fontWeight: 900, letterSpacing: '-0.02em' }}>
-                    <span className="gradient-text-accent">Coming soon</span>
+                  <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em' }}>
+                    <span className="gradient-text-accent">$149</span>
                   </div>
+                  <span style={{ color: 'var(--muted)', fontSize: '15px' }}>/ extra listing</span>
                 </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>One-time payment per analysis — pricing TBD</div>
+                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>+ $99 to keep any listing live another 30 days</div>
               </div>
 
               <div style={{ borderTop: '1px solid rgba(124,58,237,0.25)', paddingTop: '28px', marginBottom: '36px' }}>
                 <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '24px', lineHeight: 1.6 }}>
-                  For owners who want to maximize their property value with real area data.
+                  For owners who need more than one active listing a month, or want a listing to stay live longer.
                 </p>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {[
-                    { text: 'Everything in the basic plan', isPro: false },
-                    { text: 'Competitor business analysis within 2 km', isPro: true },
-                    { text: 'Recommendations for the most promising business types', isPro: true },
-                    { text: 'Rental potential estimation', isPro: true },
+                    { text: 'Everything in the free plan, every listing', isPro: false },
+                    { text: 'Additional listing this month — $149', isPro: true },
+                    { text: 'Extend any listing +30 days — $99', isPro: true },
+                    { text: 'Full 2 km analysis + AI on every listing', isPro: true },
                   ].map((item, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
                       <span style={{
@@ -487,13 +476,13 @@ export default function Home() {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
-                <Link href="/upgrade" className="btn-primary" style={{
+                <Link href="/registro" className="btn-primary" style={{
                   display: 'block', textAlign: 'center', width: '100%',
                   padding: '14px', borderRadius: '12px', fontSize: '15px',
                   background: 'linear-gradient(135deg, #7c3aed, #00b4d8)',
                   boxShadow: '0 8px 30px rgba(124,58,237,0.35)',
                 }}>
-                  Learn more about Pro ↗
+                  Start with a free listing →
                 </Link>
               </div>
             </div>

@@ -14,6 +14,7 @@ interface Property {
   precio_inmueble: number | null;
   photo_urls: string[];
   is_published: boolean;
+  expires_at: string | null;
   created_at: string;
 }
 
@@ -28,7 +29,7 @@ export default async function MisPropiedadesPage() {
 
   const { data: properties } = await getSupabase()
     .from('properties')
-    .select('id, colonia, tipo_local, m2, modalidad, precio_inmueble, photo_urls, is_published, created_at')
+    .select('id, colonia, tipo_local, m2, modalidad, precio_inmueble, photo_urls, is_published, expires_at, created_at')
     .eq('user_email', session.user.email)
     .order('created_at', { ascending: false });
 
@@ -96,15 +97,26 @@ export default async function MisPropiedadesPage() {
                       </div>
                     )}
                     {/* Status badge */}
-                    <span style={{
-                      position: 'absolute', top: 10, right: 10,
-                      fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100,
-                      background: p.is_published ? 'rgba(0,245,160,0.15)' : 'rgba(107,107,154,0.2)',
-                      border: `1px solid ${p.is_published ? 'rgba(0,245,160,0.4)' : 'rgba(107,107,154,0.3)'}`,
-                      color: p.is_published ? '#00f5a0' : '#9090b8',
-                    }}>
-                      {p.is_published ? 'Published' : 'Unpublished'}
-                    </span>
+                    {(() => {
+                      const expired = p.expires_at ? new Date(p.expires_at).getTime() <= Date.now() : false;
+                      const status = !p.is_published ? 'pending' : expired ? 'expired' : 'active';
+                      const styleMap = {
+                        active:  { bg: 'rgba(0,245,160,0.15)', bd: 'rgba(0,245,160,0.4)', fg: '#00f5a0', label: 'Active' },
+                        expired: { bg: 'rgba(255,107,107,0.15)', bd: 'rgba(255,107,107,0.4)', fg: '#ff6b6b', label: 'Expired' },
+                        pending: { bg: 'rgba(107,107,154,0.2)', bd: 'rgba(107,107,154,0.3)', fg: '#9090b8', label: 'Pending payment' },
+                      }[status];
+                      return (
+                        <span style={{
+                          position: 'absolute', top: 10, right: 10,
+                          fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100,
+                          background: styleMap.bg,
+                          border: `1px solid ${styleMap.bd}`,
+                          color: styleMap.fg,
+                        }}>
+                          {styleMap.label}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   {/* Info */}

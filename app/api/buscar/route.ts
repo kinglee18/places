@@ -150,7 +150,8 @@ Respond ONLY with valid JSON without markdown, using this exact structure:
   let propsQuery = getSupabase()
     .from('properties')
     .select('id, colonia, calle, numero, tipo_local, m2, agua_drenaje, modalidad, precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, banos, estacionamientos, lat, lng')
-    .eq('is_published', true);
+    .eq('is_published', true)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
   if (preflight_property_ids && preflight_property_ids.length > 0) {
     propsQuery = propsQuery.in('id', preflight_property_ids);
