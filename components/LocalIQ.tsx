@@ -436,20 +436,20 @@ export default function LocalIQ() {
     <ThemeProvider theme={darkTheme}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap');
-        .grid-bg { background-image: linear-gradient(#1a1a3a 1px, transparent 1px), linear-gradient(90deg, #1a1a3a 1px, transparent 1px); background-size: 40px 40px; }
+        .grid-bg { background-image: radial-gradient(circle, #3b6fa0 1.5px, transparent 1.5px); background-size: 28px 28px; }
       `}</style>
 
       <Box sx={{ minHeight: "100vh", position: "relative", overflow: "hidden", bgcolor: 'background.default', color: 'text.primary', pb: 10 }}>
         {/* Decorative elements */}
-        <Box className="grid-bg" sx={{ position: "fixed", inset: 0, opacity: 0.3, pointerEvents: "none", zIndex: 0 }} />
-        <Box sx={{ position: "fixed", top: -200, right: -200, width: 600, height: 600, background: "radial-gradient(circle, rgba(0,245,160,0.06) 0%, transparent 70%)", zIndex: 0, pointerEvents: "none" }} />
-        <Box sx={{ position: "fixed", bottom: -200, left: -100, width: 500, height: 500, background: "radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%)", zIndex: 0, pointerEvents: "none" }} />
+        <Box className="grid-bg" sx={{ position: "fixed", inset: 0, opacity: 0.12, pointerEvents: "none", zIndex: 0 }} />
+        <Box sx={{ position: "fixed", top: -200, right: -200, width: 600, height: 600, background: "radial-gradient(circle, oklch(0.235 0.07 265 / 0.07) 0%, transparent 70%)", zIndex: 0, pointerEvents: "none" }} />
+        <Box sx={{ position: "fixed", bottom: -200, left: -100, width: 500, height: 500, background: "radial-gradient(circle, oklch(0.55 0.11 250 / 0.07) 0%, transparent 70%)", zIndex: 0, pointerEvents: "none" }} />
 
         <Box sx={{ maxWidth: 720, margin: "0 auto", padding: "40px 20px", position: "relative", zIndex: 1 }}>
           {/* Header */}
           <Box mb={6}>
             <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-              <Box sx={{ width: 32, height: 32, background: "linear-gradient(135deg, #00f5a0, #00b4d8)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📍</Box>
+              <Box sx={{ width: 32, height: 32, background: "linear-gradient(135deg, #0f1b3d, #3b6fa0)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📍</Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.5px" }}>
                 Local<span style={{ color: "oklch(0.55 0.11 250)" }}>IQ</span>
               </Typography>
@@ -468,7 +468,7 @@ export default function LocalIQ() {
             </Box>
           ) : (
             /* ── FORM STATE ── */
-            <Card elevation={0} sx={{ border: "1px solid #1e1e3e", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }}>
+            <Card elevation={0} sx={{ border: "1px solid var(--surface-border)", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }}>
               <Typography variant="h6" fontWeight={700} mb={1}>Register your property</Typography>
               <Typography variant="body2" color="text.secondary" mb={5} sx={{ lineHeight: 1.6 }}>
                 Complete your commercial property details to publish it on the platform.
