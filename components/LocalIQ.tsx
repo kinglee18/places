@@ -15,7 +15,7 @@ import {
 const MapPicker = dynamic(() => import("./MapPicker"), {
   ssr: false,
   loading: () => (
-    <Box sx={{ height: 280, borderRadius: '12px', bgcolor: '#0e0e22', border: '1px solid #2a2a4a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Box sx={{ height: 280, borderRadius: '12px', bgcolor: 'var(--surface-2)', border: '1px solid var(--surface-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Typography variant="caption" color="text.secondary">Loading map...</Typography>
     </Box>
   )
@@ -23,12 +23,12 @@ const MapPicker = dynamic(() => import("./MapPicker"), {
 
 const darkTheme = createTheme({
   palette: {
-    mode: 'dark',
-    primary: { main: '#00f5a0' },
-    secondary: { main: '#00b4d8' },
-    background: { default: '#0a0a14', paper: '#0e0e22' },
-    text: { primary: '#e0e0ff', secondary: '#8888aa' },
-    error: { main: '#ff6b6b' },
+    mode: 'light',
+    primary: { main: 'oklch(0.235 0.07 265)' },
+    secondary: { main: 'oklch(0.55 0.11 250)' },
+    background: { default: 'oklch(0.985 0.005 240)', paper: 'oklch(1 0 0)' },
+    text: { primary: 'oklch(0.18 0.04 260)', secondary: 'oklch(0.45 0.03 260)' },
+    error: { main: '#e53935' },
   },
   typography: {
     fontFamily: "'Syne', sans-serif",
@@ -46,49 +46,49 @@ const darkTheme = createTheme({
         root: {
           fontFamily: "'DM Mono', monospace",
           borderRadius: 8,
-          backgroundColor: '#12122a',
-          '& fieldset': { borderColor: '#2a2a4a' },
-          '&:hover fieldset': { borderColor: '#444466' },
-          '&.Mui-focused fieldset': { borderColor: '#00f5a0' },
+          backgroundColor: 'oklch(0.96 0.01 250)',
+          '& fieldset': { borderColor: 'oklch(0.9 0.015 250)' },
+          '&:hover fieldset': { borderColor: 'oklch(0.75 0.04 250)' },
+          '&.Mui-focused fieldset': { borderColor: 'oklch(0.55 0.11 250)' },
         }
       }
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: { fontFamily: "'DM Mono', monospace", color: '#8888aa', fontSize: '14px' }
+        root: { fontFamily: "'DM Mono', monospace", color: 'oklch(0.45 0.03 260)', fontSize: '14px' }
       }
     },
     MuiButton: {
       styleOverrides: {
         root: { borderRadius: 10, padding: '12px 24px' },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-          color: '#0a0a14',
+          background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
+          color: 'oklch(0.985 0.005 240)',
           '&:hover': { opacity: 0.9, transform: 'scale(1.02)' },
           transition: 'all 0.2s',
         },
         outlined: {
-          borderColor: '#2a2a4a',
-          color: '#e0e0ff',
-          '&:hover': { backgroundColor: '#1a1a2e', borderColor: '#444466' }
+          borderColor: 'oklch(0.9 0.015 250)',
+          color: 'oklch(0.18 0.04 260)',
+          '&:hover': { backgroundColor: 'oklch(0.96 0.01 250)', borderColor: 'oklch(0.75 0.04 250)' }
         }
       }
     },
     MuiStepIcon: {
       styleOverrides: {
         root: {
-          color: '#0e0e22',
-          border: '2px solid #2a2a4a',
+          color: 'oklch(0.9 0.015 250)',
+          border: '2px solid oklch(0.85 0.02 250)',
           borderRadius: '50%',
-          '&.Mui-active': { color: '#0e0e22', border: '2px solid #00f5a0' },
-          '&.Mui-completed': { color: '#00f5a0', border: 'none' }
+          '&.Mui-active': { color: 'oklch(0.985 0.005 240)', border: '2px solid oklch(0.55 0.11 250)', backgroundColor: 'oklch(0.235 0.07 265)' },
+          '&.Mui-completed': { color: 'oklch(0.55 0.11 250)', border: 'none' }
         },
-        text: { fill: '#555577', fontFamily: "'Syne', sans-serif", fontWeight: 800 },
+        text: { fill: 'oklch(0.45 0.03 260)', fontFamily: "'Syne', sans-serif", fontWeight: 800 },
       }
     },
     MuiStepLabel: {
       styleOverrides: {
-        label: { fontFamily: "'DM Mono', monospace", color: '#666688', '&.Mui-active': { color: '#e0e0ff', fontWeight: 700 } }
+        label: { fontFamily: "'DM Mono', monospace", color: 'oklch(0.55 0.03 260)', '&.Mui-active': { color: 'oklch(0.18 0.04 260)', fontWeight: 700 } }
       }
     }
   }
@@ -154,8 +154,8 @@ function NumberStepper({ label, value, onChange, min = 0, max = 99 }: {
   label: string; value: number; onChange: (v: number) => void; min?: number; max?: number;
 }) {
   const btnStyle: React.CSSProperties = {
-    width: 34, height: 34, border: '1px solid #2a2a4a',
-    borderRadius: 8, background: '#12122a', color: '#00f5a0',
+    width: 34, height: 34, border: '1px solid var(--surface-border)',
+    borderRadius: 8, background: 'var(--surface-2)', color: 'var(--brand)',
     fontSize: 20, lineHeight: 1, cursor: 'pointer',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     flexShrink: 0, transition: 'all 0.15s', fontFamily: "'Syne', sans-serif",
@@ -163,15 +163,15 @@ function NumberStepper({ label, value, onChange, min = 0, max = 99 }: {
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{ fontFamily: "'DM Mono', monospace", color: '#8888aa', fontSize: 13, letterSpacing: 1 }}>{label}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#12122a', border: '1px solid #2a2a4a', borderRadius: 8, padding: '6px 12px', height: 50 }}>
+      <span style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)', fontSize: 13, letterSpacing: 1 }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface-2)', border: '1px solid var(--surface-border)', borderRadius: 8, padding: '6px 12px', height: 50 }}>
         <button type="button" style={btnStyle} onClick={() => onChange(Math.max(min, value - 1))}
-          onMouseEnter={e => (e.currentTarget.style.background = '#1a1a3a')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#12122a')}>−</button>
-        <span style={{ flex: 1, textAlign: 'center', fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 700, color: '#e0e0ff' }}>{value}</span>
+          onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.9 0.015 250)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface-2)')}>−</button>
+        <span style={{ flex: 1, textAlign: 'center', fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 700, color: 'oklch(0.18 0.04 260)' }}>{value}</span>
         <button type="button" style={btnStyle} onClick={() => onChange(Math.min(max, value + 1))}
-          onMouseEnter={e => (e.currentTarget.style.background = '#1a1a3a')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#12122a')}>+</button>
+          onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.9 0.015 250)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface-2)')}>+</button>
       </div>
     </div>
   );
@@ -420,7 +420,7 @@ export default function LocalIQ() {
             <Box display="flex" alignItems="center" gap={1.5} mb={1}>
               <Box sx={{ width: 32, height: 32, background: "linear-gradient(135deg, #00f5a0, #00b4d8)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📍</Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.5px" }}>
-                Local<span style={{ color: "#00f5a0" }}>IQ</span>
+                Local<span style={{ color: "oklch(0.55 0.11 250)" }}>IQ</span>
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary">Commercial property registration</Typography>
@@ -429,7 +429,7 @@ export default function LocalIQ() {
           {/* ── LOADING / REDIRECT STATE ── */}
           {submitted ? (
             <Box py={10} textAlign="center">
-              <CircularProgress size={44} sx={{ color: '#00f5a0', mb: 3 }} />
+              <CircularProgress size={44} sx={{ color: 'oklch(0.55 0.11 250)', mb: 3 }} />
               <Typography variant="h6" fontWeight={700} mb={1}>Property registered!</Typography>
               <Typography variant="body2" color="text.secondary">
                 {analyzingLocation ? 'Analyzing nearby businesses...' : 'Redirecting to your listing...'}
@@ -443,7 +443,7 @@ export default function LocalIQ() {
                 Complete your commercial property details to publish it on the platform.
               </Typography>
 
-              <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 6, '& .MuiStepConnector-line': { borderColor: '#2a2a4a' } }}>
+              <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 6, '& .MuiStepConnector-line': { borderColor: 'oklch(0.9 0.015 250)' } }}>
                 {steps.map((label) => (
                   <Step key={label}><StepLabel>{label}</StepLabel></Step>
                 ))}
@@ -480,7 +480,7 @@ export default function LocalIQ() {
                               {...params}
                               placeholder="Search neighborhood, district, city..."
                               error={!!errors.colonia}
-                              InputProps={{ ...params.InputProps, endAdornment: (<>{locationLoading ? <CircularProgress size={16} sx={{ color: '#00f5a0' }} /> : null}{params.InputProps.endAdornment}</>) }}
+                              InputProps={{ ...params.InputProps, endAdornment: (<>{locationLoading ? <CircularProgress size={16} sx={{ color: 'oklch(0.55 0.11 250)' }} /> : null}{params.InputProps.endAdornment}</>) }}
                             />
                           )}
                         />
@@ -509,7 +509,7 @@ export default function LocalIQ() {
                     {/* Map pin */}
                     <Box>
                       <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: pinError ? '#ff6b6b' : '#8888aa', letterSpacing: 1, fontSize: 13 }}>
+                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: pinError ? '#e53935' : 'oklch(0.45 0.03 260)', letterSpacing: 1, fontSize: 13 }}>
                           MAP LOCATION *
                         </Typography>
                       </Box>
@@ -688,10 +688,10 @@ export default function LocalIQ() {
                     {/* Photo upload */}
                     <Box>
                       <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: '#8888aa', letterSpacing: 1, fontSize: 13 }}>
+                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: 'oklch(0.45 0.03 260)', letterSpacing: 1, fontSize: 13 }}>
                           PHOTOS *
                         </Typography>
-                        <Typography component="span" variant="caption" sx={{ color: photos.length === 5 ? '#00f5a0' : '#8888aa', fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
+                        <Typography component="span" variant="caption" sx={{ color: photos.length === 5 ? 'oklch(0.55 0.11 250)' : 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
                           {photos.length} / 5
                         </Typography>
                       </Box>
@@ -713,7 +713,7 @@ export default function LocalIQ() {
                               onClick={() => handlePhotoRemove(i)}
                               sx={{
                                 position: 'absolute', top: 2, right: 2,
-                                bgcolor: 'rgba(10,10,20,0.75)', color: '#ff6b6b',
+                                bgcolor: 'rgba(10,10,20,0.75)', color: '#e53935',
                                 width: 22, height: 22, fontSize: 14,
                                 '&:hover': { bgcolor: 'rgba(10,10,20,0.95)' },
                               }}
@@ -728,8 +728,8 @@ export default function LocalIQ() {
                               border: '1px dashed #2a2a4a', cursor: 'pointer',
                               display: 'flex', flexDirection: 'column',
                               alignItems: 'center', justifyContent: 'center', gap: 0.5,
-                              color: '#555577', flexShrink: 0,
-                              '&:hover': { borderColor: '#00f5a0', color: '#00f5a0' },
+                              color: 'oklch(0.45 0.03 260)', flexShrink: 0,
+                              '&:hover': { borderColor: 'oklch(0.55 0.11 250)', color: 'oklch(0.55 0.11 250)' },
                               transition: 'all 0.15s',
                             }}
                           >
@@ -775,7 +775,7 @@ export default function LocalIQ() {
                           {SERVICIOS_OPCIONES.map(s => (
                             <FormControlLabel
                               key={s}
-                              label={<Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: '#e0e0ff', fontSize: 13 }}>{s}</Typography>}
+                              label={<Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: 'oklch(0.18 0.04 260)', fontSize: 13 }}>{s}</Typography>}
                               control={
                                 <Checkbox
                                   checked={field.value.includes(s)}
@@ -785,10 +785,10 @@ export default function LocalIQ() {
                                       : field.value.filter((v: string) => v !== s);
                                     field.onChange(next);
                                   }}
-                                  sx={{ color: '#2a2a4a', '&.Mui-checked': { color: '#00f5a0' }, p: 0.75 }}
+                                  sx={{ color: 'oklch(0.9 0.015 250)', '&.Mui-checked': { color: 'oklch(0.55 0.11 250)' }, p: 0.75 }}
                                 />
                               }
-                              sx={{ m: 0, px: 1.5, py: 0.75, border: '1px solid #2a2a4a', borderRadius: 2, bgcolor: '#12122a' }}
+                              sx={{ m: 0, px: 1.5, py: 0.75, border: '1px solid #2a2a4a', borderRadius: 2, bgcolor: 'oklch(0.96 0.01 250)' }}
                             />
                           ))}
                         </FormGroup>

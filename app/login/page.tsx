@@ -41,7 +41,7 @@ export default function LoginPage() {
             📍
           </div>
           <span style={{ fontSize: '22px', fontWeight: 800 }}>
-            Local<span style={{ color: '#00f5a0' }}>IQ</span>
+            Local<span style={{ color: 'oklch(0.55 0.11 250)' }}>IQ</span>
           </span>
         </div>
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
         <h1 style={{ fontSize: '26px', fontWeight: 900, marginBottom: '10px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
           Sign in to publish
         </h1>
-        <p style={{ color: '#6b6b9a', fontSize: '15px', marginBottom: '36px', lineHeight: 1.6 }}>
+        <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: '15px', marginBottom: '36px', lineHeight: 1.6 }}>
           You need an account to register and manage your properties.
         </p>
 
@@ -98,15 +98,15 @@ export default function LoginPage() {
         </button>
 
         {/* Footer note */}
-        <p style={{ marginTop: '24px', fontSize: '12px', color: '#6b6b9a', lineHeight: 1.6 }}>
+        <p style={{ marginTop: '24px', fontSize: '12px', color: 'oklch(0.45 0.03 260)', lineHeight: 1.6 }}>
           By signing in you accept our terms of use and privacy policy.
         </p>
 
         {/* Back link */}
         <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '1px solid #1e1e35' }}>
-          <Link href="/" style={{ color: '#6b6b9a', fontSize: '14px', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#00f5a0')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#6b6b9a')}>
+          <Link href="/" style={{ color: 'oklch(0.45 0.03 260)', fontSize: '14px', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'oklch(0.55 0.11 250)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'oklch(0.45 0.03 260)')}>
             ← Back to home
           </Link>
         </div>

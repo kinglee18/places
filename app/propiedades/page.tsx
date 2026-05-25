@@ -118,13 +118,13 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
         {/* Title */}
         <div style={{ marginBottom: '40px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#00f5a0', display: 'block', marginBottom: '10px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.55 0.11 250)', display: 'block', marginBottom: '10px' }}>
             Platform
           </span>
           <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, lineHeight: 1.1, marginBottom: '10px', letterSpacing: '-0.02em' }}>
             Available properties
           </h1>
-          <p style={{ color: '#6b6b9a', fontSize: '16px' }}>
+          <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: '16px' }}>
             {count ?? 0} {(count ?? 0) === 1 ? 'property found' : 'properties found'}
           </p>
         </div>
@@ -136,7 +136,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
         {/* Grid */}
         {items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 24px', color: '#6b6b9a' }}>
+          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'oklch(0.45 0.03 260)' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
             <p style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: '#9090b8' }}>No results</p>
             <p style={{ fontSize: '15px' }}>Try adjusting your filters</p>
@@ -157,7 +157,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
             )}
             {buildPageRange(page, totalPages).map((p, i) =>
               p === '…' ? (
-                <span key={`ellipsis-${i}`} style={{ color: '#6b6b9a', padding: '0 4px' }}>…</span>
+                <span key={`ellipsis-${i}`} style={{ color: 'oklch(0.45 0.03 260)', padding: '0 4px' }}>…</span>
               ) : (
                 <Link key={p} href={pageUrl(p as number)} style={pageBtnStyle(p === page)}>{p}</Link>
               )
@@ -176,7 +176,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
         }}>
           <div style={{ fontSize: '28px', marginBottom: '12px' }}>🏢</div>
           <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px' }}>Do you have a property?</h2>
-          <p style={{ color: '#6b6b9a', fontSize: '15px', marginBottom: '24px' }}>Publish it for free or unlock the Pro area analysis.</p>
+          <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: '15px', marginBottom: '24px' }}>Publish it for free or unlock the Pro area analysis.</p>
           <Link href="/registro" style={{
             background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', color: '#06060f',
             padding: '13px 32px', borderRadius: '12px', fontWeight: 700, fontSize: '15px',

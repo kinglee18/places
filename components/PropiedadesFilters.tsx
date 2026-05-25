@@ -12,8 +12,8 @@ interface FilterOptions {
 }
 
 const inputStyle = (isPending: boolean): React.CSSProperties => ({
-  background: '#12122a', border: '1px solid #2a2a4a', borderRadius: '10px',
-  color: '#e0e0ff', padding: '10px 14px', fontSize: '14px',
+  background: 'var(--surface-2)', border: '1px solid var(--surface-border)', borderRadius: '10px',
+  color: 'var(--foreground)', padding: '10px 14px', fontSize: '14px',
   fontFamily: "'Inter', sans-serif", outline: 'none',
   transition: 'border-color 0.2s, opacity 0.2s', width: '100%',
   opacity: isPending ? 0.6 : 1,
@@ -21,7 +21,7 @@ const inputStyle = (isPending: boolean): React.CSSProperties => ({
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: '11px', fontWeight: 700,
-  letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: '6px',
+  letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '6px',
 };
 
 export default function PropiedadesFilters({ filterOptions }: { filterOptions: FilterOptions }) {
@@ -64,7 +64,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
 
   return (
     <div style={{
-      background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: '16px',
+      background: 'var(--surface)', border: '1px solid var(--surface-border)', borderRadius: '16px',
       padding: '20px 24px', marginBottom: '36px',
       display: 'flex', flexDirection: 'column', gap: '14px',
       opacity: isPending ? 0.85 : 1, transition: 'opacity 0.2s',
@@ -78,8 +78,8 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
             onChange={e => setLocalSearch(e.target.value)}
             placeholder="Neighborhood, street, description..."
             style={inputStyle(isPending)}
-            onFocus={e => (e.target.style.borderColor = '#00f5a0')}
-            onBlur={e => (e.target.style.borderColor = '#2a2a4a')}
+            onFocus={e => (e.target.style.borderColor = 'oklch(0.55 0.11 250)')}
+            onBlur={e => (e.target.style.borderColor = 'var(--surface-border)')}
           />
         </div>
         <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
@@ -152,9 +152,9 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
         {hasFilters && (
           <button
             onClick={clearAll}
-            style={{ background: 'transparent', border: '1px solid #2a2a4a', borderRadius: '10px', color: '#6b6b9a', padding: '10px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#ff6b6b'; e.currentTarget.style.color = '#ff6b6b'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a4a'; e.currentTarget.style.color = '#6b6b9a'; }}
+            style={{ background: 'transparent', border: '1px solid var(--surface-border)', borderRadius: '10px', color: 'var(--muted)', padding: '10px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#e53935'; e.currentTarget.style.color = '#e53935'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'oklch(0.9 0.015 250)'; e.currentTarget.style.color = 'oklch(0.45 0.03 260)'; }}
           >
             ✕ Clear all
           </button>

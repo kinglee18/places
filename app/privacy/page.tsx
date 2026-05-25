@@ -5,12 +5,12 @@ export const metadata = { title: 'Privacy Policy — LocalIQ' };
 export default function PrivacyPage() {
   return (
     <main style={{ minHeight: '100vh', padding: '80px 24px', maxWidth: '760px', margin: '0 auto' }}>
-      <Link href="/" style={{ fontSize: '14px', color: '#6b6b9a', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '40px' }}>
+      <Link href="/" style={{ fontSize: '14px', color: 'oklch(0.45 0.03 260)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '40px' }}>
         ← Back to home
       </Link>
 
       <h1 style={{ fontSize: '36px', fontWeight: 900, marginBottom: '8px' }}>Privacy Policy</h1>
-      <p style={{ color: '#6b6b9a', fontSize: '14px', marginBottom: '48px' }}>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: '14px', marginBottom: '48px' }}>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', color: '#c0c0d8', lineHeight: 1.75, fontSize: '15px' }}>
         <section>
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>6. Contact</h2>
-          <p>For privacy-related questions, contact us at <a href="mailto:hello@localiq.app" style={{ color: '#00f5a0' }}>hello@localiq.app</a>.</p>
+          <p>For privacy-related questions, contact us at <a href="mailto:hello@localiq.app" style={{ color: 'oklch(0.55 0.11 250)' }}>hello@localiq.app</a>.</p>
         </section>
       </div>
     </main>
