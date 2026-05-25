@@ -46,7 +46,7 @@ export default async function MisPropiedadesPage() {
           <h1 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 8 }}>
             My properties
           </h1>
-          <p style={{ color: '#6b6b9a', fontSize: 14 }}>
+          <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: 14 }}>
             {items.length} registered propert{items.length !== 1 ? 'ies' : 'y'}
           </p>
         </div>
@@ -60,7 +60,7 @@ export default async function MisPropiedadesPage() {
           }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🏬</div>
             <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>No properties yet</h2>
-            <p style={{ color: '#6b6b9a', marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
+            <p style={{ color: 'oklch(0.45 0.03 260)', marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
               Register your first commercial space and start analyzing your market.
             </p>
             <Link href="/registro" style={{
@@ -83,7 +83,7 @@ export default async function MisPropiedadesPage() {
                   transition: 'border-color 0.2s, transform 0.2s',
                 }}>
                   {/* Photo */}
-                  <div style={{ height: 160, background: '#12122a', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ height: 160, background: 'oklch(0.96 0.01 250)', position: 'relative', overflow: 'hidden' }}>
                     {p.photo_urls?.[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -121,13 +121,13 @@ export default async function MisPropiedadesPage() {
 
                   {/* Info */}
                   <div style={{ padding: '16px 18px' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#00f5a0', marginBottom: 4, textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.55 0.11 250)', marginBottom: 4, textTransform: 'uppercase' }}>
                       {p.colonia}
                     </div>
                     <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: '#f0f0f8' }}>
                       {p.tipo_local}
                     </div>
-                    <div style={{ fontSize: 12, color: '#6b6b9a', marginBottom: 14 }}>
+                    <div style={{ fontSize: 12, color: 'oklch(0.45 0.03 260)', marginBottom: 14 }}>
                       {p.m2} m²{p.modalidad ? ` · ${p.modalidad === 'rent' ? 'Rent' : 'Sale'}` : ''}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -15,8 +15,8 @@ interface MapViewProps {
 }
 
 const RING_STYLE: Record<number, { color: string; fillOpacity: number }> = {
-  300: { color: "#00f5a0", fillOpacity: 0.18 },
-  600: { color: "#00b4d8", fillOpacity: 0.13 },
+  300: { color: "oklch(0.55 0.11 250)", fillOpacity: 0.18 },
+  600: { color: "oklch(0.60 0.12 240)", fillOpacity: 0.13 },
   900: { color: "#7c6bff", fillOpacity: 0.08 },
 };
 

@@ -22,16 +22,16 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
     <header style={{
       padding: '18px 48px',
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      borderBottom: '1px solid #1e1e35',
-      background: 'rgba(6,6,15,0.9)',
+      borderBottom: '1px solid var(--surface-border)',
+      background: 'oklch(0.985 0.005 240 / 0.92)',
       backdropFilter: 'blur(20px)',
       position: 'sticky', top: 0, zIndex: 50,
       fontFamily: "'Inter', sans-serif",
     }}>
       {/* Logo */}
-      <Link href="/" style={{ fontWeight: 800, fontSize: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#f0f0f8', textDecoration: 'none' }}>
-        <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 4px 12px rgba(0,245,160,0.25)' }}>📍</div>
-        Local<span style={{ color: '#00f5a0' }}>IQ</span>
+      <Link href="/" style={{ fontWeight: 800, fontSize: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--foreground)', textDecoration: 'none' }}>
+        <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 4px 12px oklch(0.235 0.07 265 / 0.25)' }}>📍</div>
+        Local<span style={{ color: 'oklch(0.55 0.11 250)' }}>IQ</span>
       </Link>
 
       {/* Desktop nav */}
@@ -40,13 +40,13 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
           <Link key={link.href} href={link.href} style={{
             fontSize: '14px',
             fontWeight: activePage === link.id ? 600 : 500,
-            color: activePage === link.id ? '#00f5a0' : '#9090b8',
+            color: activePage === link.id ? 'var(--brand)' : 'var(--muted)',
             textDecoration: 'none', transition: 'color 0.2s',
-            borderBottom: activePage === link.id ? '1px solid #00f5a0' : 'none',
+            borderBottom: activePage === link.id ? '1px solid var(--brand)' : 'none',
             paddingBottom: '2px',
           }}
-            onMouseEnter={e => { if (activePage !== link.id) e.currentTarget.style.color = '#f0f0f8'; }}
-            onMouseLeave={e => { if (activePage !== link.id) e.currentTarget.style.color = '#9090b8'; }}
+            onMouseEnter={e => { if (activePage !== link.id) e.currentTarget.style.color = 'var(--foreground)'; }}
+            onMouseLeave={e => { if (activePage !== link.id) e.currentTarget.style.color = 'var(--muted)'; }}
           >
             {link.label}
           </Link>
@@ -54,64 +54,64 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
 
         {/* Auth section */}
         {status === 'loading' ? (
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1e1e35', animation: 'pulse 1.5s infinite' }} />
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-border)', animation: 'pulse 1.5s infinite' }} />
         ) : session?.user ? (
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setMenuOpen(o => !o)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
-                background: '#12122a', border: '1px solid #2a2a4a',
+                background: 'oklch(0.96 0.01 250)', border: '1px solid #2a2a4a',
                 borderRadius: '100px', padding: '5px 12px 5px 5px',
-                cursor: 'pointer', color: '#f0f0f8', fontFamily: "'Inter', sans-serif",
+                cursor: 'pointer', color: 'var(--foreground)', fontFamily: "'Inter', sans-serif",
                 transition: 'border-color 0.2s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = '#00f5a0')}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = '#2a2a4a')}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'oklch(0.55 0.11 250)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'oklch(0.9 0.015 250)')}
             >
               {session.user.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={session.user.image} alt="avatar" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
-                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#06060f', fontWeight: 700 }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: 'oklch(0.985 0.005 240)', fontWeight: 700 }}>
                   {session.user.name?.[0] ?? '?'}
                 </div>
               )}
               <span style={{ fontSize: '13px', fontWeight: 600, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {session.user.name?.split(' ')[0]}
               </span>
-              <span style={{ fontSize: '10px', color: '#6b6b9a' }}>▾</span>
+              <span style={{ fontSize: '10px', color: 'oklch(0.45 0.03 260)' }}>▾</span>
             </button>
 
             {menuOpen && (
               <div style={{
                 position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                background: '#0d0d1a', border: '1px solid #1e1e35',
+                background: 'var(--surface)', border: '1px solid var(--surface-border)',
                 borderRadius: '14px', minWidth: '200px',
-                boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+                boxShadow: '0 16px 48px oklch(0.18 0.04 260 / 0.12)',
                 overflow: 'hidden', zIndex: 100,
               }}>
-                <div style={{ padding: '14px 16px', borderBottom: '1px solid #1e1e35' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0f0f8', marginBottom: '2px' }}>{session.user.name}</div>
-                  <div style={{ fontSize: '11px', color: '#6b6b9a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.user.email}</div>
+                <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--surface-border)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '2px' }}>{session.user.name}</div>
+                  <div style={{ fontSize: '11px', color: 'oklch(0.45 0.03 260)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.user.email}</div>
                 </div>
                 <div style={{ padding: '8px' }}>
                   <Link href="/registro" onClick={() => setMenuOpen(false)} style={{
                     display: 'block', padding: '9px 12px', borderRadius: '8px',
-                    fontSize: '13px', fontWeight: 600, color: '#f0f0f8',
+                    fontSize: '13px', fontWeight: 600, color: 'var(--foreground)',
                     textDecoration: 'none', transition: 'background 0.15s',
                   }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#1e1e35')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
                     📝 Publish property
                   </Link>
                   <Link href="/mis-propiedades" onClick={() => setMenuOpen(false)} style={{
                     display: 'block', padding: '9px 12px', borderRadius: '8px',
-                    fontSize: '13px', fontWeight: 600, color: '#f0f0f8',
+                    fontSize: '13px', fontWeight: 600, color: 'var(--foreground)',
                     textDecoration: 'none', transition: 'background 0.15s',
                   }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#1e1e35')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
                     🏠 My properties
@@ -121,11 +121,11 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
                     style={{
                       display: 'block', width: '100%', textAlign: 'left',
                       padding: '9px 12px', borderRadius: '8px', background: 'none', border: 'none',
-                      fontSize: '13px', fontWeight: 600, color: '#ff6b6b',
+                      fontSize: '13px', fontWeight: 600, color: '#e53935',
                       cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                       transition: 'background 0.15s',
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#2a0a0a')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.97 0.02 25)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
                     🚪 Sign out
@@ -136,14 +136,14 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
           </div>
         ) : (
           <Link href="/registro" style={{
-            background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-            color: '#06060f', padding: '9px 22px', borderRadius: '10px',
+            background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
+            color: 'oklch(0.985 0.005 240)', padding: '9px 22px', borderRadius: '10px',
             fontWeight: 700, fontSize: '14px', textDecoration: 'none',
-            boxShadow: '0 4px 16px rgba(0,245,160,0.25)',
+            boxShadow: '0 4px 16px oklch(0.235 0.07 265 / 0.25)',
             transition: 'transform 0.2s, box-shadow 0.2s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,245,160,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,245,160,0.25)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px oklch(0.235 0.07 265 / 0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px oklch(0.235 0.07 265 / 0.25)'; }}
           >
             Register Property
           </Link>
@@ -178,7 +178,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
               style={{
                 display: 'block', width: '100%', textAlign: 'left',
                 padding: '11px 12px', borderRadius: '10px', background: 'none', border: 'none',
-                fontSize: '15px', fontWeight: 600, color: '#ff6b6b',
+                fontSize: '15px', fontWeight: 600, color: '#e53935',
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                 marginTop: '4px',
               }}

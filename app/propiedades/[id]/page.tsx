@@ -289,7 +289,7 @@ export default function PropertyDetailPage() {
         <div style={{ maxWidth: 600, margin: '120px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Property not found</h1>
-          <p style={{ color: '#6b6b9a', marginBottom: 32 }}>This property may have been removed or the link is invalid.</p>
+          <p style={{ color: 'oklch(0.45 0.03 260)', marginBottom: 32 }}>This property may have been removed or the link is invalid.</p>
           <Link href="/propiedades" style={{
             background: 'linear-gradient(135deg, #00f5a0, #00b4d8)', color: '#06060f',
             padding: '12px 28px', borderRadius: 12, fontWeight: 700, textDecoration: 'none',
@@ -342,9 +342,9 @@ export default function PropertyDetailPage() {
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px 80px' }}>
 
         {/* Back */}
-        <Link href="/propiedades" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#6b6b9a', textDecoration: 'none', marginBottom: 32, transition: 'color 0.2s' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#00f5a0')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#6b6b9a')}>
+        <Link href="/propiedades" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'oklch(0.45 0.03 260)', textDecoration: 'none', marginBottom: 32, transition: 'color 0.2s' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'oklch(0.55 0.11 250)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'oklch(0.45 0.03 260)')}>
           ← All properties
         </Link>
 
@@ -412,11 +412,11 @@ export default function PropertyDetailPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap', marginBottom: 32 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: '#00f5a0', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: 'oklch(0.55 0.11 250)', textTransform: 'uppercase' }}>
                 {p.colonia}
               </span>
               {(p.city || p.state || p.country) && (
-                <span style={{ fontSize: 11, color: '#6b6b9a', fontFamily: "'DM Mono', monospace" }}>
+                <span style={{ fontSize: 11, color: 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace" }}>
                   {[p.city, p.state, p.country].filter(Boolean).join(', ')}
                 </span>
               )}
@@ -426,7 +426,7 @@ export default function PropertyDetailPage() {
                   padding: '3px 10px',
                   background: p.modalidad === 'rent' ? 'rgba(0,180,216,0.12)' : 'rgba(0,245,160,0.08)',
                   border: `1px solid ${p.modalidad === 'rent' ? 'rgba(0,180,216,0.4)' : 'rgba(0,245,160,0.3)'}`,
-                  color: p.modalidad === 'rent' ? '#00b4d8' : '#00f5a0',
+                  color: p.modalidad === 'rent' ? 'oklch(0.60 0.12 240)' : 'oklch(0.55 0.11 250)',
                 }}>
                   {p.modalidad === 'rent' ? 'For rent' : 'For sale'}
                 </span>
@@ -435,28 +435,28 @@ export default function PropertyDetailPage() {
             <h1 style={{ fontSize: 'clamp(22px, 3vw, 34px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 6, letterSpacing: '-0.02em' }}>
               {p.tipo_local}{p.calle ? ` · ${p.calle}${p.numero ? ` ${p.numero}` : ''}` : ''}
             </h1>
-            <p style={{ color: '#6b6b9a', fontSize: 14 }}>
+            <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: 14 }}>
               Published {new Date(p.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
 
           {/* Price block */}
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '20px 24px', minWidth: 200, textAlign: 'right' }}>
-            <div style={{ fontSize: 11, color: '#6b6b9a', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
+            <div style={{ fontSize: 11, color: 'oklch(0.45 0.03 260)', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
               {p.modalidad === 'rent' ? 'MONTHLY RENT' : p.modalidad === 'sale' ? 'SALE PRICE' : 'PRICE'}
             </div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#f0f0f8', letterSpacing: '-0.01em' }}>
               {formatPrice(p.precio_inmueble)}
             </div>
             {p.precio_mantenimiento && (
-              <div style={{ fontSize: 12, color: '#6b6b9a', marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: 'oklch(0.45 0.03 260)', marginTop: 4 }}>
                 Maintenance: {formatPrice(p.precio_mantenimiento)}/mo
               </div>
             )}
             {(p.tipo_contrato || p.fecha_disponible) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12, justifyContent: 'flex-end' }}>
                 {p.tipo_contrato && (
-                  <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 9px', background: 'rgba(0,245,160,0.07)', border: '1px solid rgba(0,245,160,0.2)', color: '#00f5a0' }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 9px', background: 'rgba(0,245,160,0.07)', border: '1px solid rgba(0,245,160,0.2)', color: 'oklch(0.55 0.11 250)' }}>
                     {p.tipo_contrato}
                   </span>
                 )}
@@ -475,11 +475,11 @@ export default function PropertyDetailPage() {
 
           {/* Stats */}
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 18, textTransform: 'uppercase' }}>Property details</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'oklch(0.45 0.03 260)', marginBottom: 18, textTransform: 'uppercase' }}>Property details</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 24px' }}>
               {stats.map(s => (
                 <div key={s.label}>
-                  <div style={{ fontSize: 11, color: '#6b6b9a', marginBottom: 3 }}>{s.icon} {s.label}</div>
+                  <div style={{ fontSize: 11, color: 'oklch(0.45 0.03 260)', marginBottom: 3 }}>{s.icon} {s.label}</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#f0f0f8' }}>{s.value}</div>
                 </div>
               ))}
@@ -488,14 +488,14 @@ export default function PropertyDetailPage() {
             {/* Services */}
             {p.servicios && p.servicios.length > 0 && (
               <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #1e1e35' }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>Additional services</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.45 0.03 260)', marginBottom: 10, textTransform: 'uppercase' }}>Additional services</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {p.servicios.map(s => (
                     <span key={s} style={{
                       fontSize: 11, fontFamily: "'DM Mono', monospace",
                       padding: '4px 10px', borderRadius: 7,
                       background: 'rgba(0,245,160,0.07)', border: '1px solid rgba(0,245,160,0.22)',
-                      color: '#00f5a0',
+                      color: 'oklch(0.55 0.11 250)',
                     }}>
                       {s}
                     </span>
@@ -511,15 +511,15 @@ export default function PropertyDetailPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
                   {isochrones.length > 0 && (
                     <div style={{ display: 'flex', gap: 14, fontSize: 11, color: '#9090b8' }}>
-                      <span><span style={{ color: '#00f5a0' }}>●</span> 5 min walk</span>
-                      <span><span style={{ color: '#00b4d8' }}>●</span> 10 min walk</span>
+                      <span><span style={{ color: 'oklch(0.55 0.11 250)' }}>●</span> 5 min walk</span>
+                      <span><span style={{ color: 'oklch(0.60 0.12 240)' }}>●</span> 10 min walk</span>
                       <span><span style={{ color: '#7c6bff' }}>●</span> 15 min walk</span>
                     </div>
                   )}
                   {mapsUrl && (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{
                       display: 'inline-flex', alignItems: 'center', gap: 6,
-                      fontSize: 12, fontWeight: 600, color: '#00b4d8', textDecoration: 'none',
+                      fontSize: 12, fontWeight: 600, color: 'oklch(0.60 0.12 240)', textDecoration: 'none',
                       opacity: 0.8, transition: 'opacity 0.15s',
                     }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
@@ -535,22 +535,22 @@ export default function PropertyDetailPage() {
 
           {/* Competition & Opportunities */}
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 18, textTransform: 'uppercase' }}>Zone analysis</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'oklch(0.45 0.03 260)', marginBottom: 18, textTransform: 'uppercase' }}>Zone analysis</p>
 
             {!competition ? (
-              <div style={{ color: '#6b6b9a', fontSize: 13, lineHeight: 1.6 }}>
+              <div style={{ color: 'oklch(0.45 0.03 260)', fontSize: 13, lineHeight: 1.6 }}>
                 {isOwner && p.lat && p.lng ? (
                   <div>
                     <p style={{ marginBottom: 14 }}>This listing does not have zone analysis yet.</p>
                     {zoneError && (
-                      <p style={{ color: '#ff6b6b', fontSize: 12, marginBottom: 12, fontFamily: "'DM Mono', monospace" }}>{zoneError}</p>
+                      <p style={{ color: '#e53935', fontSize: 12, marginBottom: 12, fontFamily: "'DM Mono', monospace" }}>{zoneError}</p>
                     )}
                     <button
                       onClick={handleAnalyzeZone}
                       disabled={runningZone}
                       style={{
                         background: runningZone ? 'rgba(0,245,160,0.08)' : 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-                        color: runningZone ? '#00f5a0' : '#0a0a14',
+                        color: runningZone ? 'oklch(0.55 0.11 250)' : 'oklch(0.985 0.005 240)',
                         border: runningZone ? '1px solid rgba(0,245,160,0.3)' : 'none',
                         borderRadius: 8, padding: '10px 20px',
                         fontWeight: 700, fontSize: 13, cursor: runningZone ? 'not-allowed' : 'pointer',
@@ -614,7 +614,7 @@ export default function PropertyDetailPage() {
                 {/* Opportunities */}
                 {competition.opportunities?.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#00f5a0', marginBottom: 10, textTransform: 'uppercase' }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.55 0.11 250)', marginBottom: 10, textTransform: 'uppercase' }}>
                       💡 Opportunities in this area
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -625,15 +625,15 @@ export default function PropertyDetailPage() {
                           background: o.score === 'high' ? 'rgba(0,245,160,0.07)' : 'rgba(0,245,160,0.03)',
                           border: `1px solid ${o.score === 'high' ? 'rgba(0,245,160,0.25)' : 'rgba(0,245,160,0.1)'}`,
                         }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: '#e0e0ff' }}>{o.category}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'oklch(0.18 0.04 260)' }}>{o.category}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ fontSize: 11, color: '#6b6b9a', fontFamily: "'DM Mono', monospace" }}>
+                            <span style={{ fontSize: 11, color: 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace" }}>
                               {o.count_500m} within 500m · {o.count_2km} within 2km
                             </span>
                             <span style={{
                               fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4,
                               background: o.score === 'high' ? 'rgba(0,245,160,0.15)' : 'rgba(0,245,160,0.07)',
-                              color: '#00f5a0', fontFamily: "'DM Mono', monospace", letterSpacing: '0.05em',
+                              color: 'oklch(0.55 0.11 250)', fontFamily: "'DM Mono', monospace", letterSpacing: '0.05em',
                             }}>
                               {o.score === 'high' ? 'HIGH' : 'MEDIUM'}
                             </span>
@@ -647,7 +647,7 @@ export default function PropertyDetailPage() {
                 {/* Saturated */}
                 {competition.saturated?.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#ff6b6b', marginBottom: 10, textTransform: 'uppercase' }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#e53935', marginBottom: 10, textTransform: 'uppercase' }}>
                       ⚠️ Saturated categories — high competition
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
@@ -656,7 +656,7 @@ export default function PropertyDetailPage() {
                           fontSize: 11, fontFamily: "'DM Mono', monospace",
                           padding: '4px 10px', borderRadius: 7,
                           background: 'rgba(255,107,107,0.07)', border: '1px solid rgba(255,107,107,0.22)',
-                          color: '#ff6b6b',
+                          color: '#e53935',
                         }}>
                           {s.category} · {s.count_500m} within 500m
                         </span>
@@ -669,7 +669,7 @@ export default function PropertyDetailPage() {
                 <div style={{ borderTop: '1px solid #1e1e35', marginBottom: 16 }} />
 
                 {/* Top nearby list */}
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.45 0.03 260)', marginBottom: 10, textTransform: 'uppercase' }}>
                   Nearest businesses
                 </p>
                 {competition.top_nearby.filter(b => b.category).slice(0, 5).map((b, i) => (
@@ -679,7 +679,7 @@ export default function PropertyDetailPage() {
                   }}>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</div>
-                      <div style={{ fontSize: 11, color: '#6b6b9a' }}>{b.category}</div>
+                      <div style={{ fontSize: 11, color: 'oklch(0.45 0.03 260)' }}>{b.category}</div>
                     </div>
                     {b.rating && (
                       <span style={{ fontSize: 12, color: '#fbbf24', fontFamily: "'DM Mono', monospace", flexShrink: 0 }}>★ {b.rating}</span>
@@ -687,13 +687,13 @@ export default function PropertyDetailPage() {
                   </div>
                 ))}
                 {competition.top_nearby.filter(b => b.category).length === 0 && (
-                  <p style={{ fontSize: 12, color: '#6b6b9a' }}>No businesses registered within 500m.</p>
+                  <p style={{ fontSize: 12, color: 'oklch(0.45 0.03 260)' }}>No businesses registered within 500m.</p>
                 )}
 
                 {/* Transit section */}
                 {competition.nearby_transit && competition.nearby_transit.length > 0 && (
                   <>
-                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', margin: '20px 0 10px', textTransform: 'uppercase' }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.45 0.03 260)', margin: '20px 0 10px', textTransform: 'uppercase' }}>
                       Nearby transit
                     </p>
                     {competition.nearby_transit.map((t, i) => (
@@ -703,7 +703,7 @@ export default function PropertyDetailPage() {
                           <div style={{ fontSize: 13, fontWeight: 600 }}>{t.name}</div>
                         </div>
                         {t.distance_m !== null && (
-                          <span style={{ fontSize: 12, color: '#6b6b9a', fontFamily: "'DM Mono', monospace", flexShrink: 0 }}>
+                          <span style={{ fontSize: 12, color: 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace", flexShrink: 0 }}>
                             {t.distance_m < 1000 ? `${t.distance_m} m` : `${(t.distance_m / 1000).toFixed(1)} km`}
                           </span>
                         )}
@@ -719,7 +719,7 @@ export default function PropertyDetailPage() {
         {/* ── Description ── */}
         {p.descripcion && (
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px', marginBottom: 24 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 14, textTransform: 'uppercase' }}>Description</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'oklch(0.45 0.03 260)', marginBottom: 14, textTransform: 'uppercase' }}>Description</p>
             <p style={{ fontSize: 15, lineHeight: 1.75, color: '#c8c8e8' }}>{p.descripcion}</p>
           </div>
         )}
@@ -729,7 +729,7 @@ export default function PropertyDetailPage() {
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px', marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 4, textTransform: 'uppercase' }}>AI Analysis</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'oklch(0.45 0.03 260)', marginBottom: 4, textTransform: 'uppercase' }}>AI Analysis</p>
                 <p style={{ fontSize: 13, color: '#9090b8' }}>Business recommendations generated by Claude</p>
               </div>
               {!analysis && (
@@ -738,7 +738,7 @@ export default function PropertyDetailPage() {
                   disabled={analyzing}
                   style={{
                     background: analyzing ? 'rgba(0,245,160,0.08)' : 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-                    color: analyzing ? '#00f5a0' : '#06060f',
+                    color: analyzing ? 'oklch(0.55 0.11 250)' : '#06060f',
                     border: analyzing ? '1px solid rgba(0,245,160,0.3)' : 'none',
                     padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
                     cursor: analyzing ? 'default' : 'pointer',
@@ -758,7 +758,7 @@ export default function PropertyDetailPage() {
             </div>
 
             {analyzeError && (
-              <p style={{ fontSize: 13, color: '#ff6b6b', fontFamily: "'DM Mono', monospace" }}>{analyzeError}</p>
+              <p style={{ fontSize: 13, color: '#e53935', fontFamily: "'DM Mono', monospace" }}>{analyzeError}</p>
             )}
 
             {analysis && (
@@ -769,7 +769,7 @@ export default function PropertyDetailPage() {
                     fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
                     background: analysis.nivel_competencia === 'high' ? 'rgba(255,107,107,0.1)' : analysis.nivel_competencia === 'medium' ? 'rgba(251,191,36,0.1)' : 'rgba(0,245,160,0.1)',
                     border: `1px solid ${analysis.nivel_competencia === 'high' ? 'rgba(255,107,107,0.4)' : analysis.nivel_competencia === 'medium' ? 'rgba(251,191,36,0.4)' : 'rgba(0,245,160,0.4)'}`,
-                    color: analysis.nivel_competencia === 'high' ? '#ff6b6b' : analysis.nivel_competencia === 'medium' ? '#fbbf24' : '#00f5a0',
+                    color: analysis.nivel_competencia === 'high' ? '#e53935' : analysis.nivel_competencia === 'medium' ? '#fbbf24' : 'oklch(0.55 0.11 250)',
                   }}>
                     {analysis.nivel_competencia === 'high' ? 'High competition' : analysis.nivel_competencia === 'medium' ? 'Medium competition' : 'Low competition'}
                   </span>
@@ -778,10 +778,10 @@ export default function PropertyDetailPage() {
 
                 {/* Recommended uses */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', textTransform: 'uppercase' }}>Recommended uses</p>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.45 0.03 260)', textTransform: 'uppercase' }}>Recommended uses</p>
                   {analysis.usos_recomendados.map((item, i) => (
-                    <div key={i} style={{ background: '#12122a', border: '1px solid #1e1e35', borderRadius: 10, padding: '12px 14px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#00f5a0', marginBottom: 4 }}>{item.uso}</div>
+                    <div key={i} style={{ background: 'oklch(0.96 0.01 250)', border: '1px solid #1e1e35', borderRadius: 10, padding: '12px 14px' }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'oklch(0.55 0.11 250)', marginBottom: 4 }}>{item.uso}</div>
                       <div style={{ fontSize: 12, color: '#9090b8', lineHeight: 1.5 }}>{item.razon}</div>
                     </div>
                   ))}
@@ -794,7 +794,7 @@ export default function PropertyDetailPage() {
                   </div>
                 )}
 
-                <button onClick={() => setAnalysis(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#6b6b9a', cursor: 'pointer', fontFamily: "'Inter', sans-serif', transition: 'border-color 0.15s'" }}>
+                <button onClick={() => setAnalysis(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: 'oklch(0.45 0.03 260)', cursor: 'pointer', fontFamily: "'Inter', sans-serif', transition: 'border-color 0.15s'" }}>
                   Regenerate analysis
                 </button>
               </div>
@@ -809,7 +809,7 @@ export default function PropertyDetailPage() {
           <div style={{ background: '#0d0d1a', border: '1px solid #1e1e35', borderRadius: 16, padding: '24px', marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6b6b9a', marginBottom: 4, textTransform: 'uppercase' }}>Rental Potential</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'oklch(0.45 0.03 260)', marginBottom: 4, textTransform: 'uppercase' }}>Rental Potential</p>
                 <p style={{ fontSize: 13, color: '#9090b8' }}>AI-estimated monthly rent range for this property</p>
               </div>
               {!rental && (
@@ -818,7 +818,7 @@ export default function PropertyDetailPage() {
                   disabled={loadingRental}
                   style={{
                     background: loadingRental ? 'rgba(0,180,216,0.08)' : 'linear-gradient(135deg, #00b4d8, #7c3aed)',
-                    color: loadingRental ? '#00b4d8' : '#f0f0f8',
+                    color: loadingRental ? 'oklch(0.60 0.12 240)' : '#f0f0f8',
                     border: loadingRental ? '1px solid rgba(0,180,216,0.3)' : 'none',
                     padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
                     cursor: loadingRental ? 'default' : 'pointer',
@@ -838,7 +838,7 @@ export default function PropertyDetailPage() {
             </div>
 
             {rentalError && (
-              <p style={{ fontSize: 13, color: '#ff6b6b', fontFamily: "'DM Mono', monospace" }}>{rentalError}</p>
+              <p style={{ fontSize: 13, color: '#e53935', fontFamily: "'DM Mono', monospace" }}>{rentalError}</p>
             )}
 
             {rental && (
@@ -849,34 +849,34 @@ export default function PropertyDetailPage() {
                     fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
                     background: rental.confidence === 'high' ? 'rgba(0,245,160,0.1)' : rental.confidence === 'medium' ? 'rgba(251,191,36,0.1)' : 'rgba(124,58,237,0.1)',
                     border: `1px solid ${rental.confidence === 'high' ? 'rgba(0,245,160,0.4)' : rental.confidence === 'medium' ? 'rgba(251,191,36,0.4)' : 'rgba(124,58,237,0.4)'}`,
-                    color: rental.confidence === 'high' ? '#00f5a0' : rental.confidence === 'medium' ? '#fbbf24' : '#a78bfa',
+                    color: rental.confidence === 'high' ? 'oklch(0.55 0.11 250)' : rental.confidence === 'medium' ? '#fbbf24' : '#a78bfa',
                   }}>
                     {rental.confidence === 'high' ? '✓ High confidence' : rental.confidence === 'medium' ? '~ Medium confidence' : '? Low confidence'}
                   </span>
-                  <span style={{ fontSize: 12, color: '#6b6b9a', fontFamily: "'DM Mono', monospace" }}>
+                  <span style={{ fontSize: 12, color: 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace" }}>
                     ${rental.price_per_m2.toLocaleString('en-US')} MXN/m²/mo
                   </span>
                 </div>
 
                 {/* Price range */}
-                <div style={{ background: '#12122a', border: '1px solid #1e1e35', borderRadius: 12, padding: '20px 24px' }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6b6b9a', marginBottom: 10, textTransform: 'uppercase' }}>Estimated monthly rent</p>
+                <div style={{ background: 'oklch(0.96 0.01 250)', border: '1px solid #1e1e35', borderRadius: 12, padding: '20px 24px' }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.45 0.03 260)', marginBottom: 10, textTransform: 'uppercase' }}>Estimated monthly rent</p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                    <span style={{ fontSize: 28, fontWeight: 900, color: '#00b4d8', letterSpacing: '-0.02em' }}>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: 'oklch(0.60 0.12 240)', letterSpacing: '-0.02em' }}>
                       ${rental.estimated_min.toLocaleString('en-US')}
                     </span>
-                    <span style={{ fontSize: 18, color: '#6b6b9a' }}>—</span>
-                    <span style={{ fontSize: 28, fontWeight: 900, color: '#00b4d8', letterSpacing: '-0.02em' }}>
+                    <span style={{ fontSize: 18, color: 'oklch(0.45 0.03 260)' }}>—</span>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: 'oklch(0.60 0.12 240)', letterSpacing: '-0.02em' }}>
                       ${rental.estimated_max.toLocaleString('en-US')}
                     </span>
-                    <span style={{ fontSize: 14, color: '#6b6b9a' }}>MXN/mo</span>
+                    <span style={{ fontSize: 14, color: 'oklch(0.45 0.03 260)' }}>MXN/mo</span>
                   </div>
                 </div>
 
                 {/* Summary */}
                 <p style={{ fontSize: 14, color: '#c8c8e8', lineHeight: 1.6 }}>{rental.summary}</p>
 
-                <button onClick={() => setRental(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#6b6b9a', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                <button onClick={() => setRental(null)} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #1e1e35', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: 'oklch(0.45 0.03 260)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
                   Recalculate
                 </button>
               </div>
@@ -899,7 +899,7 @@ export default function PropertyDetailPage() {
             textDecoration: 'none', border: '1px solid #1e1e35',
             transition: 'border-color 0.2s, color 0.2s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#2a2a4a'; e.currentTarget.style.color = '#f0f0f8'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'oklch(0.9 0.015 250)'; e.currentTarget.style.color = '#f0f0f8'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e35'; e.currentTarget.style.color = '#9090b8'; }}
           >
             ← Back to all properties

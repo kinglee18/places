@@ -11,7 +11,7 @@ import {
 const ZonaPicker = dynamic(() => import("./ZonaPicker"), {
   ssr: false,
   loading: () => (
-    <Box sx={{ height: 320, borderRadius: "12px", bgcolor: "#0e0e22", border: "1px solid #2a2a4a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <Box sx={{ height: 320, borderRadius: "12px", bgcolor: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Typography variant="caption" color="text.secondary">Loading map...</Typography>
     </Box>
   ),
@@ -21,11 +21,11 @@ const ZonaPicker = dynamic(() => import("./ZonaPicker"), {
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
-    primary: { main: "#00f5a0" },
-    secondary: { main: "#00b4d8" },
-    background: { default: "#0a0a14", paper: "#0e0e22" },
-    text: { primary: "#e0e0ff", secondary: "#8888aa" },
-    error: { main: "#ff6b6b" },
+    primary: { main: "#3b6fa0" },
+    secondary: { main: "#4080b4" },
+    background: { default: "#f7f8fd", paper: "#edf0f8" },
+    text: { primary: "#181e38", secondary: "#5a6288" },
+    error: { main: "#e53935" },
   },
   typography: {
     fontFamily: "'Syne', sans-serif",
@@ -43,16 +43,16 @@ const darkTheme = createTheme({
         root: {
           fontFamily: "'DM Mono', monospace",
           borderRadius: 8,
-          backgroundColor: "#12122a",
-          "& fieldset": { borderColor: "#2a2a4a" },
+          backgroundColor: "#edf0f8",
+          "& fieldset": { borderColor: "#d5daea" },
           "&:hover fieldset": { borderColor: "#444466" },
-          "&.Mui-focused fieldset": { borderColor: "#00f5a0" },
+          "&.Mui-focused fieldset": { borderColor: "#3b6fa0" },
         },
       },
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: { fontFamily: "'DM Mono', monospace", color: "#8888aa", fontSize: "14px" },
+        root: { fontFamily: "'DM Mono', monospace", color: "#5a6288", fontSize: "14px" },
       },
     },
     MuiButton: {
@@ -60,23 +60,23 @@ const darkTheme = createTheme({
         root: { borderRadius: 10, padding: "12px 24px" },
         containedPrimary: {
           background: "linear-gradient(135deg, #00f5a0, #00b4d8)",
-          color: "#0a0a14",
+          color: "#f7f8fd",
           "&:hover": { opacity: 0.9, transform: "scale(1.02)" },
           transition: "all 0.2s",
         },
         outlined: {
-          borderColor: "#2a2a4a",
-          color: "#e0e0ff",
-          "&:hover": { backgroundColor: "#1a1a2e", borderColor: "#444466" },
+          borderColor: "#d5daea",
+          color: "#181e38",
+          "&:hover": { backgroundColor: "#edf0f8", borderColor: "#a4b4d2" },
         },
       },
     },
     MuiSlider: {
       styleOverrides: {
-        root: { color: "#00f5a0" },
-        rail: { backgroundColor: "#2a2a4a" },
-        mark: { backgroundColor: "#2a2a4a" },
-        markLabel: { fontFamily: "'DM Mono', monospace", color: "#8888aa", fontSize: 11 },
+        root: { color: "#3b6fa0" },
+        rail: { backgroundColor: "#d5daea" },
+        mark: { backgroundColor: "#d5daea" },
+        markLabel: { fontFamily: "'DM Mono', monospace", color: "#5a6288", fontSize: 11 },
       },
     },
   },
@@ -170,7 +170,7 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
     return () => clearTimeout(t);
   }, [score]);
   return (
-    <Box sx={{ background: "#1a1a2e", borderRadius: 1, height: 6, overflow: "hidden", flex: 1 }}>
+    <Box sx={{ background: "oklch(0.9 0.015 250)", borderRadius: 1, height: 6, overflow: "hidden", flex: 1 }}>
       <Box sx={{ width: `${width}%`, height: "100%", background: color, borderRadius: 1, transition: "width 1.1s cubic-bezier(0.4,0,0.2,1)" }} />
     </Box>
   );
@@ -178,9 +178,9 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
 
 // ─── Badge de competencia ────────────────────────────────────────────────────
 const compConfig = {
-  low:    { bg: "#001a10", border: "#003820", color: "#44cc88", label: "low competition" },
-  medium: { bg: "#1a1200", border: "#3a2800", color: "#ccaa44", label: "medium competition" },
-  high:   { bg: "#1a0808", border: "#3a1212", color: "#cc4444", label: "high competition" },
+  low:    { bg: "oklch(0.95 0.06 155)", border: "oklch(0.82 0.1 155)", color: "oklch(0.42 0.14 155)", label: "low competition" },
+  medium: { bg: "oklch(0.97 0.05 70)", border: "oklch(0.85 0.1 70)", color: "oklch(0.52 0.14 70)", label: "medium competition" },
+  high:   { bg: "oklch(0.96 0.06 25)", border: "oklch(0.83 0.12 25)", color: "oklch(0.50 0.18 25)", label: "high competition" },
 };
 
 // ─── Ejemplos de descripción ─────────────────────────────────────────────────
@@ -312,18 +312,18 @@ export default function BuscarLocal() {
           {/* Header */}
           <Box mb={6}>
             <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-              <Box sx={{ width: 32, height: 32, background: "linear-gradient(135deg, #00b4d8, #00f5a0)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔍</Box>
+              <Box sx={{ width: 32, height: 32, background: "linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔍</Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.5px" }}>
-                Local<span style={{ color: "#00f5a0" }}>IQ</span>
+                Local<span style={{ color: "oklch(0.55 0.11 250)" }}>IQ</span>
               </Typography>
-              <Chip label="search · beta" size="small" sx={{ bgcolor: "#1a1a3a", border: "1px solid #2a2a5a", color: "#8888cc", fontFamily: "'DM Mono', monospace", height: 20, fontSize: 10 }} />
+              <Chip label="search · beta" size="small" sx={{ bgcolor: "oklch(0.93 0.03 250)", border: "1px solid oklch(0.85 0.04 250)", color: "oklch(0.45 0.08 250)", fontFamily: "'DM Mono', monospace", height: 20, fontSize: 10 }} />
             </Box>
             <Typography variant="body2" color="text.secondary">find the ideal space for your project</Typography>
           </Box>
 
           {/* ── ESTADO: INPUT ───────────────────────────────────────────── */}
           {appState === "input" && (
-            <Card elevation={0} sx={{ border: "1px solid #1e1e3e", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }} className="fadein">
+            <Card elevation={0} sx={{ border: "1px solid var(--surface-border)", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }} className="fadein">
 
               <Typography variant="h6" fontWeight={700} mb={1}>What do you want to do?</Typography>
               <Typography variant="body2" color="text.secondary" mb={4} sx={{ lineHeight: 1.7 }}>
@@ -332,7 +332,7 @@ export default function BuscarLocal() {
 
               {/* Textarea principal */}
               <Box mb={1}>
-                <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1 }}>
+                <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1 }}>
                   DESCRIBE YOUR SITUATION *
                 </Typography>
                 <TextField
@@ -362,21 +362,21 @@ export default function BuscarLocal() {
                     label={`Ejemplo ${i + 1}`}
                     size="small"
                     onClick={() => setDescripcion(ej)}
-                    sx={{ bgcolor: "#12122a", border: "1px solid #2a2a4a", color: "#8888cc", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, "&:hover": { borderColor: "#00f5a0", color: "#00f5a0" }, transition: "all 0.2s" }}
+                    sx={{ bgcolor: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", color: "#8888cc", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, "&:hover": { borderColor: "oklch(0.55 0.11 250)", color: "oklch(0.55 0.11 250)" }, transition: "all 0.2s" }}
                   />
                 ))}
               </Box>
 
               {/* Opciones adicionales */}
               <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, p: 3, mb: 4 }}>
-                <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#555577", letterSpacing: 1, fontSize: 11, display: "block", mb: 3 }}>
+                <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 11, display: "block", mb: 3 }}>
                   ADDITIONAL OPTIONS (optional)
                 </Typography>
 
                 <Box display="flex" flexDirection="column" gap={3.5}>
                   {/* Zona */}
                   <FormControl fullWidth>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
                       PREFERRED ZONE
                     </Typography>
                     <ZonaPicker onChange={setZona} />
@@ -384,7 +384,7 @@ export default function BuscarLocal() {
 
                   {/* Modalidad: renta / compra / cualquiera */}
                   <Box>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1.5 }}>
                       RENT OR BUY?
                     </Typography>
                     <ToggleButtonGroup
@@ -396,14 +396,14 @@ export default function BuscarLocal() {
                         "& .MuiToggleButton-root": {
                           fontFamily: "'DM Mono', monospace",
                           fontSize: 12,
-                          color: "#8888aa",
-                          borderColor: "#2a2a4a",
+                          color: "oklch(0.45 0.03 260)",
+                          borderColor: "oklch(0.9 0.015 250)",
                           textTransform: "none",
                           px: 2,
                           py: 0.7,
                           "&.Mui-selected": {
                             background: "rgba(0, 245, 160, 0.08)",
-                            color: "#00f5a0",
+                            color: "oklch(0.55 0.11 250)",
                             borderColor: "rgba(0, 245, 160, 0.4)",
                             "&:hover": { background: "rgba(0, 245, 160, 0.12)" },
                           },
@@ -419,10 +419,10 @@ export default function BuscarLocal() {
                   {/* Presupuesto */}
                   <Box>
                     <Box display="flex" justifyContent="space-between" mb={1}>
-                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13 }}>
+                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13 }}>
                         MONTHLY RENT BUDGET
                       </Typography>
-                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#00f5a0", fontWeight: 700 }}>
+                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.55 0.11 250)", fontWeight: 700 }}>
                         ${presupuesto.toLocaleString()} MXN
                       </Typography>
                     </Box>
@@ -459,7 +459,7 @@ export default function BuscarLocal() {
           {/* ── ESTADO: PREFLIGHT LOADING ───────────────────────────────── */}
           {appState === "preflight_loading" && (
             <Box textAlign="center" py={12} className="fadein">
-              <CircularProgress size={64} sx={{ color: "#00f5a0", mb: 3 }} />
+              <CircularProgress size={64} sx={{ color: "oklch(0.55 0.11 250)", mb: 3 }} />
               <Typography variant="h6" fontWeight={700}>Searching matches{dots}</Typography>
               <Typography variant="caption" color="text.secondary" display="block" mt={1}>
                 detecting category · checking inventory · measuring saturation
@@ -470,7 +470,7 @@ export default function BuscarLocal() {
           {/* ── ESTADO: AI LOADING ──────────────────────────────────────── */}
           {appState === "ai_loading" && (
             <Box textAlign="center" py={12} className="fadein">
-              <CircularProgress size={64} sx={{ color: "#00f5a0", mb: 3 }} />
+              <CircularProgress size={64} sx={{ color: "oklch(0.55 0.11 250)", mb: 3 }} />
               <Typography variant="h6" fontWeight={700}>AI Analysis in progress{dots}</Typography>
               <Typography variant="caption" color="text.secondary" display="block" mt={1}>
                 interpreting your profile · analyzing zones · generating tips
@@ -497,7 +497,7 @@ export default function BuscarLocal() {
                   <Box display="flex" gap={1.5} alignItems="center">
                     <Typography fontSize={26}>{preflight.giro_detectado.emoji}</Typography>
                     <Box flex={1}>
-                      <Typography variant="caption" sx={{ color: "#00f5a0", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
+                      <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
                         DETECTED CATEGORY {preflight.giro_detectado.source === "ai" && "· via AI"}
                         {preflight.giro_detectado.source === "keyword" && "· via keywords"}
                       </Typography>
@@ -506,7 +506,7 @@ export default function BuscarLocal() {
                     <Chip
                       size="small"
                       label={preflight.modalidad_filtro === "rent" ? "Rent" : preflight.modalidad_filtro === "sale" ? "Buy" : "Any"}
-                      sx={{ bgcolor: "#12122a", border: "1px solid #2a2a4a", color: "#8888cc", fontFamily: "'DM Mono', monospace", fontSize: 11 }}
+                      sx={{ bgcolor: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", color: "#8888cc", fontFamily: "'DM Mono', monospace", fontSize: 11 }}
                     />
                   </Box>
                 </CardContent>
@@ -516,8 +516,8 @@ export default function BuscarLocal() {
               <Box mb={3} p={2} borderRadius={2} bgcolor="#0a0a1e" border="1px solid #1e1e3e">
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
                   {preflight.geo_aplicado
-                    ? <>Found <b style={{ color: "#00f5a0" }}>{preflight.properties_match.length}</b> space{preflight.properties_match.length !== 1 ? "s" : ""} within <b>{preflight.radio_km}km</b> of the selected area{preflight.modalidad_filtro !== "any" ? ` for ${preflight.modalidad_filtro === "rent" ? "rent" : "sale"}` : ""}.</>
-                    : <>Showing <b style={{ color: "#00f5a0" }}>{preflight.properties_match.length}</b> available space{preflight.properties_match.length !== 1 ? "s" : ""}{preflight.modalidad_filtro !== "any" ? ` for ${preflight.modalidad_filtro === "rent" ? "rent" : "sale"}` : ""}. <i style={{ color: "#8888aa" }}>(no zone selected — no distance filter)</i></>
+                    ? <>Found <b style={{ color: "oklch(0.55 0.11 250)" }}>{preflight.properties_match.length}</b> space{preflight.properties_match.length !== 1 ? "s" : ""} within <b>{preflight.radio_km}km</b> of the selected area{preflight.modalidad_filtro !== "any" ? ` for ${preflight.modalidad_filtro === "rent" ? "rent" : "sale"}` : ""}.</>
+                    : <>Showing <b style={{ color: "oklch(0.55 0.11 250)" }}>{preflight.properties_match.length}</b> available space{preflight.properties_match.length !== 1 ? "s" : ""}{preflight.modalidad_filtro !== "any" ? ` for ${preflight.modalidad_filtro === "rent" ? "rent" : "sale"}` : ""}. <i style={{ color: "oklch(0.45 0.03 260)" }}>(no zone selected — no distance filter)</i></>
                   }
                 </Typography>
               </Box>
@@ -544,14 +544,14 @@ export default function BuscarLocal() {
               {/* Lista de matches con saturación */}
               {preflight.properties_match.length > 0 && (
                 <Box mb={4}>
-                  <Typography variant="caption" sx={{ color: "#8888aa", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
+                  <Typography variant="caption" sx={{ color: "oklch(0.45 0.03 260)", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
                     🏠 AVAILABLE SPACES (sorted by proximity)
                   </Typography>
                   <Box display="flex" flexDirection="column" gap={2}>
                     {preflight.properties_match.map((p) => {
                       const sat = p.saturacion;
                       const satCfg = sat.nivel === "high"
-                        ? { bg: "#1a0808", border: "#3a1212", color: "#ff6b6b", icon: "⚠️", text: `High saturation: ${sat.competidores_500m} competitor${sat.competidores_500m !== 1 ? "s" : ""} within 500m, ${sat.competidores_2km} within 2km` }
+                        ? { bg: "#1a0808", border: "#3a1212", color: "#e53935", icon: "⚠️", text: `High saturation: ${sat.competidores_500m} competitor${sat.competidores_500m !== 1 ? "s" : ""} within 500m, ${sat.competidores_2km} within 2km` }
                         : sat.nivel === "medium"
                           ? { bg: "#1a1200", border: "#3a2800", color: "#ccaa44", icon: "⚡", text: `Medium saturation: ${sat.competidores_500m} within 500m, ${sat.competidores_2km} within 2km` }
                           : { bg: "#001a10", border: "#003820", color: "#44cc88", icon: "✓", text: sat.competidores_2km > 0 ? `Low: only ${sat.competidores_2km} competitor${sat.competidores_2km !== 1 ? "s" : ""} within 2km` : "No direct competitors in the area" };
@@ -563,7 +563,7 @@ export default function BuscarLocal() {
                           style={{ textDecoration: "none", color: "inherit", display: "block" }}
                         >
                           <Box sx={{
-                            border: "1px solid #1e1e3e",
+                            border: "1px solid var(--surface-border)",
                             borderRadius: 3,
                             overflow: "hidden",
                             transition: "transform 0.2s, border-color 0.2s",
@@ -574,7 +574,7 @@ export default function BuscarLocal() {
                               {/* Foto */}
                               <Box sx={{
                                 width: 110, flexShrink: 0,
-                                background: "#0e0e22",
+                                background: "oklch(0.96 0.01 250)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 fontSize: 28, opacity: 0.4, minHeight: 130,
                                 position: "relative", overflow: "hidden",
@@ -603,8 +603,8 @@ export default function BuscarLocal() {
                                       background: "rgba(0,180,216,0.08)", border: "1px solid rgba(0,180,216,0.25)",
                                       borderRadius: 1.5, px: 1, py: 0.3, flexShrink: 0, textAlign: "center",
                                     }}>
-                                      <Typography sx={{ fontSize: 9, color: "#8888aa", fontFamily: "'DM Mono', monospace", display: "block" }}>DIST</Typography>
-                                      <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#00b4d8", fontFamily: "'DM Mono', monospace" }}>
+                                      <Typography sx={{ fontSize: 9, color: "oklch(0.45 0.03 260)", fontFamily: "'DM Mono', monospace", display: "block" }}>DIST</Typography>
+                                      <Typography sx={{ fontSize: 12, fontWeight: 700, color: "oklch(0.60 0.12 240)", fontFamily: "'DM Mono', monospace" }}>
                                         {p.distance_km.toFixed(1)}km
                                       </Typography>
                                     </Box>
@@ -612,11 +612,11 @@ export default function BuscarLocal() {
                                 </Box>
 
                                 <Box display="flex" gap={1} flexWrap="wrap">
-                                  <Box sx={{ background: "#12122a", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
-                                    <Typography sx={{ fontSize: 11, color: "#8888aa", fontFamily: "'DM Mono', monospace" }}>{p.tipo_local}</Typography>
+                                  <Box sx={{ background: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
+                                    <Typography sx={{ fontSize: 11, color: "oklch(0.45 0.03 260)", fontFamily: "'DM Mono', monospace" }}>{p.tipo_local}</Typography>
                                   </Box>
-                                  <Box sx={{ background: "#12122a", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
-                                    <Typography sx={{ fontSize: 11, color: "#00f5a0", fontFamily: "'DM Mono', monospace" }}>{p.m2} m²</Typography>
+                                  <Box sx={{ background: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
+                                    <Typography sx={{ fontSize: 11, color: "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace" }}>{p.m2} m²</Typography>
                                   </Box>
                                   {p.modalidad && (
                                     <Box sx={{
@@ -624,7 +624,7 @@ export default function BuscarLocal() {
                                       border: `1px solid ${p.modalidad === "rent" ? "rgba(0,180,216,0.3)" : "rgba(0,245,160,0.2)"}`,
                                       borderRadius: 1, px: 1, py: 0.3,
                                     }}>
-                                      <Typography sx={{ fontSize: 11, color: p.modalidad === "rent" ? "#00b4d8" : "#00f5a0", fontFamily: "'DM Mono', monospace" }}>
+                                      <Typography sx={{ fontSize: 11, color: p.modalidad === "rent" ? "oklch(0.60 0.12 240)" : "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace" }}>
                                         {p.modalidad === "rent" ? "Rent" : "Sale"}
                                       </Typography>
                                     </Box>
@@ -654,7 +654,7 @@ export default function BuscarLocal() {
                                   <Typography fontWeight={800} fontSize={15} color={p.precio_inmueble ? "text.primary" : "text.secondary"}>
                                     {p.precio_inmueble ? `$${p.precio_inmueble.toLocaleString("en-US")} MXN` : "—"}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: "#00f5a0", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
+                                  <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
                                     View details →
                                   </Typography>
                                 </Box>
@@ -706,7 +706,7 @@ export default function BuscarLocal() {
                   <Box display="flex" gap={1.5} alignItems="flex-start">
                     <Typography fontSize={28}>🤖</Typography>
                     <Box>
-                      <Typography variant="caption" sx={{ color: "#00f5a0", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
+                      <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
                         DETECTED CATEGORY
                       </Typography>
                       <Typography variant="h6" fontWeight={700} mt={0.5} mb={1}>
@@ -721,21 +721,21 @@ export default function BuscarLocal() {
               </Card>
 
               {/* Requisitos del espacio */}
-              <Card elevation={0} sx={{ border: "1px solid #1e1e3e", borderRadius: 3, mb: 3 }}>
+              <Card elevation={0} sx={{ border: "1px solid var(--surface-border)", borderRadius: 3, mb: 3 }}>
                 <CardContent sx={{ p: 3, pb: "24px !important" }}>
-                  <Typography variant="caption" sx={{ color: "#00b4d8", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
+                  <Typography variant="caption" sx={{ color: "oklch(0.60 0.12 240)", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
                     📐 SPACE REQUIREMENTS
                   </Typography>
 
                   <Box display="flex" gap={3} mb={3} flexWrap="wrap">
                     <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, px: 2.5, py: 1.5, textAlign: "center" }}>
                       <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>minimum</Typography>
-                      <Typography fontWeight={800} fontSize={22} color="#00b4d8">{result.requisitos_espacio.m2_minimo}</Typography>
+                      <Typography fontWeight={800} fontSize={22} color="oklch(0.60 0.12 240)">{result.requisitos_espacio.m2_minimo}</Typography>
                       <Typography variant="caption" color="text.secondary">m²</Typography>
                     </Box>
                     <Box sx={{ background: "#0c0c1e", border: "1px solid #1a1a3a", borderRadius: 2, px: 2.5, py: 1.5, textAlign: "center" }}>
                       <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>ideal (recommended)</Typography>
-                      <Typography fontWeight={800} fontSize={22} color="#00f5a0">{result.requisitos_espacio.m2_ideal}</Typography>
+                      <Typography fontWeight={800} fontSize={22} color="oklch(0.55 0.11 250)">{result.requisitos_espacio.m2_ideal}</Typography>
                       <Typography variant="caption" color="text.secondary">m²</Typography>
                     </Box>
                   </Box>
@@ -754,7 +754,7 @@ export default function BuscarLocal() {
                       <Typography variant="caption" color="text.secondary" display="block" mb={1}>Desirable</Typography>
                       <Box display="flex" gap={1} flexWrap="wrap">
                         {result.requisitos_espacio.caracteristicas_deseables.map((c, i) => (
-                          <Chip key={i} label={c} size="small" sx={{ bgcolor: "#12122a", border: "1px solid #2a2a4a", color: "#8888cc", fontFamily: "'DM Mono', monospace", fontSize: 11 }} />
+                          <Chip key={i} label={c} size="small" sx={{ bgcolor: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", color: "#8888cc", fontFamily: "'DM Mono', monospace", fontSize: 11 }} />
                         ))}
                       </Box>
                     </Box>
@@ -782,14 +782,14 @@ export default function BuscarLocal() {
               )}
 
               {/* Colonias recomendadas */}
-              <Typography variant="caption" sx={{ color: "#8888aa", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
+              <Typography variant="caption" sx={{ color: "oklch(0.45 0.03 260)", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 2 }}>
                 📍 RECOMMENDED NEIGHBORHOODS
               </Typography>
               <Box display="flex" flexDirection="column" gap={2} mb={3}>
                 {result.colonias_recomendadas.map((col, i) => (
                   <Card key={i} elevation={0} sx={{ border: i === 0 ? "1px solid #00f5a044" : "1px solid #1e1e3e", borderRadius: 3, position: "relative", transition: "transform 0.2s", "&:hover": { transform: "translateY(-2px)" } }}>
                     {i === 0 && (
-                      <Chip label="BEST OPTION" size="small" sx={{ position: "absolute", top: -10, right: 16, background: "linear-gradient(135deg, #00f5a0, #00b4d8)", color: "#0a0a14", fontWeight: 800, fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 1 }} />
+                      <Chip label="BEST OPTION" size="small" sx={{ position: "absolute", top: -10, right: 16, background: "linear-gradient(135deg, #00f5a0, #00b4d8)", color: "oklch(0.985 0.005 240)", fontWeight: 800, fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 1 }} />
                     )}
                     <CardContent sx={{ p: 3, pb: "24px !important" }}>
                       <Box display="flex" alignItems="flex-start" justifyContent="space-between" gap={2} mb={2}>
@@ -803,8 +803,8 @@ export default function BuscarLocal() {
                       </Typography>
                       <Box display="flex" alignItems="center" gap={1.5}>
                         <Typography variant="caption" color="text.secondary" sx={{ width: 90, flexShrink: 0 }}>opportunity</Typography>
-                        <ScoreBar score={col.nivel_oportunidad} color="#00f5a0" />
-                        <Typography variant="caption" sx={{ color: "#00f5a0", width: 28, textAlign: "right", fontWeight: 700 }}>
+                        <ScoreBar score={col.nivel_oportunidad} color="oklch(0.55 0.11 250)" />
+                        <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", width: 28, textAlign: "right", fontWeight: 700 }}>
                           {col.nivel_oportunidad}
                         </Typography>
                       </Box>
@@ -828,7 +828,7 @@ export default function BuscarLocal() {
               {/* Consejos */}
               {result.consejos.length > 0 && (
                 <Box mb={4} p={2.5} borderRadius={2} bgcolor="#0a0a1e" border="1px solid #1e1e3e">
-                  <Typography variant="caption" sx={{ color: "#00b4d8", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: "oklch(0.60 0.12 240)", fontWeight: 700, letterSpacing: 1, fontSize: 11, display: "block", mb: 1.5 }}>
                     💡 PRACTICAL TIPS
                   </Typography>
                   {result.consejos.map((c, i) => (
@@ -841,7 +841,7 @@ export default function BuscarLocal() {
               {result.matching_properties?.length > 0 && (
                 <Box mb={4}>
                   <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
-                    <Typography variant="caption" sx={{ color: "#00f5a0", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
+                    <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", fontWeight: 700, letterSpacing: 1, fontSize: 11 }}>
                       🏠 AVAILABLE SPACES MATCHING YOUR SEARCH
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
@@ -867,7 +867,7 @@ export default function BuscarLocal() {
                           {/* Badge top pick */}
                           {i === 0 && (
                             <Box sx={{ background: "linear-gradient(135deg, #00f5a0, #00b4d8)", px: 2, py: 0.5 }}>
-                              <Typography sx={{ fontSize: 10, fontWeight: 800, color: "#0a0a14", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>
+                              <Typography sx={{ fontSize: 10, fontWeight: 800, color: "oklch(0.985 0.005 240)", fontFamily: "'DM Mono', monospace", letterSpacing: 1 }}>
                                 ✦ BEST MATCH
                               </Typography>
                             </Box>
@@ -877,7 +877,7 @@ export default function BuscarLocal() {
                             {/* Foto */}
                             <Box sx={{
                               width: 110, flexShrink: 0,
-                              background: "#0e0e22",
+                              background: "oklch(0.96 0.01 250)",
                               display: "flex", alignItems: "center", justifyContent: "center",
                               fontSize: 28, opacity: 0.4, minHeight: 110,
                               position: "relative", overflow: "hidden",
@@ -906,19 +906,19 @@ export default function BuscarLocal() {
                                   background: "rgba(0,245,160,0.08)", border: "1px solid rgba(0,245,160,0.2)",
                                   borderRadius: 1.5, px: 1, py: 0.3, flexShrink: 0, textAlign: "center",
                                 }}>
-                                  <Typography sx={{ fontSize: 9, color: "#8888aa", fontFamily: "'DM Mono', monospace", display: "block" }}>MATCH</Typography>
-                                  <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#00f5a0", fontFamily: "'DM Mono', monospace" }}>
+                                  <Typography sx={{ fontSize: 9, color: "oklch(0.45 0.03 260)", fontFamily: "'DM Mono', monospace", display: "block" }}>MATCH</Typography>
+                                  <Typography sx={{ fontSize: 13, fontWeight: 800, color: "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace" }}>
                                     {Math.min(p.match_score, 99)}
                                   </Typography>
                                 </Box>
                               </Box>
 
                               <Box display="flex" gap={1} flexWrap="wrap">
-                                <Box sx={{ background: "#12122a", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
-                                  <Typography sx={{ fontSize: 11, color: "#8888aa", fontFamily: "'DM Mono', monospace" }}>{p.tipo_local}</Typography>
+                                <Box sx={{ background: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
+                                  <Typography sx={{ fontSize: 11, color: "oklch(0.45 0.03 260)", fontFamily: "'DM Mono', monospace" }}>{p.tipo_local}</Typography>
                                 </Box>
-                                <Box sx={{ background: "#12122a", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
-                                  <Typography sx={{ fontSize: 11, color: "#00f5a0", fontFamily: "'DM Mono', monospace" }}>{p.m2} m²</Typography>
+                                <Box sx={{ background: "oklch(0.96 0.01 250)", border: "1px solid #2a2a4a", borderRadius: 1, px: 1, py: 0.3 }}>
+                                  <Typography sx={{ fontSize: 11, color: "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace" }}>{p.m2} m²</Typography>
                                 </Box>
                                 {p.modalidad && (
                                   <Box sx={{
@@ -926,7 +926,7 @@ export default function BuscarLocal() {
                                     border: `1px solid ${p.modalidad === "rent" ? "rgba(0,180,216,0.3)" : "rgba(0,245,160,0.2)"}`,
                                     borderRadius: 1, px: 1, py: 0.3,
                                   }}>
-                                    <Typography sx={{ fontSize: 11, color: p.modalidad === "rent" ? "#00b4d8" : "#00f5a0", fontFamily: "'DM Mono', monospace" }}>
+                                    <Typography sx={{ fontSize: 11, color: p.modalidad === "rent" ? "oklch(0.60 0.12 240)" : "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace" }}>
                                       {p.modalidad === "rent" ? "For rent" : "For sale"}
                                     </Typography>
                                   </Box>
@@ -937,7 +937,7 @@ export default function BuscarLocal() {
                               {p.match_reasons.length > 0 && (
                                 <Box display="flex" gap={0.5} flexWrap="wrap">
                                   {p.match_reasons.slice(0, 3).map((r, ri) => (
-                                    <Typography key={ri} variant="caption" sx={{ color: "#555577", fontFamily: "'DM Mono', monospace", fontSize: 10 }}>
+                                    <Typography key={ri} variant="caption" sx={{ color: "oklch(0.45 0.03 260)", fontFamily: "'DM Mono', monospace", fontSize: 10 }}>
                                       · {r}
                                     </Typography>
                                   ))}
@@ -948,7 +948,7 @@ export default function BuscarLocal() {
                                 <Typography fontWeight={800} fontSize={15} color={p.precio_inmueble ? "text.primary" : "text.secondary"}>
                                   {p.precio_inmueble ? `$${p.precio_inmueble.toLocaleString("en-US")} MXN` : "—"}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: "#00f5a0", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
+                                <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
                                   View details →
                                 </Typography>
                               </Box>
@@ -961,7 +961,7 @@ export default function BuscarLocal() {
 
                   <Box mt={2} textAlign="center">
                     <a href="/propiedades" style={{ textDecoration: "none" }}>
-                      <Typography variant="caption" sx={{ color: "#00b4d8", fontFamily: "'DM Mono', monospace", fontSize: 12, "&:hover": { textDecoration: "underline" } }}>
+                      <Typography variant="caption" sx={{ color: "oklch(0.60 0.12 240)", fontFamily: "'DM Mono', monospace", fontSize: 12, "&:hover": { textDecoration: "underline" } }}>
                         View all available spaces →
                       </Typography>
                     </a>
@@ -977,7 +977,7 @@ export default function BuscarLocal() {
                     No registered spaces match your search yet.
                   </Typography>
                   <a href="/propiedades" style={{ textDecoration: "none" }}>
-                    <Typography variant="caption" sx={{ color: "#00f5a0", fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
+                    <Typography variant="caption" sx={{ color: "oklch(0.55 0.11 250)", fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
                       View all spaces →
                     </Typography>
                   </a>

@@ -26,7 +26,7 @@ export default async function EditarPropiedadPage({
   const property = data as PropertyData & { user_email: string };
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0a0a14' }}>
+    <main style={{ minHeight: '100vh', background: 'oklch(0.985 0.005 240)' }}>
       <NavHeader />
       <EditProperty property={property} />
     </main>

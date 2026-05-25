@@ -14,7 +14,7 @@ import {
 const MapPicker = dynamic(() => import("./MapPicker"), {
   ssr: false,
   loading: () => (
-    <Box sx={{ height: 280, borderRadius: "12px", bgcolor: "#0e0e22", border: "1px solid #2a2a4a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <Box sx={{ height: 280, borderRadius: "12px", bgcolor: "var(--surface-2)", border: "1px solid var(--surface-border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Typography variant="caption" color="text.secondary">Cargando mapa...</Typography>
     </Box>
   ),
@@ -22,12 +22,12 @@ const MapPicker = dynamic(() => import("./MapPicker"), {
 
 const darkTheme = createTheme({
   palette: {
-    mode: "dark",
-    primary: { main: "#00f5a0" },
-    secondary: { main: "#00b4d8" },
-    background: { default: "#0a0a14", paper: "#0e0e22" },
-    text: { primary: "#e0e0ff", secondary: "#8888aa" },
-    error: { main: "#ff6b6b" },
+    mode: "light",
+    primary: { main: "#0f1b3d" },
+    secondary: { main: "#3b6fa0" },
+    background: { default: "#f7f8fd", paper: "#ffffff" },
+    text: { primary: "#181e38", secondary: "#5a6288" },
+    error: { main: "#e53935" },
   },
   typography: {
     fontFamily: "'Syne', sans-serif",
@@ -42,49 +42,49 @@ const darkTheme = createTheme({
         root: {
           fontFamily: "'DM Mono', monospace",
           borderRadius: 8,
-          backgroundColor: "#12122a",
-          "& fieldset": { borderColor: "#2a2a4a" },
-          "&:hover fieldset": { borderColor: "#444466" },
-          "&.Mui-focused fieldset": { borderColor: "#00f5a0" },
+          backgroundColor: "#edf0f8",
+          "& fieldset": { borderColor: "#d5daea" },
+          "&:hover fieldset": { borderColor: "#a4b4d2" },
+          "&.Mui-focused fieldset": { borderColor: "#3b6fa0" },
         },
       },
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: { fontFamily: "'DM Mono', monospace", color: "#8888aa", fontSize: "14px" },
+        root: { fontFamily: "'DM Mono', monospace", color: "#5a6288", fontSize: "14px" },
       },
     },
     MuiButton: {
       styleOverrides: {
         root: { borderRadius: 10, padding: "12px 24px" },
         containedPrimary: {
-          background: "linear-gradient(135deg, #00f5a0, #00b4d8)",
-          color: "#0a0a14",
+          background: "linear-gradient(135deg, #0f1b3d, #3b6fa0)",
+          color: "#f7f8fd",
           "&:hover": { opacity: 0.9, transform: "scale(1.02)" },
           transition: "all 0.2s",
         },
         outlined: {
-          borderColor: "#2a2a4a",
-          color: "#e0e0ff",
-          "&:hover": { backgroundColor: "#1a1a2e", borderColor: "#444466" },
+          borderColor: "#d5daea",
+          color: "#181e38",
+          "&:hover": { backgroundColor: "#edf0f8", borderColor: "#a4b4d2" },
         },
       },
     },
     MuiStepIcon: {
       styleOverrides: {
         root: {
-          color: "#0e0e22",
-          border: "2px solid #2a2a4a",
+          color: "#d5daea",
+          border: "2px solid #cad2e4",
           borderRadius: "50%",
-          "&.Mui-active": { color: "#0e0e22", border: "2px solid #00f5a0" },
-          "&.Mui-completed": { color: "#00f5a0", border: "none" },
+          "&.Mui-active": { color: "#f7f8fd", border: "2px solid #3b6fa0", backgroundColor: "#0f1b3d" },
+          "&.Mui-completed": { color: "#3b6fa0", border: "none" },
         },
-        text: { fill: "#555577", fontFamily: "'Syne', sans-serif", fontWeight: 800 },
+        text: { fill: "#5a6288", fontFamily: "'Syne', sans-serif", fontWeight: 800 },
       },
     },
     MuiStepLabel: {
       styleOverrides: {
-        label: { fontFamily: "'DM Mono', monospace", color: "#666688", "&.Mui-active": { color: "#e0e0ff", fontWeight: 700 } },
+        label: { fontFamily: "'DM Mono', monospace", color: "#787ea0", "&.Mui-active": { color: "#181e38", fontWeight: 700 } },
       },
     },
   },
@@ -122,8 +122,8 @@ function NumberStepper({ label, value, onChange, min = 0, max = 99 }: {
   label: string; value: number; onChange: (v: number) => void; min?: number; max?: number;
 }) {
   const btnStyle: React.CSSProperties = {
-    width: 34, height: 34, border: "1px solid #2a2a4a",
-    borderRadius: 8, background: "#12122a", color: "#00f5a0",
+    width: 34, height: 34, border: "1px solid var(--surface-border)",
+    borderRadius: 8, background: "var(--surface-2)", color: "var(--brand)",
     fontSize: 20, lineHeight: 1, cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center",
     flexShrink: 0, transition: "all 0.15s", fontFamily: "'Syne', sans-serif",
@@ -131,10 +131,10 @@ function NumberStepper({ label, value, onChange, min = 0, max = 99 }: {
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <span style={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", fontSize: 13, letterSpacing: 1 }}>{label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#12122a", border: "1px solid #2a2a4a", borderRadius: 8, padding: "6px 12px", height: 50 }}>
+      <span style={{ fontFamily: "'DM Mono', monospace", color: "var(--muted)", fontSize: 13, letterSpacing: 1 }}>{label}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface-2)", border: "1px solid var(--surface-border)", borderRadius: 8, padding: "6px 12px", height: 50 }}>
         <button type="button" style={btnStyle} onClick={() => onChange(Math.max(min, value - 1))}>−</button>
-        <span style={{ flex: 1, textAlign: "center", fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 700, color: "#e0e0ff" }}>{value}</span>
+        <span style={{ flex: 1, textAlign: "center", fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 700, color: "var(--foreground)" }}>{value}</span>
         <button type="button" style={btnStyle} onClick={() => onChange(Math.min(max, value + 1))}>+</button>
       </div>
     </div>
@@ -332,7 +332,7 @@ export default function EditProperty({ property }: { property: PropertyData }) {
           </Box>
 
           <Card elevation={0} sx={{ border: "1px solid #1e1e3e", borderRadius: 4, pt: 4, pb: 5, px: { xs: 3, md: 5 } }}>
-            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 6, "& .MuiStepConnector-line": { borderColor: "#2a2a4a" } }}>
+            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 6, "& .MuiStepConnector-line": { borderColor: "oklch(0.9 0.015 250)" } }}>
               {steps.map((label) => (
                 <Step key={label}><StepLabel>{label}</StepLabel></Step>
               ))}
@@ -370,7 +370,7 @@ export default function EditProperty({ property }: { property: PropertyData }) {
                   </Grid>
 
                   <Box>
-                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13, display: "block", mb: 1 }}>
+                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "oklch(0.45 0.03 260)", letterSpacing: 1, fontSize: 13, display: "block", mb: 1 }}>
                       MAP LOCATION
                     </Typography>
                     <MapPicker
@@ -443,10 +443,10 @@ export default function EditProperty({ property }: { property: PropertyData }) {
                   {/* Fotos */}
                   <Box>
                     <Box display="flex" alignItems="center" gap={1} mb={1}>
-                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "#8888aa", letterSpacing: 1, fontSize: 13 }}>
+                      <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: "var(--muted)", letterSpacing: 1, fontSize: 13 }}>
                         PHOTOS
                       </Typography>
-                      <Typography component="span" variant="caption" sx={{ color: totalPhotos >= 1 ? "#00f5a0" : "#8888aa", fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
+                      <Typography component="span" variant="caption" sx={{ color: totalPhotos >= 1 ? "var(--brand)" : "var(--muted)", fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
                         {totalPhotos} / 5
                       </Typography>
                     </Box>
@@ -454,24 +454,24 @@ export default function EditProperty({ property }: { property: PropertyData }) {
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
                       {/* Fotos existentes */}
                       {keptPhotoUrls.map((url, i) => (
-                        <Box key={`kept-${i}`} sx={{ position: "relative", width: 90, height: 90, borderRadius: 2, overflow: "hidden", border: "1px solid #2a2a4a", flexShrink: 0 }}>
+                        <Box key={`kept-${i}`} sx={{ position: "relative", width: 90, height: 90, borderRadius: 2, overflow: "hidden", border: "1px solid var(--surface-border)", flexShrink: 0 }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={url} alt={`foto-${i}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          <IconButton size="small" onClick={() => removeKeptPhoto(i)} sx={{ position: "absolute", top: 2, right: 2, bgcolor: "rgba(10,10,20,0.75)", color: "#ff6b6b", width: 22, height: 22, fontSize: 14, "&:hover": { bgcolor: "rgba(10,10,20,0.95)" } }}>×</IconButton>
+                          <IconButton size="small" onClick={() => removeKeptPhoto(i)} sx={{ position: "absolute", top: 2, right: 2, bgcolor: "oklch(0.985 0.005 240 / 0.9)", color: "#e53935", width: 22, height: 22, fontSize: 14, "&:hover": { bgcolor: "oklch(0.985 0.005 240)" } }}>×</IconButton>
                         </Box>
                       ))}
                       {/* Fotos nuevas */}
                       {newPhotoPreviews.map((src, i) => (
-                        <Box key={`new-${i}`} sx={{ position: "relative", width: 90, height: 90, borderRadius: 2, overflow: "hidden", border: "1px solid #2a2a4a", flexShrink: 0 }}>
+                        <Box key={`new-${i}`} sx={{ position: "relative", width: 90, height: 90, borderRadius: 2, overflow: "hidden", border: "1px solid var(--surface-border)", flexShrink: 0 }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={src} alt={`nueva-${i}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, border: "2px solid #00f5a0", borderRadius: 2, pointerEvents: "none" }} />
-                          <IconButton size="small" onClick={() => removeNewPhoto(i)} sx={{ position: "absolute", top: 2, right: 2, bgcolor: "rgba(10,10,20,0.75)", color: "#ff6b6b", width: 22, height: 22, fontSize: 14, "&:hover": { bgcolor: "rgba(10,10,20,0.95)" } }}>×</IconButton>
+                          <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, border: "2px solid oklch(0.55 0.11 250)", borderRadius: 2, pointerEvents: "none" }} />
+                          <IconButton size="small" onClick={() => removeNewPhoto(i)} sx={{ position: "absolute", top: 2, right: 2, bgcolor: "oklch(0.985 0.005 240 / 0.9)", color: "#e53935", width: 22, height: 22, fontSize: 14, "&:hover": { bgcolor: "oklch(0.985 0.005 240)" } }}>×</IconButton>
                         </Box>
                       ))}
                       {/* Botón agregar */}
                       {totalPhotos < 5 && (
-                        <Box onClick={() => fileInputRef.current?.click()} sx={{ width: 90, height: 90, borderRadius: 2, border: "1px dashed #2a2a4a", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.5, color: "#555577", flexShrink: 0, "&:hover": { borderColor: "#00f5a0", color: "#00f5a0" }, transition: "all 0.15s" }}>
+                        <Box onClick={() => fileInputRef.current?.click()} sx={{ width: 90, height: 90, borderRadius: 2, border: "1px dashed var(--surface-border)", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.5, color: "var(--muted)", flexShrink: 0, "&:hover": { borderColor: "oklch(0.55 0.11 250)", color: "oklch(0.55 0.11 250)" }, transition: "all 0.15s" }}>
                           <Typography sx={{ fontSize: 24, lineHeight: 1 }}>+</Typography>
                           <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 10 }}>Add photo</Typography>
                         </Box>
