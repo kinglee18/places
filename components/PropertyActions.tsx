@@ -51,10 +51,10 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
         style={{
           width: "100%", marginBottom: 8,
           fontSize: 12, fontWeight: 700,
-          color: published ? "#9090b8" : "oklch(0.55 0.11 250)",
-          border: `1px solid ${published ? "rgba(144,144,184,0.25)" : "rgba(0,245,160,0.35)"}`,
+          color: published ? "#5a6288" : "oklch(0.38 0.10 250)",
+          border: `1px solid ${published ? "#d5daea" : "oklch(0.82 0.06 250)"}`,
           borderRadius: 8, padding: "6px 12px",
-          background: published ? "transparent" : "rgba(0,245,160,0.06)",
+          background: published ? "transparent" : "oklch(0.94 0.03 250)",
           cursor: toggling ? "not-allowed" : "pointer",
           fontFamily: "inherit", opacity: toggling ? 0.6 : 1,
           transition: "all 0.15s",
@@ -108,8 +108,8 @@ export default function PropertyActions({ id, isPublished }: { id: string; isPub
               onClick={() => setConfirming(false)}
               disabled={deleting}
               style={{
-                fontSize: 11, color: "#6b6b9a",
-                border: "1px solid #2a2a4a", borderRadius: 8,
+                fontSize: 11, color: "#9099b8",
+                border: "1px solid #d5daea", borderRadius: 8,
                 padding: "6px 10px", background: "transparent",
                 cursor: "pointer", fontFamily: "inherit",
               }}

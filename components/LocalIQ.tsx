@@ -210,6 +210,7 @@ export default function LocalIQ() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [mapFlyTo, setMapFlyTo] = useState<{ lat: number; lng: number } | null>(null);
   const [pinAddress, setPinAddress] = useState<{ colonia: string | null; city: string | null; state: string | null; country: string | null } | null>(null);
+  const [autoFilledColonia, setAutoFilledColonia] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const locationDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -225,15 +226,6 @@ export default function LocalIQ() {
       } catch { /* silently ignore */ }
       setLocationLoading(false);
     }, 300);
-  }, []);
-
-  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
-    try {
-      const res = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
-      if (!res.ok) return;
-      const addr = await res.json();
-      setPinAddress(addr);
-    } catch { /* non-blocking */ }
   }, []);
 
   const { control, handleSubmit, trigger, watch, setValue, formState: { errors } } = useForm<FormData>({
@@ -253,6 +245,22 @@ export default function LocalIQ() {
   });
 
   const watchModalidad = watch('modalidad');
+
+  // autoFillNeighborhood=true when called from a map-pin click/drag so that
+  // the colonia field is populated automatically. When called from the search
+  // autocomplete the user already chose their neighborhood, so we skip it.
+  const reverseGeocode = useCallback(async (lat: number, lng: number, autoFillNeighborhood = false) => {
+    try {
+      const res = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+      if (!res.ok) return;
+      const addr = await res.json();
+      setPinAddress(addr);
+      if (autoFillNeighborhood && addr.colonia) {
+        setValue('colonia', addr.colonia, { shouldValidate: true });
+        setAutoFilledColonia(true);
+      }
+    } catch { /* non-blocking */ }
+  }, [setValue]);
 
   const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -494,7 +502,12 @@ export default function LocalIQ() {
                           getOptionLabel={(o) => typeof o === 'string' ? o : o.label}
                           loading={locationLoading}
                           inputValue={field.value}
-                          onInputChange={(_, val) => { field.onChange(val); searchLocation(val); }}
+                          onInputChange={(_, val, reason) => {
+                            field.onChange(val);
+                            searchLocation(val);
+                            // If the user is typing manually (not a programmatic setValue), clear the auto-fill badge
+                            if (reason === 'input') setAutoFilledColonia(false);
+                          }}
                           onChange={(_, val) => {
                             field.onChange(typeof val === 'string' ? val : val?.label ?? '');
                             if (val && typeof val !== 'string' && val.lat && val.lng) {
@@ -516,6 +529,11 @@ export default function LocalIQ() {
                           )}
                         />
                         {errors.colonia && <FormHelperText>{errors.colonia.message}</FormHelperText>}
+                        {autoFilledColonia && !errors.colonia && (
+                          <FormHelperText sx={{ color: 'oklch(0.42 0.12 155)', mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            ✓ Auto-detected from pin — you can edit it
+                          </FormHelperText>
+                        )}
                       </FormControl>
                     )} />
                     <Grid container spacing={2}>
@@ -546,7 +564,7 @@ export default function LocalIQ() {
                       </Box>
                       <Box sx={{ borderRadius: '12px', outline: pinError ? '1.5px solid #ff6b6b' : 'none' }}>
                         <MapPicker
-                          onLocationSelect={(lat, lng) => { setPinLocation({ lat, lng }); setPinError(false); reverseGeocode(lat, lng); }}
+                          onLocationSelect={(lat, lng) => { setPinLocation({ lat, lng }); setPinError(false); reverseGeocode(lat, lng, true); }}
                           initialLat={pinLocation?.lat}
                           initialLng={pinLocation?.lng}
                           flyTo={mapFlyTo}

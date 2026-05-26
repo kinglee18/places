@@ -36,17 +36,20 @@ export default async function MisPropiedadesPage() {
   const items = (properties ?? []) as Property[];
 
   return (
-    <main style={{ minHeight: '100vh', background: '#06060f', color: '#f0f0f8', fontFamily: "'Inter', sans-serif" }}>
+    <main style={{ minHeight: '100vh', background: 'oklch(0.985 0.005 240)', color: '#181e38', fontFamily: "'Inter', sans-serif" }}>
       <NavHeader />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '48px 24px 80px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 36 }}>
-          <h1 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.55 0.11 250)', display: 'block', marginBottom: 8 }}>
+            My account
+          </span>
+          <h1 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 8, color: '#181e38' }}>
             My properties
           </h1>
-          <p style={{ color: 'oklch(0.45 0.03 260)', fontSize: 14 }}>
+          <p style={{ color: '#5a6288', fontSize: 14 }}>
             {items.length} registered propert{items.length !== 1 ? 'ies' : 'y'}
           </p>
         </div>
@@ -55,19 +58,20 @@ export default async function MisPropiedadesPage() {
           /* Empty state */
           <div style={{
             textAlign: 'center', padding: '80px 24px',
-            border: '1px dashed #1e1e35', borderRadius: 20,
-            background: '#0a0a18',
+            border: '1px dashed #c8d0e8', borderRadius: 20,
+            background: '#f5f6fc',
           }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🏬</div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>No properties yet</h2>
-            <p style={{ color: 'oklch(0.45 0.03 260)', marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10, color: '#181e38' }}>No properties yet</h2>
+            <p style={{ color: '#5a6288', marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
               Register your first commercial space and start analyzing your market.
             </p>
             <Link href="/registro" style={{
-              background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-              color: '#06060f', padding: '13px 28px', borderRadius: 12,
+              background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+              color: '#ffffff', padding: '13px 28px', borderRadius: 12,
               fontWeight: 700, fontSize: 14, textDecoration: 'none',
-              boxShadow: '0 6px 24px rgba(0,245,160,0.25)',
+              boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
+              display: 'inline-block',
             }}>
               + Register property
             </Link>
@@ -78,12 +82,13 @@ export default async function MisPropiedadesPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
               {items.map(p => (
                 <div key={p.id} style={{
-                  background: '#0d0d1a', border: '1px solid #1e1e35',
+                  background: '#ffffff', border: '1px solid #e4e7f4',
                   borderRadius: 16, overflow: 'hidden',
-                  transition: 'border-color 0.2s, transform 0.2s',
+                  boxShadow: '0 2px 8px rgba(15,27,61,0.04)',
+                  transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
                 }}>
                   {/* Photo */}
-                  <div style={{ height: 160, background: 'oklch(0.96 0.01 250)', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ height: 160, background: '#edf0f8', position: 'relative', overflow: 'hidden' }}>
                     {p.photo_urls?.[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -92,7 +97,7 @@ export default async function MisPropiedadesPage() {
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, opacity: 0.3 }}>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, opacity: 0.25 }}>
                         🏬
                       </div>
                     )}
@@ -101,9 +106,9 @@ export default async function MisPropiedadesPage() {
                       const expired = p.expires_at ? new Date(p.expires_at).getTime() <= Date.now() : false;
                       const status = !p.is_published ? 'pending' : expired ? 'expired' : 'active';
                       const styleMap = {
-                        active:  { bg: 'rgba(0,245,160,0.15)', bd: 'rgba(0,245,160,0.4)', fg: '#00f5a0', label: 'Active' },
-                        expired: { bg: 'rgba(255,107,107,0.15)', bd: 'rgba(255,107,107,0.4)', fg: '#ff6b6b', label: 'Expired' },
-                        pending: { bg: 'rgba(107,107,154,0.2)', bd: 'rgba(107,107,154,0.3)', fg: '#9090b8', label: 'Pending payment' },
+                        active:  { bg: 'oklch(0.96 0.06 155)', bd: 'oklch(0.82 0.1 155)',  fg: 'oklch(0.40 0.14 155)', label: 'Active' },
+                        expired: { bg: 'oklch(0.97 0.04 25)',  bd: 'oklch(0.84 0.1 25)',   fg: 'oklch(0.50 0.18 25)',  label: 'Expired' },
+                        pending: { bg: 'oklch(0.96 0.02 250)', bd: 'oklch(0.84 0.05 250)', fg: 'oklch(0.48 0.08 250)', label: 'Pending payment' },
                       }[status];
                       return (
                         <span style={{
@@ -124,22 +129,22 @@ export default async function MisPropiedadesPage() {
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.55 0.11 250)', marginBottom: 4, textTransform: 'uppercase' }}>
                       {p.colonia}
                     </div>
-                    <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: '#f0f0f8' }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: '#181e38' }}>
                       {p.tipo_local}
                     </div>
-                    <div style={{ fontSize: 12, color: 'oklch(0.45 0.03 260)', marginBottom: 14 }}>
+                    <div style={{ fontSize: 12, color: '#5a6288', marginBottom: 14 }}>
                       {p.m2} m²{p.modalidad ? ` · ${p.modalidad === 'rent' ? 'Rent' : 'Sale'}` : ''}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: '#f0f0f8' }}>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: '#181e38' }}>
                         {formatPrice(p.precio_inmueble)}
                       </span>
                       <Link href={`/propiedades/${p.id}`} style={{
-                        fontSize: 12, fontWeight: 700, color: '#9090b8',
-                        border: '1px solid rgba(144,144,184,0.25)', borderRadius: 8,
+                        fontSize: 12, fontWeight: 700, color: '#3b6fa0',
+                        border: '1px solid rgba(59,111,160,0.3)', borderRadius: 8,
                         padding: '5px 12px', textDecoration: 'none',
                       }}>
-                        Ver →
+                        View →
                       </Link>
                     </div>
                     <PropertyActions id={p.id} isPublished={p.is_published} />
@@ -151,10 +156,11 @@ export default async function MisPropiedadesPage() {
             {/* CTA */}
             <div style={{ textAlign: 'center' }}>
               <Link href="/registro" style={{
-                background: 'linear-gradient(135deg, #00f5a0, #00b4d8)',
-                color: '#06060f', padding: '13px 28px', borderRadius: 12,
+                background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+                color: '#ffffff', padding: '13px 28px', borderRadius: 12,
                 fontWeight: 700, fontSize: 14, textDecoration: 'none',
-                boxShadow: '0 6px 24px rgba(0,245,160,0.25)',
+                boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
+                display: 'inline-block',
               }}>
                 + Register another property
               </Link>
