@@ -17,6 +17,7 @@ const EDITABLE_FIELDS = [
   'habitaciones', 'banos', 'estacionamientos', 'modalidad', 'precio_inmueble',
   'precio_mantenimiento', 'descripcion', 'photo_urls', 'is_published', 'competition_data',
   'altura_techo_m', 'fecha_disponible', 'tipo_contrato',
+  'usos_permitidos', 'usos_no_preferidos',
 ];
 
 async function verifyOwnership(id: string, email: string) {

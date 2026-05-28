@@ -118,6 +118,9 @@ interface FormData {
   tipoTerreno: string; estadoConservacion: string;
   calidadConstruccion: string; tipoEnergia: string; usoSuelo: string;
   servicios: string[];
+  // Business preferences
+  usosPermitidos: string[];
+  usosNoPreferidos: string[];
 }
 
 const NIVELES_PISO = [
@@ -146,6 +149,25 @@ const CALIDADES_CONSTRUCCION = ['High', 'Medium', 'Low'];
 const TIPOS_ENERGIA = ['Single-phase', 'Three-phase', 'Not specified'];
 const USOS_SUELO = ['Commercial', 'Industrial', 'Mixed-use', 'Residential with commercial', 'Not specified'];
 const SERVICIOS_OPCIONES = ['Electricity', 'Exterior lighting', 'Reception', 'Good access'];
+
+const BUSINESS_TYPES = [
+  'Restaurant / food service',
+  'Café / coffee shop',
+  'Bar / nightlife',
+  'Retail / boutique',
+  'Pharmacy / drugstore',
+  'Barbershop / hair salon',
+  'Gym / fitness center',
+  'Office / coworking',
+  'Medical / clinic',
+  'Education / tutoring',
+  'Convenience store',
+  'Laundry / dry cleaning',
+  'Beauty / spa',
+  'Bakery / pastry shop',
+  'Electronics / tech',
+  'Tattoo / piercing',
+];
 
 interface PinLocation { lat: number; lng: number; }
 
@@ -240,6 +262,7 @@ export default function LocalIQ() {
       m2Construccion: '', frenteM: '', fondoM: '', alturaTechoM: '',
       tipoTerreno: '', estadoConservacion: '', calidadConstruccion: '',
       tipoEnergia: '', usoSuelo: '', servicios: [],
+      usosPermitidos: [], usosNoPreferidos: [],
     },
     mode: 'onTouched'
   });
@@ -371,6 +394,8 @@ export default function LocalIQ() {
       servicios: data.servicios ?? [],
       tipo_contrato: data.tipoContrato || null,
       fecha_disponible: data.fechaDisponible || null,
+      usos_permitidos: data.usosPermitidos ?? [],
+      usos_no_preferidos: data.usosNoPreferidos ?? [],
     };
 
     let created: { id: string; requiresPayment: boolean };
@@ -901,20 +926,44 @@ export default function LocalIQ() {
 
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
-                        <Controller name="precioInmueble" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>
-                              {watchModalidad === 'rent' ? 'MONTHLY RENT (MXN)' : watchModalidad === 'sale' ? 'SALE PRICE (MXN)' : 'PRICE (MXN)'}
-                              {' '}<Typography component="span" variant="caption" color="text.secondary">(optional)</Typography>
-                            </InputLabel>
-                            <TextField
-                              {...field}
-                              type="number"
-                              placeholder={watchModalidad === 'rent' ? 'Ex: 15000' : 'Ex: 2500000'}
-                              InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" mr={0.5}>$</Typography> }}
-                            />
-                          </FormControl>
-                        )} />
+                        <Controller
+                          name="precioInmueble"
+                          control={control}
+                          rules={{
+                            validate: (value) => {
+                              if (watchModalidad === 'rent' || watchModalidad === 'sale') {
+                                if (!value || value === '') {
+                                  return watchModalidad === 'rent'
+                                    ? 'Monthly rent is required'
+                                    : 'Sale price is required';
+                                }
+                                if (Number(value) <= 0) return 'Price must be greater than 0';
+                              }
+                              return true;
+                            },
+                          }}
+                          render={({ field }) => (
+                            <FormControl fullWidth error={!!errors.precioInmueble}>
+                              <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>
+                                {watchModalidad === 'rent' ? 'MONTHLY RENT (MXN)' : watchModalidad === 'sale' ? 'SALE PRICE (MXN)' : 'PRICE (MXN)'}
+                                {watchModalidad === 'rent' || watchModalidad === 'sale'
+                                  ? <Typography component="span" variant="caption" color="error" ml={0.5}>*</Typography>
+                                  : <Typography component="span" variant="caption" color="text.secondary"> (optional)</Typography>
+                                }
+                              </InputLabel>
+                              <TextField
+                                {...field}
+                                type="number"
+                                error={!!errors.precioInmueble}
+                                placeholder={watchModalidad === 'rent' ? 'Ex: 15000' : 'Ex: 2500000'}
+                                InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" mr={0.5}>$</Typography> }}
+                              />
+                              {errors.precioInmueble && (
+                                <FormHelperText>{errors.precioInmueble.message}</FormHelperText>
+                              )}
+                            </FormControl>
+                          )}
+                        />
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Controller name="precioMantenimiento" control={control} render={({ field }) => (
@@ -930,6 +979,121 @@ export default function LocalIQ() {
                         )} />
                       </Grid>
                     </Grid>
+
+                    {/* ── Business Preferences ── */}
+                    <Controller
+                      name="usosPermitidos"
+                      control={control}
+                      render={({ field: fAllowed }) => (
+                        <Controller
+                          name="usosNoPreferidos"
+                          control={control}
+                          render={({ field: fDisallowed }) => (
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)', fontSize: 13, letterSpacing: 1, mb: 1.5 }}
+                              >
+                                BUSINESS PREFERENCES <Typography component="span" variant="caption" color="text.secondary">(optional)</Typography>
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, lineHeight: 1.5 }}>
+                                Mark each business type as ✓ ideal, ✗ not preferred, or leave blank.
+                              </Typography>
+                              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 1 }}>
+                                {BUSINESS_TYPES.map((tipo) => {
+                                  const isAllowed = fAllowed.value.includes(tipo);
+                                  const isDisallowed = fDisallowed.value.includes(tipo);
+                                  const toggle = (list: 'allowed' | 'disallowed') => {
+                                    if (list === 'allowed') {
+                                      const next = isAllowed
+                                        ? fAllowed.value.filter((v: string) => v !== tipo)
+                                        : [...fAllowed.value, tipo];
+                                      fAllowed.onChange(next);
+                                      if (!isAllowed) fDisallowed.onChange(fDisallowed.value.filter((v: string) => v !== tipo));
+                                    } else {
+                                      const next = isDisallowed
+                                        ? fDisallowed.value.filter((v: string) => v !== tipo)
+                                        : [...fDisallowed.value, tipo];
+                                      fDisallowed.onChange(next);
+                                      if (!isDisallowed) fAllowed.onChange(fAllowed.value.filter((v: string) => v !== tipo));
+                                    }
+                                  };
+                                  return (
+                                    <Box
+                                      key={tipo}
+                                      sx={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        border: '1px solid',
+                                        borderColor: isAllowed ? 'oklch(0.78 0.14 155)' : isDisallowed ? 'oklch(0.78 0.14 25)' : 'var(--surface-border)',
+                                        borderRadius: 2, px: 1.5, py: 1,
+                                        background: isAllowed ? 'oklch(0.18 0.04 155 / 0.35)' : isDisallowed ? 'oklch(0.18 0.04 25 / 0.35)' : 'var(--surface-2)',
+                                        transition: 'all 0.15s',
+                                      }}
+                                    >
+                                      <Typography variant="caption" sx={{ fontSize: 12, color: isAllowed ? 'oklch(0.78 0.14 155)' : isDisallowed ? 'oklch(0.72 0.18 25)' : 'var(--text-secondary)', flex: 1 }}>
+                                        {tipo}
+                                      </Typography>
+                                      <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
+                                        <Box
+                                          component="button"
+                                          type="button"
+                                          onClick={() => toggle('allowed')}
+                                          sx={{
+                                            width: 26, height: 26, borderRadius: 1,
+                                            border: '1px solid',
+                                            borderColor: isAllowed ? 'oklch(0.78 0.14 155)' : 'var(--surface-border)',
+                                            background: isAllowed ? 'oklch(0.78 0.14 155)' : 'transparent',
+                                            color: isAllowed ? '#fff' : 'var(--muted)',
+                                            fontSize: 13, cursor: 'pointer', display: 'flex',
+                                            alignItems: 'center', justifyContent: 'center',
+                                            transition: 'all 0.12s', fontWeight: 700,
+                                          }}
+                                          title="Ideal for this use"
+                                        >
+                                          ✓
+                                        </Box>
+                                        <Box
+                                          component="button"
+                                          type="button"
+                                          onClick={() => toggle('disallowed')}
+                                          sx={{
+                                            width: 26, height: 26, borderRadius: 1,
+                                            border: '1px solid',
+                                            borderColor: isDisallowed ? 'oklch(0.72 0.18 25)' : 'var(--surface-border)',
+                                            background: isDisallowed ? 'oklch(0.72 0.18 25)' : 'transparent',
+                                            color: isDisallowed ? '#fff' : 'var(--muted)',
+                                            fontSize: 13, cursor: 'pointer', display: 'flex',
+                                            alignItems: 'center', justifyContent: 'center',
+                                            transition: 'all 0.12s', fontWeight: 700,
+                                          }}
+                                          title="Not preferred"
+                                        >
+                                          ✕
+                                        </Box>
+                                      </Box>
+                                    </Box>
+                                  );
+                                })}
+                              </Box>
+                              {(fAllowed.value.length > 0 || fDisallowed.value.length > 0) && (
+                                <Box sx={{ mt: 1.5, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                  {fAllowed.value.length > 0 && (
+                                    <Typography variant="caption" sx={{ color: 'oklch(0.78 0.14 155)', fontSize: 11 }}>
+                                      ✓ Ideal: {fAllowed.value.join(', ')}
+                                    </Typography>
+                                  )}
+                                  {fDisallowed.value.length > 0 && (
+                                    <Typography variant="caption" sx={{ color: 'oklch(0.72 0.18 25)', fontSize: 11 }}>
+                                      ✕ Not preferred: {fDisallowed.value.join(', ')}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              )}
+                            </Box>
+                          )}
+                        />
+                      )}
+                    />
 
                   </Box>
 

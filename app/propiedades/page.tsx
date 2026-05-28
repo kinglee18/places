@@ -124,7 +124,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   };
 
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
-  const items = (properties ?? []) as Property[];
+  const items = (properties ?? []) as unknown as Property[];
 
   const mapPins = items
     .filter(p => p.lat != null && p.lng != null)

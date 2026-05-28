@@ -25,8 +25,6 @@ const TYPE_TO_CATEGORY: Record<string, string> = {
   dentist: 'Medical / Clinic',
   doctor: 'Medical / Clinic',
   hospital: 'Medical / Clinic',
-  bank: 'Bank / Finance',
-  atm: 'Bank / Finance',
 };
 
 const INCLUDED_TYPES = Object.keys(TYPE_TO_CATEGORY);
@@ -112,22 +110,24 @@ const ZONE_SUGGESTIONS: Record<ZoneType, Array<{ category: string; reason: strin
   ],
 };
 
-// Which business categories make sense for each property type
+// Which business categories make sense for each property type.
+// "Bank / Finance" is intentionally excluded — it requires special licensing
+// and is not a viable opportunity for typical small/medium entrepreneurs.
 const TIPO_COMPATIBILITY: Record<string, string[]> = {
   'Street-facing (with storefront)': [
     'Restaurant', 'Café', 'Café / Bakery', 'Bar', 'Pharmacy',
-    'Beauty / Salon', 'Clothing / Retail', 'Retail', 'Convenience / Grocery', 'Bank / Finance',
+    'Beauty / Salon', 'Clothing / Retail', 'Retail', 'Convenience / Grocery', 'Laundry',
   ],
   'Inside commercial plaza': [
     'Restaurant', 'Café', 'Café / Bakery', 'Pharmacy', 'Beauty / Salon',
-    'Clothing / Retail', 'Retail', 'Gym / Wellness', 'Medical / Clinic', 'Bank / Finance',
+    'Clothing / Retail', 'Retail', 'Gym / Wellness', 'Medical / Clinic',
   ],
   'Corner unit': [
     'Restaurant', 'Café', 'Bar', 'Pharmacy', 'Convenience / Grocery',
-    'Clothing / Retail', 'Retail', 'Bank / Finance',
+    'Clothing / Retail', 'Retail',
   ],
   'Basement / Semi-basement': [
-    'Gym / Wellness', 'Laundry', 'Medical / Clinic', 'Bank / Finance', 'Retail',
+    'Gym / Wellness', 'Laundry', 'Medical / Clinic', 'Retail',
   ],
   'Market stall': [
     'Convenience / Grocery', 'Café / Bakery', 'Retail', 'Restaurant',
@@ -193,6 +193,55 @@ function metersAway(lat1: number, lng1: number, lat2: number, lng2: number): num
   const Δλ = ((lng2 - lng1) * Math.PI) / 180;
   const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// ── Food subcategory detection ────────────────────────────────────────────────
+// Maps cuisine label → keywords to detect in business names (lowercase).
+// Used to find gaps: cuisines present in the wider area (demand proven) but
+// absent within 500m (opportunity).
+const CUISINE_KEYWORDS: Record<string, string[]> = {
+  'Chinese':             ['china', 'chinese', 'chino', 'chifa', 'wok', 'dim sum', 'szechuan', 'cantonese'],
+  'Japanese / Sushi':    ['japan', 'japanese', 'sushi', 'ramen', 'udon', 'teppan', 'yakitori', 'nikkei', 'tempura'],
+  'Italian / Pizza':     ['pizza', 'italian', 'pasta', 'pizzeria', 'trattoria', 'osteria', 'lasagna'],
+  'Seafood':             ['mariscos', 'marisco', 'seafood', 'ceviche', 'ostiones', 'camarones', 'pescado', 'fish'],
+  'Vegan / Vegetarian':  ['vegan', 'vegano', 'vegetarian', 'vegetariano', 'plant based', 'organic'],
+  'Korean BBQ':          ['korean', 'koreano', 'korea', 'bbq', 'kimchi', 'grill'],
+  'Thai':                ['thai', 'thailand', 'tailandes', 'tailandesa'],
+  'Indian':              ['india', 'indian', 'curry', 'tandoor', 'masala', 'biryani'],
+  'Burgers':             ['burger', 'smash', 'hamburger', 'hamburgesa', 'burguer'],
+  'Breakfast / Brunch':  ['breakfast', 'brunch', 'desayuno', 'chilaquiles', 'pancake', 'waffle', 'huevos'],
+  'Ice cream / Desserts':['helado', 'ice cream', 'gelato', 'nieves', 'postre', 'dessert', 'nieve'],
+  'Tacos / Street food': ['taco', 'tacos', 'taqueria', 'birria', 'barbacoa', 'carnitas', 'quesadilla', 'torta'],
+  'Coffee / Specialty':  ['specialty coffee', 'third wave', 'artisan coffee', 'cold brew', 'espresso bar'],
+  'Bakery / Pastry':     ['bakery', 'panaderia', 'pasteleria', 'reposteria', 'boulangerie'],
+};
+
+const FOOD_TYPES = new Set([
+  'restaurant', 'fast_food_restaurant', 'meal_takeaway', 'meal_delivery', 'cafe', 'coffee_shop', 'bakery',
+]);
+
+function detectFoodSubcategories(
+  r500: PlacesV2Result[],
+  r5000: PlacesV2Result[],
+): { present_500m: string[]; present_5km: string[]; gaps: string[] } {
+  const detect = (places: PlacesV2Result[]): string[] => {
+    const found = new Set<string>();
+    for (const p of places) {
+      const name = (p.displayName?.text ?? '').toLowerCase();
+      const isFood = (p.types ?? []).some(t => FOOD_TYPES.has(t));
+      if (!isFood) continue;
+      for (const [cuisine, keywords] of Object.entries(CUISINE_KEYWORDS)) {
+        if (keywords.some(k => name.includes(k))) found.add(cuisine);
+      }
+    }
+    return [...found];
+  };
+
+  const present_500m = detect(r500);
+  const present_5km  = detect(r5000);
+  const gaps = present_5km.filter(c => !present_500m.includes(c));
+
+  return { present_500m, present_5km, gaps };
 }
 
 // Places people specifically travel to visit — the gateway for tourist zone classification.
@@ -361,6 +410,7 @@ export async function POST(req: NextRequest) {
 
   const { opportunities, saturated } = analyzeOpportunities(within_500m, within_2km, tipoLocal ?? null);
   const tourist_context = detectTouristContext(rTourist);
+  const food_subcategories = detectFoodSubcategories(r500, r5000);
 
   const nearby_transit = rTransit.slice(0, 5).map(p => {
     const typeKey = (p.types ?? []).find(t => TRANSIT_ICON[t]) ?? 'transit_station';
@@ -375,7 +425,7 @@ export async function POST(req: NextRequest) {
     };
   }).sort((a, b) => (a.distance_m ?? Infinity) - (b.distance_m ?? Infinity));
 
-  const result = { within_500m, within_2km, top_nearby, opportunities, saturated, tourist_context, nearby_transit };
+  const result = { within_500m, within_2km, top_nearby, opportunities, saturated, tourist_context, nearby_transit, food_subcategories };
 
   return NextResponse.json(result);
 }

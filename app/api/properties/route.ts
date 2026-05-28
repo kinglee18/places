@@ -15,6 +15,7 @@ const INSERTABLE_FIELDS = [
   'frente_m', 'fondo_m', 'altura_techo_m', 'tipo_terreno', 'estado_conservacion',
   'calidad_construccion', 'tipo_energia', 'uso_suelo', 'servicios',
   'tipo_contrato', 'fecha_disponible',
+  'usos_permitidos', 'usos_no_preferidos',
 ];
 
 const FREE_DAYS = 30;

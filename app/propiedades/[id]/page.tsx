@@ -55,6 +55,11 @@ interface CompetitionData {
     icon: string;
     distance_m: number | null;
   }>;
+  food_subcategories?: {
+    present_500m: string[];
+    present_5km: string[];
+    gaps: string[];
+  };
 }
 
 interface Property {
@@ -97,6 +102,8 @@ interface Property {
   tipo_energia: string | null;
   uso_suelo: string | null;
   servicios: string[] | null;
+  usos_permitidos: string[] | null;
+  usos_no_preferidos: string[] | null;
 }
 
 function formatPrice(val: number | null): string {
@@ -154,6 +161,37 @@ export default function PropertyDetailPage() {
   const [rentalError, setRentalError] = useState<string | null>(null);
 
   const [extending, setExtending] = useState(false);
+
+  // ── Inquiries ──────────────────────────────────────────────────────────────
+  type Inquiry = {
+    id: string;
+    sender_name: string | null;
+    sender_email: string | null;
+    questions: string[];
+    message: string | null;
+    is_read: boolean;
+    created_at: string;
+  };
+
+  const PRESET_QUESTIONS = [
+    '¿Sigue disponible?',
+    '¿Cuáles son los requisitos?',
+    '¿Tiene estacionamiento?',
+    '¿Cuál es el tiempo mínimo de contrato?',
+    '¿Permite remodelaciones?',
+    '¿Los servicios están incluidos?',
+  ];
+
+  const [inqSelected, setInqSelected]   = useState<string[]>([]);
+  const [inqMessage, setInqMessage]     = useState('');
+  const [inqName, setInqName]           = useState('');
+  const [inqEmail, setInqEmail]         = useState('');
+  const [inqSending, setInqSending]     = useState(false);
+  const [inqSent, setInqSent]           = useState(false);
+  const [inqError, setInqError]         = useState<string | null>(null);
+  const [inquiries, setInquiries]       = useState<Inquiry[]>([]);
+  const [loadingInq, setLoadingInq]     = useState(false);
+  const [inboxOpen, setInboxOpen]       = useState(false);
 
   const handleExtend = async () => {
     if (!id) return;
@@ -246,6 +284,50 @@ export default function PropertyDetailPage() {
       setZoneError(e instanceof Error ? e.message : 'Unknown error');
     }
     setRunningZone(false);
+  };
+
+  const handleSendInquiry = async () => {
+    if (inqSelected.length === 0 && !inqMessage.trim()) return;
+    setInqSending(true);
+    setInqError(null);
+    try {
+      const res = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyId: id,
+          senderName: inqName.trim() || null,
+          senderEmail: inqEmail.trim() || null,
+          questions: inqSelected,
+          message: inqMessage.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error((j as { error?: string }).error ?? 'Could not send message');
+      }
+      setInqSent(true);
+    } catch (e) {
+      setInqError(e instanceof Error ? e.message : 'Unknown error');
+    }
+    setInqSending(false);
+  };
+
+  const fetchInquiries = async () => {
+    if (!id) return;
+    setLoadingInq(true);
+    const res = await fetch(`/api/inquiries?propertyId=${id}`);
+    if (res.ok) setInquiries(await res.json());
+    setLoadingInq(false);
+  };
+
+  const markRead = async (inquiryId: string) => {
+    await fetch('/api/inquiries', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inquiryId, propertyId: id }),
+    });
+    setInquiries(prev => prev.map(q => q.id === inquiryId ? { ...q, is_read: true } : q));
   };
 
   useEffect(() => {
@@ -511,6 +593,51 @@ export default function PropertyDetailPage() {
               </div>
             )}
 
+            {/* Business preferences */}
+            {((p.usos_permitidos && p.usos_permitidos.length > 0) || (p.usos_no_preferidos && p.usos_no_preferidos.length > 0)) && (
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, marginBottom: 14, textTransform: 'uppercase' }}>
+                  Owner preferences
+                </p>
+                {p.usos_permitidos && p.usos_permitidos.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: 'oklch(0.42 0.14 155)', marginBottom: 7, letterSpacing: '0.06em' }}>
+                      ✓ Ideal uses
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {p.usos_permitidos.map(u => (
+                        <span key={u} style={{
+                          fontSize: 11, padding: '4px 10px', borderRadius: 7,
+                          background: 'oklch(0.97 0.05 155)', border: '1px solid oklch(0.86 0.1 155)',
+                          color: 'oklch(0.40 0.14 155)', fontWeight: 600,
+                        }}>
+                          {u}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {p.usos_no_preferidos && p.usos_no_preferidos.length > 0 && (
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: 'oklch(0.50 0.18 25)', marginBottom: 7, letterSpacing: '0.06em' }}>
+                      ✕ Not preferred
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {p.usos_no_preferidos.map(u => (
+                        <span key={u} style={{
+                          fontSize: 11, padding: '4px 10px', borderRadius: 7,
+                          background: 'oklch(0.97 0.04 25)', border: '1px solid oklch(0.88 0.1 25)',
+                          color: 'oklch(0.50 0.18 25)', fontWeight: 600,
+                        }}>
+                          {u}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Embedded map */}
             {p.lat && p.lng && (
               <div style={{ marginTop: 20 }}>
@@ -642,6 +769,30 @@ export default function PropertyDetailPage() {
                             </span>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Food subcategory gaps */}
+                {competition.food_subcategories?.gaps && competition.food_subcategories.gaps.length > 0 && (
+                  <div style={{ marginBottom: 20 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.42 0.14 155)', marginBottom: 6, textTransform: 'uppercase' }}>
+                      🍽️ Food gaps — demand nearby, absent here
+                    </p>
+                    <p style={{ fontSize: 12, color: MUTED, marginBottom: 10, lineHeight: 1.5 }}>
+                      These cuisine types exist within 2–5km (demand proven) but have no presence within 500m:
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                      {competition.food_subcategories.gaps.map((gap) => (
+                        <span key={gap} style={{
+                          fontSize: 12, fontWeight: 600,
+                          padding: '5px 12px', borderRadius: 8,
+                          background: 'oklch(0.97 0.05 155)', border: '1px solid oklch(0.86 0.1 155)',
+                          color: 'oklch(0.40 0.14 155)',
+                        }}>
+                          {gap}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -793,87 +944,224 @@ export default function PropertyDetailPage() {
                     <p style={{ fontSize: 12, color: 'oklch(0.52 0.14 70)', lineHeight: 1.5 }}>⚠ {analysis.advertencia}</p>
                   </div>
                 )}
-
-                <button onClick={() => setAnalysis(null)} style={{ alignSelf: 'flex-start', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 8, padding: '6px 14px', fontSize: 12, color: MUTED, cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.15s' }}>
-                  Regenerate analysis
-                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* ── Rental Potential ── */}
-        {session?.user && (
+        {/* ── Inquiry form (non-owners) ── */}
+        {!isOwner && (
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>Rental Potential</p>
-                <p style={{ fontSize: 13, color: MUTED }}>AI-estimated monthly rent range for this property</p>
-              </div>
-              {!rental && (
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>
+              Contact the owner
+            </p>
+            <p style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>
+              Select one or more questions, or write your own.
+            </p>
+
+            {inqSent ? (
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+                <p style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: 6 }}>Message sent!</p>
+                <p style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>The owner will contact you shortly.</p>
                 <button
-                  onClick={handleRentalPotential}
-                  disabled={loadingRental}
+                  onClick={() => { setInqSent(false); setInqSelected([]); setInqMessage(''); setInqName(''); setInqEmail(''); }}
+                  style={{ fontSize: 12, color: MUTED, background: 'none', border: `1px solid ${BORDER}`, borderRadius: 8, padding: '6px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}
+                >
+                  Send another question
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Preset question chips */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                  {PRESET_QUESTIONS.map((q) => {
+                    const active = inqSelected.includes(q);
+                    return (
+                      <button
+                        key={q}
+                        onClick={() => setInqSelected(prev => active ? prev.filter(x => x !== q) : [...prev, q])}
+                        style={{
+                          fontSize: 13, padding: '7px 14px', borderRadius: 100,
+                          border: `1px solid ${active ? ACCENT : BORDER}`,
+                          background: active ? 'rgba(59,111,160,0.08)' : CARD,
+                          color: active ? ACCENT : TEXT,
+                          cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                          fontWeight: active ? 700 : 400,
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {active ? '✓ ' : ''}{q}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Free text */}
+                <textarea
+                  value={inqMessage}
+                  onChange={e => setInqMessage(e.target.value)}
+                  placeholder="Write your question here..."
+                  rows={3}
                   style={{
-                    background: loadingRental ? '#f0f2fa' : 'linear-gradient(135deg, #3b6fa0, #6b5ce7)',
-                    color: loadingRental ? ACCENT : '#ffffff',
-                    border: loadingRental ? `1px solid ${BORDER}` : 'none',
-                    padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
-                    cursor: loadingRental ? 'default' : 'pointer',
-                    fontFamily: "'Inter', sans-serif",
-                    transition: 'opacity 0.2s',
-                    display: 'flex', alignItems: 'center', gap: 8,
+                    width: '100%', resize: 'vertical', padding: '12px 14px',
+                    border: `1px solid ${BORDER}`, borderRadius: 10,
+                    fontSize: 14, color: TEXT, background: CARD2,
+                    fontFamily: "'Inter', sans-serif", outline: 'none',
+                    boxSizing: 'border-box', marginBottom: 14,
+                  }}
+                />
+
+                {/* Sender info — only shown to guests */}
+                {!session?.user && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                    <input
+                      type="text"
+                      value={inqName}
+                      onChange={e => setInqName(e.target.value)}
+                      placeholder="Your name (optional)"
+                      style={{ padding: '10px 14px', border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: 13, color: TEXT, background: CARD2, fontFamily: "'Inter', sans-serif", outline: 'none' }}
+                    />
+                    <input
+                      type="email"
+                      value={inqEmail}
+                      onChange={e => setInqEmail(e.target.value)}
+                      placeholder="Your email (optional)"
+                      style={{ padding: '10px 14px', border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: 13, color: TEXT, background: CARD2, fontFamily: "'Inter', sans-serif", outline: 'none' }}
+                    />
+                  </div>
+                )}
+
+                {inqError && (
+                  <p style={{ fontSize: 12, color: '#dc2626', marginBottom: 10, fontFamily: "'DM Mono', monospace" }}>{inqError}</p>
+                )}
+
+                <button
+                  onClick={handleSendInquiry}
+                  disabled={inqSending || (inqSelected.length === 0 && !inqMessage.trim())}
+                  style={{
+                    background: (inqSelected.length === 0 && !inqMessage.trim()) || inqSending
+                      ? '#f0f2fa' : 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+                    color: (inqSelected.length === 0 && !inqMessage.trim()) || inqSending ? SUBTLE : '#ffffff',
+                    border: 'none', borderRadius: 10, padding: '11px 24px',
+                    fontSize: 14, fontWeight: 700, cursor: inqSending ? 'wait' : 'pointer',
+                    fontFamily: "'Inter', sans-serif", transition: 'all 0.2s',
                   }}
                 >
-                  {loadingRental ? (
-                    <>
-                      <span style={{ display: 'inline-block', width: 12, height: 12, border: `2px solid ${ACCENT}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                      Estimating...
-                    </>
-                  ) : '💰 Estimate Rental Potential'}
+                  {inqSending ? 'Sending…' : 'Send message →'}
                 </button>
-              )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── Owner inbox ── */}
+        {isOwner && (
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>
+                  Received inquiries
+                </p>
+                <p style={{ fontSize: 13, color: MUTED }}>Questions sent by interested visitors</p>
+              </div>
+              <button
+                onClick={() => {
+                  const opening = !inboxOpen;
+                  setInboxOpen(opening);
+                  if (opening && inquiries.length === 0) fetchInquiries();
+                }}
+                style={{
+                  background: inboxOpen ? '#f0f2fa' : 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+                  color: inboxOpen ? ACCENT : '#ffffff',
+                  border: inboxOpen ? `1px solid ${BORDER}` : 'none',
+                  borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {inboxOpen ? 'Hide' : 'View inquiries'}
+              </button>
             </div>
 
-            {rentalError && (
-              <p style={{ fontSize: 13, color: '#dc2626', fontFamily: "'DM Mono', monospace" }}>{rentalError}</p>
-            )}
-
-            {rental && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
-                    background: rental.confidence === 'high' ? 'oklch(0.97 0.05 155)' : rental.confidence === 'medium' ? 'oklch(0.98 0.03 70)' : '#f0f0ff',
-                    border: `1px solid ${rental.confidence === 'high' ? 'oklch(0.88 0.1 155)' : rental.confidence === 'medium' ? 'oklch(0.88 0.08 70)' : '#c4b5fd'}`,
-                    color: rental.confidence === 'high' ? 'oklch(0.42 0.14 155)' : rental.confidence === 'medium' ? 'oklch(0.52 0.14 70)' : '#7c3aed',
-                  }}>
-                    {rental.confidence === 'high' ? '✓ High confidence' : rental.confidence === 'medium' ? '~ Medium confidence' : '? Low confidence'}
-                  </span>
-                  <span style={{ fontSize: 12, color: MUTED, fontFamily: "'DM Mono', monospace" }}>
-                    ${rental.price_per_m2.toLocaleString('en-US')} MXN/m²/mo
-                  </span>
-                </div>
-
-                <div style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '20px 24px' }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, marginBottom: 10, textTransform: 'uppercase' }}>Estimated monthly rent</p>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                    <span style={{ fontSize: 28, fontWeight: 900, color: ACCENT2, letterSpacing: '-0.02em' }}>
-                      ${rental.estimated_min.toLocaleString('en-US')}
-                    </span>
-                    <span style={{ fontSize: 18, color: MUTED }}>—</span>
-                    <span style={{ fontSize: 28, fontWeight: 900, color: ACCENT2, letterSpacing: '-0.02em' }}>
-                      ${rental.estimated_max.toLocaleString('en-US')}
-                    </span>
-                    <span style={{ fontSize: 14, color: MUTED }}>MXN/mo</span>
+            {inboxOpen && (
+              <div style={{ marginTop: 20 }}>
+                {loadingInq ? (
+                  <div style={{ color: MUTED, fontSize: 13, padding: '20px 0', textAlign: 'center' }}>Loading…</div>
+                ) : inquiries.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '32px 0', color: MUTED }}>
+                    <div style={{ fontSize: 32, marginBottom: 10 }}>📭</div>
+                    <p style={{ fontSize: 14 }}>No inquiries yet.</p>
                   </div>
-                </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {inquiries.map((inq) => (
+                      <div
+                        key={inq.id}
+                        onClick={() => { if (!inq.is_read) markRead(inq.id); }}
+                        style={{
+                          background: inq.is_read ? CARD2 : 'rgba(59,111,160,0.04)',
+                          border: `1px solid ${inq.is_read ? BORDER : 'rgba(59,111,160,0.25)'}`,
+                          borderRadius: 12, padding: '16px 18px', cursor: inq.is_read ? 'default' : 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
+                          <div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>
+                              {inq.sender_name ?? 'Anonymous visitor'}
+                            </span>
+                            {inq.sender_email && (
+                              <a href={`mailto:${inq.sender_email}`} style={{ fontSize: 12, color: ACCENT, marginLeft: 8, textDecoration: 'none' }}>
+                                {inq.sender_email}
+                              </a>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                            {!inq.is_read && (
+                              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, background: 'rgba(59,111,160,0.1)', border: '1px solid rgba(59,111,160,0.3)', color: ACCENT, letterSpacing: '0.06em' }}>
+                                NEW
+                              </span>
+                            )}
+                            <span style={{ fontSize: 11, color: SUBTLE, fontFamily: "'DM Mono', monospace" }}>
+                              {new Date(inq.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
 
-                <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.6 }}>{rental.summary}</p>
+                        {inq.questions.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: inq.message ? 10 : 0 }}>
+                            {inq.questions.map((q) => (
+                              <span key={q} style={{
+                                fontSize: 12, padding: '4px 10px', borderRadius: 100,
+                                background: 'rgba(59,111,160,0.07)', border: '1px solid rgba(59,111,160,0.2)',
+                                color: ACCENT,
+                              }}>{q}</span>
+                            ))}
+                          </div>
+                        )}
 
-                <button onClick={() => setRental(null)} style={{ alignSelf: 'flex-start', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 8, padding: '6px 14px', fontSize: 12, color: MUTED, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-                  Recalculate
-                </button>
+                        {inq.message && (
+                          <p style={{ fontSize: 13, color: TEXT, lineHeight: 1.6, margin: 0 }}>{inq.message}</p>
+                        )}
+
+                        {inq.sender_email && (
+                          <div style={{ marginTop: 12 }}>
+                            <a
+                              href={`mailto:${inq.sender_email}?subject=Re: ${encodeURIComponent(p.tipo_local + ' en ' + p.colonia)}&body=${encodeURIComponent('Hola ' + (inq.sender_name ?? '') + ',\n\nGracias por tu interés en la propiedad.\n\n')}`}
+                              style={{
+                                display: 'inline-block', fontSize: 12, fontWeight: 700,
+                                color: ACCENT, border: `1px solid rgba(59,111,160,0.3)`,
+                                borderRadius: 8, padding: '5px 12px', textDecoration: 'none',
+                              }}
+                            >
+                              ✉ Reply by email →
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
