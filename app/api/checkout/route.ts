@@ -7,7 +7,7 @@ type Kind = 'extra' | 'extend';
 const PRODUCTS: Record<Kind, { amount: number; name: string; description: string }> = {
   extra: {
     amount: 14900, // $149 MXN
-    name: 'Additional listing on LocalIQ',
+    name: 'Additional listing on Plaziia',
     description: 'Publish another listing this month · 30 days live · full Google Maps + AI analysis',
   },
   extend: {

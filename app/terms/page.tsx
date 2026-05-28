@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Terms of Service — LocalIQ' };
+export const metadata = { title: 'Terms of Service — Plaziia' };
 
 export default function TermsPage() {
   return (
@@ -15,22 +15,22 @@ export default function TermsPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', color: '#c0c0d8', lineHeight: 1.75, fontSize: '15px' }}>
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>1. Acceptance of Terms</h2>
-          <p>By accessing or using LocalIQ, you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform.</p>
+          <p>By accessing or using Plaziia, you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform.</p>
         </section>
 
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>2. Use of the Platform</h2>
-          <p>LocalIQ allows property owners to register and list commercial properties. You are responsible for the accuracy of the information you provide. You may not use the platform for any unlawful purpose.</p>
+          <p>Plaziia allows property owners to register and list commercial properties. You are responsible for the accuracy of the information you provide. You may not use the platform for any unlawful purpose.</p>
         </section>
 
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>3. Intellectual Property</h2>
-          <p>All content, trademarks, and data on this platform are the property of LocalIQ or its licensors. You may not reproduce or redistribute any part of this platform without written permission.</p>
+          <p>All content, trademarks, and data on this platform are the property of Plaziia or its licensors. You may not reproduce or redistribute any part of this platform without written permission.</p>
         </section>
 
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>4. Limitation of Liability</h2>
-          <p>LocalIQ provides information on an &quot;as is&quot; basis. We do not guarantee the accuracy of market analysis or AI recommendations. Use this information as one factor among many in your decision-making process.</p>
+          <p>Plaziia provides information on an &quot;as is&quot; basis. We do not guarantee the accuracy of market analysis or AI recommendations. Use this information as one factor among many in your decision-making process.</p>
         </section>
 
         <section>
@@ -40,7 +40,7 @@ export default function TermsPage() {
 
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>6. Contact</h2>
-          <p>For questions about these terms, please contact us at <a href="mailto:hello@localiq.app" style={{ color: 'oklch(0.55 0.11 250)' }}>hello@localiq.app</a>.</p>
+          <p>For questions about these terms, please contact us at <a href="mailto:hello@plaziia.com" style={{ color: 'oklch(0.55 0.11 250)' }}>hello@plaziia.com</a>.</p>
         </section>
       </div>
     </main>

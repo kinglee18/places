@@ -2,7 +2,7 @@ import LocalIQComponent from '../../components/LocalIQ';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Property Registration - LocalIQ',
+  title: 'Property Registration — Plaziia',
   description: 'Enter your property details for AI analysis.',
 }
 

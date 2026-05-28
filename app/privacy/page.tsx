@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Privacy Policy — LocalIQ' };
+export const metadata = { title: 'Privacy Policy — Plaziia' };
 
 export default function PrivacyPage() {
   return (
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 style={{ color: '#f0f0f8', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>6. Contact</h2>
-          <p>For privacy-related questions, contact us at <a href="mailto:hello@localiq.app" style={{ color: 'oklch(0.55 0.11 250)' }}>hello@localiq.app</a>.</p>
+          <p>For privacy-related questions, contact us at <a href="mailto:hello@plaziia.com" style={{ color: 'oklch(0.55 0.11 250)' }}>hello@plaziia.com</a>.</p>
         </section>
       </div>
     </main>

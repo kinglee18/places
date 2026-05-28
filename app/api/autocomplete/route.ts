@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set('featuretype', 'settlement');
 
   const res = await fetch(url.toString(), {
-    headers: { 'User-Agent': 'localiq-app/1.0 (contact@localiq.app)' },
+    headers: { 'User-Agent': 'plaziia-app/1.0 (contact@plaziia.com)' },
   });
 
   if (!res.ok) return NextResponse.json({ predictions: [] });

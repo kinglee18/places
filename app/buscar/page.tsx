@@ -2,7 +2,7 @@ import BuscarLocal from '../../components/BuscarLocal';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Find Space — LocalIQ',
+  title: 'Find Space — Plaziia',
   description: 'Describe your project and AI finds the ideal commercial space for you.',
 };
 

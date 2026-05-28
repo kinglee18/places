@@ -2,7 +2,7 @@ import './globals.css'
 import Providers from '../components/Providers'
 
 export const metadata = {
-  title: 'LocalIQ Platform',
+  title: 'Plaziia',
   description: 'Business intelligence for commercial properties and property registration.',
 }
 

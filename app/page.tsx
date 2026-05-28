@@ -281,7 +281,7 @@ export default function Home() {
               <span className="gradient-text-accent">to make smart decisions</span>
             </h2>
             <p style={{ color: 'var(--muted)', maxWidth: '520px', margin: '0 auto', fontSize: '17px' }}>
-              From basic registration to pro analysis, LocalIQ supports you every step of the way.
+              From basic registration to pro analysis, Plaziia supports you every step of the way.
             </p>
           </div>
 
@@ -317,7 +317,7 @@ export default function Home() {
           <div style={{ textAlign: 'center', marginBottom: '72px' }}>
             <span className="section-label">Process</span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2 }}>
-              How LocalIQ Works
+              How Plaziia Works
             </h2>
           </div>
 
@@ -531,10 +531,21 @@ export default function Home() {
         background: 'var(--surface)',
       }}>
         <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: 'var(--accent)' }}>📍</span>
-          Local<span style={{ color: 'var(--accent)' }}>IQ</span>
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ft-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#0f1b3d"/><stop offset="1" stopColor="#3b6fa0"/>
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="8" fill="url(#ft-g)"/>
+            <rect x="4" y="8" width="24" height="3" rx="1.5" fill="white" opacity="0.9"/>
+            <rect x="5" y="14" width="8" height="6" rx="1.5" fill="white" opacity="0.65"/>
+            <rect x="19" y="14" width="8" height="6" rx="1.5" fill="white" opacity="0.65"/>
+            <rect x="12" y="22" width="8" height="7" rx="1.5" fill="white" opacity="0.45"/>
+          </svg>
+          <span style={{ letterSpacing: '-0.02em' }}>Plazi<span style={{ color: 'var(--accent)' }}>ia</span></span>
         </div>
-        <p>© {new Date().getFullYear()} LocalIQ Platform. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Plaziia. All rights reserved.</p>
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           <Link href="/propiedades" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}

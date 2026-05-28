@@ -29,9 +29,23 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
       fontFamily: "'Inter', sans-serif",
     }}>
       {/* Logo */}
-      <Link href="/" style={{ fontWeight: 800, fontSize: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--foreground)', textDecoration: 'none' }}>
-        <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 4px 12px oklch(0.235 0.07 265 / 0.25)' }}>📍</div>
-        Local<span style={{ color: 'oklch(0.55 0.11 250)' }}>IQ</span>
+      <Link href="/" style={{ fontWeight: 800, fontSize: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--foreground)', textDecoration: 'none', letterSpacing: '-0.03em' }}>
+        {/* Plaziia storefront icon */}
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, filter: 'drop-shadow(0 4px 10px rgba(15,27,61,0.28))' }}>
+          <defs>
+            <linearGradient id="nav-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#0f1b3d"/>
+              <stop offset="1" stopColor="#3b6fa0"/>
+            </linearGradient>
+          </defs>
+          <rect width="32" height="32" rx="8" fill="url(#nav-g)"/>
+          <rect x="4" y="8" width="24" height="3" rx="1.5" fill="white" opacity="0.9"/>
+          <rect x="5" y="14" width="8" height="6" rx="1.5" fill="white" opacity="0.65"/>
+          <rect x="19" y="14" width="8" height="6" rx="1.5" fill="white" opacity="0.65"/>
+          <rect x="12" y="22" width="8" height="7" rx="1.5" fill="white" opacity="0.45"/>
+          <circle cx="18.5" cy="26" r="0.9" fill="white" opacity="0.9"/>
+        </svg>
+        <span style={{ color: '#0f1b3d' }}>Plazi</span><span style={{ color: '#3b6fa0' }}>ia</span>
       </Link>
 
       {/* Desktop nav */}

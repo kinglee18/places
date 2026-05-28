@@ -76,7 +76,7 @@ export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
           const marker = L.marker([p.lat, p.lng], { icon: dot }).addTo(map);
           marker.bindPopup(
             `<div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:#181e38;min-width:110px;padding:2px 0">${p.label}</div>`,
-            { closeButton: false, offset: [0, -6], className: 'localiq-popup' }
+            { closeButton: false, offset: [0, -6], className: 'plaziia-popup' }
           );
           marker.on('mouseover', () => marker.openPopup());
           marker.on('mouseout', () => marker.closePopup());
@@ -108,12 +108,12 @@ export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
     >
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <style>{`
-        .localiq-popup .leaflet-popup-content-wrapper {
+        .plaziia-popup .leaflet-popup-content-wrapper {
           border-radius: 10px;
           box-shadow: 0 4px 16px rgba(15,27,61,0.12);
           border: 1px solid #e4e7f4;
         }
-        .localiq-popup .leaflet-popup-tip { display: none; }
+        .plaziia-popup .leaflet-popup-tip { display: none; }
       `}</style>
       <div ref={mapRef} style={{ width: '100%', height: 560 }} />
     </div>
