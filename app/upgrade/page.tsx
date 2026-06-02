@@ -17,12 +17,6 @@ const proFeatures = [
     detail: 'Machine learning algorithms analyze your property to suggest the most promising uses.',
   },
   {
-    icon: '💰',
-    title: 'Rental Potential',
-    desc: 'Know your property\'s estimated rental value based on comparable properties.',
-    detail: 'Market-driven pricing data to maximize your rental income.',
-  },
-  {
     icon: '⚡',
     title: 'Priority Support',
     desc: 'Direct support channel for any questions about your analysis.',
@@ -59,12 +53,6 @@ const testimonials = [
     role: 'Restaurant Owner, Condesa',
     quote: 'The competition analysis saved me from opening in a saturated market. Invaluable.',
     highlight: 'Competitor Analysis',
-  },
-  {
-    name: 'Elena R.',
-    role: 'Real Estate Investor',
-    quote: 'The rental potential estimate helped me negotiate 15% higher rent than I initially quoted.',
-    highlight: 'Rental Potential',
   },
   {
     name: 'Javier L.',

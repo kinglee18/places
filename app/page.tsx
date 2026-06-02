@@ -22,13 +22,7 @@ const features = [
     title: 'AI Recommendations',
     desc: 'Our algorithms suggest the most promising business types based on the unique characteristics of your property.',
     plan: 'pro',
-  },
-  {
-    icon: '💰',
-    title: 'Rental Potential',
-    desc: 'Know the estimated rental value for your property based on similar properties in your area.',
-    plan: 'pro',
-  },
+  }
 ];
 
 const steps = [
@@ -397,7 +391,6 @@ export default function Home() {
                     'Details: price, size and amenities',
                     'Competitor analysis within 2 km',
                     'AI business recommendations',
-                    'Rental potential estimate',
                   ].map((item, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
                       <span style={{ color: 'var(--accent)', fontSize: '16px', flexShrink: 0, marginTop: '2px' }}>✓</span>
