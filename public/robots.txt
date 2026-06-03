@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /registro
+Disallow: /mis-propiedades
+Disallow: /admin
+Disallow: /upgrade
+Allow: /
+
+Sitemap: https://plaziia.com/sitemap.xml

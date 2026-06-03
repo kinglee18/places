@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
+
+export const metadata: Metadata = {
+  title: 'Commercial Properties',
+  description: 'Browse commercial properties listed on Plaziia — offices, stores, warehouses, and more.',
+};
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { getSupabase } from '@/lib/supabase';
