@@ -1,4 +1,4 @@
-import BuscarLocal from '../../components/BuscarLocal';
+import BuscarLocal from '@/components/BuscarLocal';
 import Link from 'next/link';
 
 export const metadata = {

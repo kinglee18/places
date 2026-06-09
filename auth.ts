@@ -14,7 +14,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isRegistro = nextUrl.pathname.startsWith('/registro');
+      const isRegistro = nextUrl.pathname.endsWith('/registro');
 
       if (isRegistro && !isLoggedIn) {
         return Response.redirect(new URL('/login', nextUrl));

@@ -2,46 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import NavHeader from '@/components/NavHeader';
-
-const features = [
-  {
-    icon: '🗺️',
-    title: 'Nearby Competition',
-    desc: 'We analyze all registered businesses within a 2 km radius to identify real market saturation.',
-    plan: 'pro',
-  },
-  {
-    icon: '📍',
-    title: 'Property Registration',
-    desc: 'Publish your property with all the details: exact location, price, amenities and full description.',
-    plan: 'basic',
-  },
-  {
-    icon: '🤖',
-    title: 'AI Recommendations',
-    desc: 'Our algorithms suggest the most promising business types based on the unique characteristics of your property.',
-    plan: 'pro',
-  }
-];
-
-const steps = [
-  {
-    number: '01',
-    title: 'Register your property',
-    desc: 'Enter your property details: address, size, price and main characteristics.',
-  },
-  {
-    number: '02',
-    title: 'Choose your plan',
-    desc: 'Select the free basic plan or the Pro plan with complete area analysis.',
-  },
-  {
-    number: '03',
-    title: 'Get your analysis',
-    desc: 'With the Pro plan you will get a complete analysis of competition and AI-powered recommendations for your area.',
-  },
-];
 
 interface Property {
   id: string;
@@ -57,10 +19,25 @@ export default function Home() {
   const [hoveredPlan, setHoveredPlan] = useState<'basic' | 'pro' | null>(null);
   const [latestProperties, setLatestProperties] = useState<Property[]>([]);
   const [loadingProps, setLoadingProps] = useState(true);
+  const t = useTranslations('HomePage');
+  const tF = useTranslations('Features');
+  const tS = useTranslations('Steps');
+
+  const features = [
+    { icon: '🗺️', title: tF('nearbyCompetitionTitle'), desc: tF('nearbyCompetitionDesc'), plan: 'pro' },
+    { icon: '📍', title: tF('propertyRegistrationTitle'), desc: tF('propertyRegistrationDesc'), plan: 'basic' },
+    { icon: '🤖', title: tF('aiRecommendationsTitle'), desc: tF('aiRecommendationsDesc'), plan: 'pro' },
+  ];
+
+  const steps = [
+    { number: '01', title: tS('step1Title'), desc: tS('step1Desc') },
+    { number: '02', title: tS('step2Title'), desc: tS('step2Desc') },
+    { number: '03', title: tS('step3Title'), desc: tS('step3Desc') },
+  ];
 
   useEffect(() => {
     fetch('/api/properties?limit=6&published=true')
-      .then(r =>  r.json())
+      .then(r => r.json())
       .then((data: Property[]) => {
         setLatestProperties(data ?? []);
         setLoadingProps(false);
@@ -110,7 +87,7 @@ export default function Home() {
           {/* Badge */}
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
             <span className="tag tag-accent" style={{ fontSize: '13px' }}>
-              ✦ Business intelligence platform
+              ✦ {t('badge')}
             </span>
           </div>
 
@@ -121,10 +98,10 @@ export default function Home() {
             marginBottom: '28px',
             letterSpacing: '-0.02em',
           }}>
-            <span className="gradient-text">Register your property.</span>
+            <span className="gradient-text">{t('heroLine1')}</span>
             <br />
-            <span style={{ color: 'var(--foreground)' }}>Discover its </span>
-            <span className="gradient-text-accent">real potential.</span>
+            <span style={{ color: 'var(--foreground)' }}>{t('heroLine2')} </span>
+            <span className="gradient-text-accent">{t('heroAccent')}</span>
           </h1>
 
           <p style={{
@@ -135,17 +112,17 @@ export default function Home() {
             margin: '0 auto 52px auto',
             lineHeight: 1.7,
           }}>
-            Publish your commercial property in minutes or unlock complete analysis
-            of <strong style={{ color: 'var(--foreground)' }}>nearby competition</strong> and{' '}
-            <strong style={{ color: 'var(--foreground)' }}>AI-powered recommendations</strong> for your area.
+            {t.rich('heroDesc', {
+              strong: (chunks) => <strong style={{ color: 'var(--foreground)' }}>{chunks}</strong>,
+            })}
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/registro" className="btn-primary">
-              I have a property →
+              {t('ctaHaveProperty')}
             </Link>
             <Link href="/buscar" className="btn-secondary">
-              I&apos;m looking for a space →
+              {t('ctaLookingForSpace')}
             </Link>
           </div>
 
@@ -158,9 +135,9 @@ export default function Home() {
             flexWrap: 'wrap',
           }}>
             {[
-              { value: '2 km', label: 'Analysis radius' },
-              { value: '100%', label: 'Real-time data' },
-              { value: 'AI', label: 'Powered by AI' },
+              { value: t('stat1Value'), label: t('stat1Label') },
+              { value: t('stat2Value'), label: t('stat2Label') },
+              { value: t('stat3Value'), label: t('stat3Label') },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--accent)' }}>{s.value}</div>
@@ -176,10 +153,10 @@ export default function Home() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '56px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <span className="section-label">Marketplace</span>
+              <span className="section-label">{t('marketplaceLabel')}</span>
               <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, lineHeight: 1.2, marginTop: '8px' }}>
-                Latest registered<br />
-                <span className="gradient-text-accent">properties</span>
+                {t('latestPropertiesTitle')}<br />
+                <span className="gradient-text-accent">{t('latestPropertiesAccent')}</span>
               </h2>
             </div>
             <Link href="/propiedades" style={{
@@ -190,7 +167,7 @@ export default function Home() {
               onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '0.85')}
             >
-              View all →
+              {t('viewAll')}
             </Link>
           </div>
 
@@ -207,9 +184,9 @@ export default function Home() {
               color: 'var(--muted)',
             }}>
               <div style={{ fontSize: '40px', marginBottom: '16px' }}>📭</div>
-              <p style={{ fontSize: '16px' }}>No properties registered yet.</p>
+              <p style={{ fontSize: '16px' }}>{t('noPropertiesYet')}</p>
               <Link href="/registro" className="btn-primary" style={{ display: 'inline-block', marginTop: '24px' }}>
-                Be the first →
+                {t('beFirst')}
               </Link>
             </div>
           ) : (
@@ -253,7 +230,7 @@ export default function Home() {
                       <span style={{ fontSize: '15px', fontWeight: 700, color: p.precio_inmueble ? 'var(--foreground)' : 'var(--muted)' }}>
                         {p.precio_inmueble
                           ? `$${p.precio_inmueble.toLocaleString('en-US')} MXN`
-                          : 'Price not listed'}
+                          : t('priceNotListed')}
                       </span>
                     </div>
                   </div>
@@ -269,13 +246,13 @@ export default function Home() {
       <section id="features" style={{ padding: '100px 24px', background: 'var(--surface)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '72px' }}>
-            <span className="section-label">Features</span>
+            <span className="section-label">{t('featuresLabel')}</span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2, marginBottom: '16px' }}>
-              Everything you need<br />
-              <span className="gradient-text-accent">to make smart decisions</span>
+              {t('featuresTitle')}<br />
+              <span className="gradient-text-accent">{t('featuresAccent')}</span>
             </h2>
             <p style={{ color: 'var(--muted)', maxWidth: '520px', margin: '0 auto', fontSize: '17px' }}>
-              From basic registration to pro analysis, Plaziia supports you every step of the way.
+              {t('featuresDesc')}
             </p>
           </div>
 
@@ -309,9 +286,9 @@ export default function Home() {
       <section id="how-it-works" style={{ padding: '100px 24px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '72px' }}>
-            <span className="section-label">Process</span>
+            <span className="section-label">{t('processLabel')}</span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2 }}>
-              How Plaziia Works
+              {t('processTitle')}
             </h2>
           </div>
 
@@ -348,17 +325,17 @@ export default function Home() {
       <section id="plans" style={{ padding: '100px 24px', background: 'var(--surface)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '72px' }}>
-            <span className="section-label">Plans</span>
+            <span className="section-label">{t('plansLabel')}</span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2, marginBottom: '16px' }}>
-              Choose the plan that<br />fits your needs
+              {t('plansTitle')}
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: '17px', maxWidth: '480px', margin: '0 auto' }}>
-              Publish one listing free every month — full analysis included. Pay only for extra listings or longer runtime.
+              {t('plansDesc')}
             </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px' }}>
-            {/* ── PLAN BÁSICO ── */}
+            {/* ── BASIC PLAN ── */}
             <div
               className="card"
               onMouseEnter={() => setHoveredPlan('basic')}
@@ -372,29 +349,23 @@ export default function Home() {
             >
               <div style={{ marginBottom: '32px' }}>
                 <span className="tag tag-accent" style={{ marginBottom: '20px', display: 'inline-flex' }}>
-                  ✓ BASIC
+                  ✓ {t('basicTag')}
                 </span>
                 <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '4px' }}>
-                  Free
+                  {t('basicPrice')}
                 </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>1 listing / month · live 30 days</div>
+                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>{t('basicSubtitle')}</div>
               </div>
 
               <div style={{ borderTop: '1px solid var(--plan-basic-border)', paddingTop: '28px', marginBottom: '36px' }}>
                 <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '24px', lineHeight: 1.6 }}>
-                  Publish one commercial property each month — full market analysis included, live for 30 days.
+                  {t('basicDesc')}
                 </p>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {[
-                    'Complete property registration',
-                    'Map location selection',
-                    'Details: price, size and amenities',
-                    'Competitor analysis within 2 km',
-                    'AI business recommendations',
-                  ].map((item, i) => (
+                  {(['basicFeature1', 'basicFeature2', 'basicFeature3', 'basicFeature4', 'basicFeature5'] as const).map((key, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
                       <span style={{ color: 'var(--accent)', fontSize: '16px', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                      <span style={{ color: 'var(--foreground)' }}>{item}</span>
+                      <span style={{ color: 'var(--foreground)' }}>{t(key)}</span>
                     </li>
                   ))}
                 </ul>
@@ -404,11 +375,11 @@ export default function Home() {
                 display: 'block', textAlign: 'center', width: '100%',
                 padding: '14px', borderRadius: '12px', fontSize: '15px',
               }}>
-                Register free
+                {t('basicCta')}
               </Link>
             </div>
 
-            {/* ── PLAN PRO ── */}
+            {/* ── PRO PLAN ── */}
             <div
               className="card"
               onMouseEnter={() => setHoveredPlan('pro')}
@@ -432,28 +403,28 @@ export default function Home() {
 
               <div style={{ marginBottom: '32px', position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <span className="tag tag-pro">⚡ PAY AS YOU GO</span>
+                  <span className="tag tag-pro">⚡ {t('proTag')}</span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
                   <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em' }}>
-                    <span className="gradient-text-accent">$149</span>
+                    <span className="gradient-text-accent">{t('proPrice')}</span>
                   </div>
-                  <span style={{ color: 'var(--muted)', fontSize: '15px' }}>/ extra listing</span>
+                  <span style={{ color: 'var(--muted)', fontSize: '15px' }}>{t('proUnit')}</span>
                 </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>+ $99 to keep any listing live another 30 days</div>
+                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>{t('proSubtitle')}</div>
               </div>
 
               <div style={{ borderTop: '1px solid rgba(124,58,237,0.25)', paddingTop: '28px', marginBottom: '36px' }}>
                 <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '24px', lineHeight: 1.6 }}>
-                  For owners who need more than one active listing a month, or want a listing to stay live longer.
+                  {t('proDesc')}
                 </p>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {[
-                    { text: 'Everything in the free plan, every listing', isPro: false },
-                    { text: 'Additional listing this month — $149', isPro: true },
-                    { text: 'Extend any listing +30 days — $99', isPro: true },
-                    { text: 'Full 2 km analysis + AI on every listing', isPro: true },
+                    { key: 'proFeature1' as const, isPro: false },
+                    { key: 'proFeature2' as const, isPro: true },
+                    { key: 'proFeature3' as const, isPro: true },
+                    { key: 'proFeature4' as const, isPro: true },
                   ].map((item, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
                       <span style={{
@@ -462,7 +433,7 @@ export default function Home() {
                       }}>
                         {item.isPro ? '⚡' : '✓'}
                       </span>
-                      <span>{item.text}</span>
+                      <span>{t(item.key)}</span>
                     </li>
                   ))}
                 </ul>
@@ -475,7 +446,7 @@ export default function Home() {
                   background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
                   boxShadow: '0 8px 30px oklch(0.235 0.07 265 / 0.3)',
                 }}>
-                  Start with a free listing →
+                  {t('proCta')}
                 </Link>
               </div>
             </div>
@@ -498,14 +469,14 @@ export default function Home() {
         }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '660px', margin: '0 auto' }}>
           <h2 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-0.02em' }}>
-            Your property deserves<br />
-            <span className="gradient-text-accent">smart decisions</span>
+            {t('ctaFinalTitle')}<br />
+            <span className="gradient-text-accent">{t('ctaFinalAccent')}</span>
           </h2>
           <p style={{ color: 'var(--muted)', fontSize: '18px', marginBottom: '44px', lineHeight: 1.7 }}>
-            Register it today and start understanding the market around it.
+            {t('ctaFinalDesc')}
           </p>
           <Link href="/registro" className="btn-primary" style={{ fontSize: '17px', padding: '18px 44px' }}>
-            Get started now →
+            {t('getStarted')}
           </Link>
         </div>
       </section>
@@ -538,26 +509,26 @@ export default function Home() {
           </svg>
           <span style={{ letterSpacing: '-0.02em' }}>Plazi<span style={{ color: 'var(--accent)' }}>ia</span></span>
         </div>
-        <p>© {new Date().getFullYear()} Plaziia. All rights reserved.</p>
+        <p>{t('footerRights', { year: new Date().getFullYear() })}</p>
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           <Link href="/propiedades" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>Properties</Link>
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerProperties')}</Link>
           <a href="#plans" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>Plans</a>
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerPlans')}</a>
           <a href="#features" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>Features</a>
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerFeatures')}</a>
           <Link href="/registro" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>Register</Link>
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerRegister')}</Link>
           <Link href="/terms" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>Terms</Link>
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerTerms')}</Link>
           <Link href="/privacy" style={{ transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>Privacy</Link>
+            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerPrivacy')}</Link>
         </div>
       </footer>
     </main>

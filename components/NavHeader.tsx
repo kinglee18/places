@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 type ActivePage = 'home' | 'propiedades' | 'upgrade' | 'buscar';
 
@@ -10,12 +12,13 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useTranslations('NavHeader');
 
   const navLinks: { label: string; href: string; id: ActivePage | null }[] = [
-    { label: 'Properties', href: '/propiedades', id: 'propiedades' },
-    { label: 'How it works', href: activePage === 'home' ? '#how-it-works' : '/#how-it-works', id: null },
-    { label: 'Pro Plan', href: '/upgrade', id: 'upgrade' },
-    { label: 'Find a Space', href: '/buscar', id: 'buscar' },
+    { label: t('properties'), href: '/propiedades', id: 'propiedades' },
+    { label: t('howItWorks'), href: activePage === 'home' ? '#how-it-works' : '/#how-it-works', id: null },
+    { label: t('proPlan'), href: '/upgrade', id: 'upgrade' },
+    { label: t('findSpace'), href: '/buscar', id: 'buscar' },
   ];
 
   return (
@@ -65,6 +68,8 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
             {link.label}
           </Link>
         ))}
+
+        <LanguageSwitcher />
 
         {/* Auth section */}
         {status === 'loading' ? (
@@ -118,7 +123,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    📝 Publish property
+                    📝 {t('publishProperty')}
                   </Link>
                   <Link href="/mis-propiedades" onClick={() => setMenuOpen(false)} style={{
                     display: 'block', padding: '9px 12px', borderRadius: '8px',
@@ -128,7 +133,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    🏠 My properties
+                    🏠 {t('myProperties')}
                   </Link>
                   <button
                     onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }); }}
@@ -142,7 +147,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
                     onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.97 0.02 25)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    🚪 Sign out
+                    🚪 {t('signOut')}
                   </button>
                 </div>
               </div>
@@ -159,7 +164,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px oklch(0.235 0.07 265 / 0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px oklch(0.235 0.07 265 / 0.25)'; }}
           >
-            Register Property
+            {t('registerProperty')}
           </Link>
         )}
       </nav>
@@ -167,7 +172,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
       {/* Mobile hamburger */}
       <button
         className="nav-hamburger"
-        aria-label="Open menu"
+        aria-label={t('openMenu')}
         onClick={() => setMobileOpen(o => !o)}
       >
         {mobileOpen ? '✕' : '☰'}
@@ -183,10 +188,13 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
             {link.label}
           </Link>
         ))}
+        <div style={{ padding: '8px 12px' }}>
+          <LanguageSwitcher />
+        </div>
         {session?.user ? (
           <>
-            <Link href="/registro" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>📝 Publish property</Link>
-            <Link href="/mis-propiedades" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>🏠 My properties</Link>
+            <Link href="/registro" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>📝 {t('publishProperty')}</Link>
+            <Link href="/mis-propiedades" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>🏠 {t('myProperties')}</Link>
             <button
               onClick={() => { setMobileOpen(false); signOut({ callbackUrl: '/' }); }}
               style={{
@@ -197,12 +205,12 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
                 marginTop: '4px',
               }}
             >
-              🚪 Sign out
+              🚪 {t('signOut')}
             </button>
           </>
         ) : (
           <Link href="/registro" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>
-            Register Property
+            {t('registerProperty')}
           </Link>
         )}
       </div>

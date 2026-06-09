@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PropertyActions from '@/components/PropertyActions';
+import { getTranslations } from 'next-intl/server';
 
 interface Property {
   id: string;
@@ -27,6 +28,8 @@ export default async function MisPropiedadesPage() {
   const session = await auth();
   if (!session?.user?.email) redirect('/login');
 
+  const t = await getTranslations('MisPropiedadesPage');
+
   const { data: properties } = await getSupabase()
     .from('properties')
     .select('id, colonia, tipo_local, m2, modalidad, precio_inmueble, photo_urls, is_published, expires_at, created_at')
@@ -44,13 +47,13 @@ export default async function MisPropiedadesPage() {
         {/* Header */}
         <div style={{ marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.55 0.11 250)', display: 'block', marginBottom: 8 }}>
-            My account
+            {t('accountLabel')}
           </span>
           <h1 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 8, color: '#181e38' }}>
-            My properties
+            {t('title')}
           </h1>
           <p style={{ color: '#5a6288', fontSize: 14 }}>
-            {items.length} registered propert{items.length !== 1 ? 'ies' : 'y'}
+            {items.length} {t('title').toLowerCase()}
           </p>
         </div>
 
@@ -62,9 +65,9 @@ export default async function MisPropiedadesPage() {
             background: '#f5f6fc',
           }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🏬</div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10, color: '#181e38' }}>No properties yet</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10, color: '#181e38' }}>{t('emptyTitle')}</h2>
             <p style={{ color: '#5a6288', marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
-              Register your first commercial space and start analyzing your market.
+              {t('emptyDesc')}
             </p>
             <Link href="/registro" style={{
               background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
@@ -73,7 +76,7 @@ export default async function MisPropiedadesPage() {
               boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
               display: 'inline-block',
             }}>
-              + Register property
+              {t('emptyRegisterBtn')}
             </Link>
           </div>
         ) : (
@@ -106,9 +109,9 @@ export default async function MisPropiedadesPage() {
                       const expired = p.expires_at ? new Date(p.expires_at).getTime() <= Date.now() : false;
                       const status = !p.is_published ? 'pending' : expired ? 'expired' : 'active';
                       const styleMap = {
-                        active:  { bg: 'oklch(0.96 0.06 155)', bd: 'oklch(0.82 0.1 155)',  fg: 'oklch(0.40 0.14 155)', label: 'Active' },
-                        expired: { bg: 'oklch(0.97 0.04 25)',  bd: 'oklch(0.84 0.1 25)',   fg: 'oklch(0.50 0.18 25)',  label: 'Expired' },
-                        pending: { bg: 'oklch(0.96 0.02 250)', bd: 'oklch(0.84 0.05 250)', fg: 'oklch(0.48 0.08 250)', label: 'Pending payment' },
+                        active:  { bg: 'oklch(0.96 0.06 155)', bd: 'oklch(0.82 0.1 155)',  fg: 'oklch(0.40 0.14 155)', label: t('statusActive') },
+                        expired: { bg: 'oklch(0.97 0.04 25)',  bd: 'oklch(0.84 0.1 25)',   fg: 'oklch(0.50 0.18 25)',  label: t('statusExpired') },
+                        pending: { bg: 'oklch(0.96 0.02 250)', bd: 'oklch(0.84 0.05 250)', fg: 'oklch(0.48 0.08 250)', label: t('statusPending') },
                       }[status];
                       return (
                         <span style={{
@@ -133,7 +136,7 @@ export default async function MisPropiedadesPage() {
                       {p.tipo_local}
                     </div>
                     <div style={{ fontSize: 12, color: '#5a6288', marginBottom: 14 }}>
-                      {p.m2} m²{p.modalidad ? ` · ${p.modalidad === 'rent' ? 'Rent' : 'Sale'}` : ''}
+                      {p.m2} m²{p.modalidad ? ` · ${p.modalidad === 'rent' ? t('rent') : t('sale')}` : ''}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: 15, fontWeight: 800, color: '#181e38' }}>
@@ -144,7 +147,7 @@ export default async function MisPropiedadesPage() {
                         border: '1px solid rgba(59,111,160,0.3)', borderRadius: 8,
                         padding: '5px 12px', textDecoration: 'none',
                       }}>
-                        View →
+                        {t('viewBtn')}
                       </Link>
                     </div>
                     <Link
@@ -159,7 +162,7 @@ export default async function MisPropiedadesPage() {
                         textDecoration: 'none',
                       }}
                     >
-                      💡 Get pricing suggestion →
+                      {t('pricingSuggestion')}
                     </Link>
                     <PropertyActions id={p.id} isPublished={p.is_published} />
                   </div>
@@ -176,7 +179,7 @@ export default async function MisPropiedadesPage() {
                 boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
                 display: 'inline-block',
               }}>
-                + Register another property
+                {t('registerAnotherBtn')}
               </Link>
             </div>
           </>

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import NavHeader from '@/components/NavHeader';
 
 const MapView = dynamic(() => import('@/components/MapView'), {
@@ -136,6 +137,9 @@ const ACCENT2 = '#0f1b3d';
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: session } = useSession();
+  const tP = useTranslations('PropertyDetail');
+  const tL = useTranslations('LocalIQ');
+
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading]   = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -174,12 +178,12 @@ export default function PropertyDetailPage() {
   };
 
   const PRESET_QUESTIONS = [
-    '¿Sigue disponible?',
-    '¿Cuáles son los requisitos?',
-    '¿Tiene estacionamiento?',
-    '¿Cuál es el tiempo mínimo de contrato?',
-    '¿Permite remodelaciones?',
-    '¿Los servicios están incluidos?',
+    tP('presetQ1'),
+    tP('presetQ2'),
+    tP('presetQ3'),
+    tP('presetQ4'),
+    tP('presetQ5'),
+    tP('presetQ6'),
   ];
 
   const [inqSelected, setInqSelected]   = useState<string[]>([]);
@@ -192,6 +196,102 @@ export default function PropertyDetailPage() {
   const [inquiries, setInquiries]       = useState<Inquiry[]>([]);
   const [loadingInq, setLoadingInq]     = useState(false);
   const [inboxOpen, setInboxOpen]       = useState(false);
+
+  // ── DB value → translated label lookup functions ────────────────────────────
+  const tipoLabel = (v: string): string => ({
+    'Street-facing (with storefront)': tL('tipoStreetFacing'),
+    'Inside commercial plaza': tL('tipoInsidePlaza'),
+    'Corner unit': tL('tipoCornerUnit'),
+    'Basement / Semi-basement': tL('tipoBasement'),
+    'Market stall': tL('tipoMarketStall'),
+  }[v] ?? v);
+
+  const nivelLabel = (v: string): string => ({
+    'Ground floor (street level)': tL('nivelGroundFloor'),
+    'Mezzanine': tL('nivelMezzanine'),
+    '2nd floor': tL('nivel2ndFloor'),
+    '3rd floor or above': tL('nivel3rdPlus'),
+    'Basement / semi-basement': tL('nivelBasement'),
+  }[v] ?? v);
+
+  const usoAnteriorLabel = (v: string): string => ({
+    'Restaurant / food service': tL('usoRestaurant'),
+    'Retail / store': tL('usoRetail'),
+    'Office': tL('usoOffice'),
+    'Gym / wellness': tL('usoGym'),
+    'Beauty / salon': tL('usoBeauty'),
+    'Medical / clinic': tL('usoMedical'),
+    'Warehouse': tL('usoWarehouse'),
+    'Vacant (never used)': tL('usoVacant'),
+    'Other': tL('usoOther'),
+  }[v] ?? v);
+
+  const terrenoLabel = (v: string): string => ({
+    'Regular': tL('terrenoRegular'),
+    'Irregular': tL('terrenoIrregular'),
+    'Corner lot': tL('terrenoCornerLot'),
+  }[v] ?? v);
+
+  const conservacionLabel = (v: string): string => ({
+    'New': tL('conservNew'),
+    'Excellent': tL('conservExcellent'),
+    'Good': tL('conservGood'),
+    'Fair': tL('conservFair'),
+    'Needs renovation': tL('conservRenovation'),
+  }[v] ?? v);
+
+  const calidadLabel = (v: string): string => ({
+    'High': tL('calidadHigh'),
+    'Medium': tL('calidadMedium'),
+    'Low': tL('calidadLow'),
+  }[v] ?? v);
+
+  const energiaLabel = (v: string): string => ({
+    'Single-phase': tL('energiaSingle'),
+    'Three-phase': tL('energiaThree'),
+    'Not specified': tL('energiaNotSpecified'),
+  }[v] ?? v);
+
+  const sueloLabel = (v: string): string => ({
+    'Commercial': tL('usoSueloCommercial'),
+    'Industrial': tL('usoSueloIndustrial'),
+    'Mixed-use': tL('usoSueloMixed'),
+    'Residential with commercial': tL('usoSueloResidential'),
+    'Not specified': tL('usoSueloNotSpecified'),
+  }[v] ?? v);
+
+  const aguaLabel = (v: string): string => ({
+    'Water and drainage complete': tL('waterComplete'),
+    'Water only': tL('waterOnly'),
+    'Drainage only': tL('drainageOnly'),
+    'No connections': tL('noConnections'),
+  }[v] ?? v);
+
+  const servicioLabel = (v: string): string => ({
+    'Electricity': tL('servicioElectricity'),
+    'Exterior lighting': tL('servicioLighting'),
+    'Reception': tL('servicioReception'),
+    'Good access': tL('servicioAccess'),
+  }[v] ?? v);
+
+  const bizLabel = (v: string): string => ({
+    'Restaurant / food service': tL('bizRestaurant'),
+    'Café / coffee shop': tL('bizCafe'),
+    'Bar / nightlife': tL('bizBar'),
+    'Retail / boutique': tL('bizRetail'),
+    'Pharmacy / drugstore': tL('bizPharmacy'),
+    'Barbershop / hair salon': tL('bizBarbershop'),
+    'Gym / fitness center': tL('bizGym'),
+    'Office / coworking': tL('bizOffice'),
+    'Medical / clinic': tL('bizMedical'),
+    'Education / tutoring': tL('bizEducation'),
+    'Convenience store': tL('bizConvenience'),
+    'Laundry / dry cleaning': tL('bizLaundry'),
+    'Beauty / spa': tL('bizBeauty'),
+    'Bakery / pastry shop': tL('bizBakery'),
+    'Electronics / tech': tL('bizElectronics'),
+    'Tattoo / piercing': tL('bizTattoo'),
+  }[v] ?? v);
 
   const handleExtend = async () => {
     if (!id) return;
@@ -378,13 +478,13 @@ export default function PropertyDetailPage() {
         <NavHeader />
         <div style={{ maxWidth: 600, margin: '120px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Property not found</h1>
-          <p style={{ color: MUTED, marginBottom: 32 }}>This property may have been removed or the link is invalid.</p>
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>{tP('notFound')}</h1>
+          <p style={{ color: MUTED, marginBottom: 32 }}>{tP('notFoundDesc')}</p>
           <Link href="/propiedades" style={{
             background: 'linear-gradient(135deg, #0f1b3d, #3b6fa0)', color: '#ffffff',
             padding: '12px 28px', borderRadius: 12, fontWeight: 700, textDecoration: 'none',
           }}>
-            ← Back to properties
+            {tP('backToProperties')}
           </Link>
         </div>
       </main>
@@ -395,23 +495,23 @@ export default function PropertyDetailPage() {
   const photos = p.photo_urls?.length > 0 ? p.photo_urls : null;
 
   const stats = [
-    stat('📐', 'Land area', `${p.m2} m²`),
-    stat('🏗️', 'Built area', p.m2_construccion ? `${p.m2_construccion} m²` : null),
-    stat('↔️', 'Frontage', p.frente_m ? `${p.frente_m} m` : null),
-    stat('↕️', 'Depth', p.fondo_m ? `${p.fondo_m} m` : null),
-    stat('⬆️', 'Ceiling height', p.altura_techo_m ? `${p.altura_techo_m} m` : null),
-    stat('🏢', 'Floor', p.nivel_piso),
-    stat('📅', 'Age', p.antiguedad ? `${p.antiguedad} years` : null),
-    stat('🔲', 'Lot type', p.tipo_terreno),
-    stat('🔧', 'Condition', p.estado_conservacion),
-    stat('🏆', 'Build quality', p.calidad_construccion),
-    stat('⚡', 'Electrical', p.tipo_energia),
-    stat('🗺️', 'Zoning', p.uso_suelo),
-    stat('💧', 'Water / Drainage', p.agua_drenaje),
-    stat('🚿', 'Bathrooms', p.banos || null),
-    stat('🚪', 'Rooms', p.habitaciones || null),
-    stat('🅿️', 'Parking', p.estacionamientos || null),
-    stat('🔄', 'Last use', p.uso_anterior),
+    stat('📐', tP('statLandArea'), `${p.m2} m²`),
+    stat('🏗️', tP('statBuiltArea'), p.m2_construccion ? `${p.m2_construccion} m²` : null),
+    stat('↔️', tP('statFrontage'), p.frente_m ? `${p.frente_m} m` : null),
+    stat('↕️', tP('statDepth'), p.fondo_m ? `${p.fondo_m} m` : null),
+    stat('⬆️', tP('statCeiling'), p.altura_techo_m ? `${p.altura_techo_m} m` : null),
+    stat('🏢', tP('statFloor'), p.nivel_piso ? nivelLabel(p.nivel_piso) : null),
+    stat('📅', tP('statAge'), p.antiguedad ? tP('ageValue', { n: p.antiguedad }) : null),
+    stat('🔲', tP('statLotType'), p.tipo_terreno ? terrenoLabel(p.tipo_terreno) : null),
+    stat('🔧', tP('statCondition'), p.estado_conservacion ? conservacionLabel(p.estado_conservacion) : null),
+    stat('🏆', tP('statQuality'), p.calidad_construccion ? calidadLabel(p.calidad_construccion) : null),
+    stat('⚡', tP('statElectrical'), p.tipo_energia ? energiaLabel(p.tipo_energia) : null),
+    stat('🗺️', tP('statZoning'), p.uso_suelo ? sueloLabel(p.uso_suelo) : null),
+    stat('💧', tP('statWater'), p.agua_drenaje ? aguaLabel(p.agua_drenaje) : null),
+    stat('🚿', tP('statBathrooms'), p.banos || null),
+    stat('🚪', tP('statRooms'), p.habitaciones || null),
+    stat('🅿️', tP('statParking'), p.estacionamientos || null),
+    stat('🔄', tP('statLastUse'), p.uso_anterior ? usoAnteriorLabel(p.uso_anterior) : null),
   ].filter(Boolean) as { icon: string; label: string; value: string }[];
 
   const competition = p.competition_data;
@@ -436,7 +536,7 @@ export default function PropertyDetailPage() {
         <Link href="/propiedades" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: MUTED, textDecoration: 'none', marginBottom: 32, transition: 'color 0.2s' }}
           onMouseEnter={e => (e.currentTarget.style.color = ACCENT)}
           onMouseLeave={e => (e.currentTarget.style.color = MUTED)}>
-          ← All properties
+          {tP('backAll')}
         </Link>
 
         {/* ── Owner: listing expiry / extend ── */}
@@ -449,8 +549,8 @@ export default function PropertyDetailPage() {
           }}>
             <div style={{ fontSize: 14, color: TEXT }}>
               {isExpired
-                ? '⚠️ This listing has expired and is no longer visible on the marketplace.'
-                : `🟢 Active listing · ${daysLeft} day${daysLeft === 1 ? '' : 's'} left (until ${expiresAt.toLocaleDateString('es-MX')})`}
+                ? tP('expired')
+                : tP('active', { days: daysLeft ?? 0, date: expiresAt.toLocaleDateString('es-MX') })}
             </div>
             <button
               onClick={handleExtend}
@@ -460,7 +560,7 @@ export default function PropertyDetailPage() {
                 padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13,
                 border: 'none', cursor: extending ? 'wait' : 'pointer', whiteSpace: 'nowrap',
               }}>
-              {extending ? 'Redirecting…' : isExpired ? 'Republish 30 days · $99' : 'Extend 30 days · $99'}
+              {extending ? tP('redirecting') : isExpired ? tP('republish') : tP('extend')}
             </button>
           </div>
         )}
@@ -517,29 +617,29 @@ export default function PropertyDetailPage() {
                   border: `1px solid ${p.modalidad === 'rent' ? 'rgba(59,111,160,0.35)' : 'rgba(15,27,61,0.2)'}`,
                   color: p.modalidad === 'rent' ? ACCENT : ACCENT2,
                 }}>
-                  {p.modalidad === 'rent' ? 'For rent' : 'For sale'}
+                  {p.modalidad === 'rent' ? tP('forRent') : tP('forSale')}
                 </span>
               )}
             </div>
             <h1 style={{ fontSize: 'clamp(22px, 3vw, 34px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 6, letterSpacing: '-0.02em', color: TEXT }}>
-              {p.tipo_local}{p.calle ? ` · ${p.calle}${p.numero ? ` ${p.numero}` : ''}` : ''}
+              {tipoLabel(p.tipo_local)}{p.calle ? ` · ${p.calle}${p.numero ? ` ${p.numero}` : ''}` : ''}
             </h1>
             <p style={{ color: MUTED, fontSize: 14 }}>
-              Published {new Date(p.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {tP('published', { date: new Date(p.created_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) })}
             </p>
           </div>
 
           {/* Price block */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '20px 24px', minWidth: 200, textAlign: 'right', boxShadow: '0 2px 12px rgba(15,27,61,0.06)' }}>
             <div style={{ fontSize: 11, color: SUBTLE, fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
-              {p.modalidad === 'rent' ? 'MONTHLY RENT' : p.modalidad === 'sale' ? 'SALE PRICE' : 'PRICE'}
+              {p.modalidad === 'rent' ? tP('priceRent') : p.modalidad === 'sale' ? tP('priceSale') : tP('priceLabel')}
             </div>
             <div style={{ fontSize: 26, fontWeight: 900, color: TEXT, letterSpacing: '-0.01em' }}>
               {formatPrice(p.precio_inmueble)}
             </div>
             {p.precio_mantenimiento && (
               <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>
-                Maintenance: {formatPrice(p.precio_mantenimiento)}/mo
+                {tP('maintenance', { price: formatPrice(p.precio_mantenimiento) })}
               </div>
             )}
             {(p.tipo_contrato || p.fecha_disponible) && (
@@ -551,7 +651,7 @@ export default function PropertyDetailPage() {
                 )}
                 {p.fecha_disponible && (
                   <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 9px', background: '#f0f2fa', border: `1px solid ${BORDER}`, color: SUBTLE }}>
-                    Available {new Date(p.fecha_disponible).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {tP('available', { date: new Date(p.fecha_disponible).toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric' }) })}
                   </span>
                 )}
               </div>
@@ -564,7 +664,7 @@ export default function PropertyDetailPage() {
 
           {/* Stats */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 18, textTransform: 'uppercase' }}>Property details</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 18, textTransform: 'uppercase' }}>{tP('sectionDetails')}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 24px' }}>
               {stats.map(s => (
                 <div key={s.label}>
@@ -577,7 +677,7 @@ export default function PropertyDetailPage() {
             {/* Services */}
             {p.servicios && p.servicios.length > 0 && (
               <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, marginBottom: 10, textTransform: 'uppercase' }}>Additional services</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, marginBottom: 10, textTransform: 'uppercase' }}>{tP('sectionServices')}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {p.servicios.map(s => (
                     <span key={s} style={{
@@ -586,7 +686,7 @@ export default function PropertyDetailPage() {
                       background: 'rgba(59,111,160,0.07)', border: '1px solid rgba(59,111,160,0.2)',
                       color: ACCENT,
                     }}>
-                      {s}
+                      {servicioLabel(s)}
                     </span>
                   ))}
                 </div>
@@ -597,12 +697,12 @@ export default function PropertyDetailPage() {
             {((p.usos_permitidos && p.usos_permitidos.length > 0) || (p.usos_no_preferidos && p.usos_no_preferidos.length > 0)) && (
               <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, marginBottom: 14, textTransform: 'uppercase' }}>
-                  Owner preferences
+                  {tP('sectionPreferences')}
                 </p>
                 {p.usos_permitidos && p.usos_permitidos.length > 0 && (
                   <div style={{ marginBottom: 12 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, color: 'oklch(0.42 0.14 155)', marginBottom: 7, letterSpacing: '0.06em' }}>
-                      ✓ Ideal uses
+                      {tP('idealUses')}
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {p.usos_permitidos.map(u => (
@@ -611,7 +711,7 @@ export default function PropertyDetailPage() {
                           background: 'oklch(0.97 0.05 155)', border: '1px solid oklch(0.86 0.1 155)',
                           color: 'oklch(0.40 0.14 155)', fontWeight: 600,
                         }}>
-                          {u}
+                          {bizLabel(u)}
                         </span>
                       ))}
                     </div>
@@ -620,7 +720,7 @@ export default function PropertyDetailPage() {
                 {p.usos_no_preferidos && p.usos_no_preferidos.length > 0 && (
                   <div>
                     <p style={{ fontSize: 11, fontWeight: 700, color: 'oklch(0.50 0.18 25)', marginBottom: 7, letterSpacing: '0.06em' }}>
-                      ✕ Not preferred
+                      {tP('notPreferred')}
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {p.usos_no_preferidos.map(u => (
@@ -629,7 +729,7 @@ export default function PropertyDetailPage() {
                           background: 'oklch(0.97 0.04 25)', border: '1px solid oklch(0.88 0.1 25)',
                           color: 'oklch(0.50 0.18 25)', fontWeight: 600,
                         }}>
-                          {u}
+                          {bizLabel(u)}
                         </span>
                       ))}
                     </div>
@@ -645,9 +745,9 @@ export default function PropertyDetailPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
                   {isochrones.length > 0 && (
                     <div style={{ display: 'flex', gap: 14, fontSize: 11, color: SUBTLE }}>
-                      <span><span style={{ color: ACCENT }}>●</span> 5 min walk</span>
-                      <span><span style={{ color: '#4a7fb5' }}>●</span> 10 min walk</span>
-                      <span><span style={{ color: '#6b5ce7' }}>●</span> 15 min walk</span>
+                      <span><span style={{ color: ACCENT }}>●</span> {tP('walk5')}</span>
+                      <span><span style={{ color: '#4a7fb5' }}>●</span> {tP('walk10')}</span>
+                      <span><span style={{ color: '#6b5ce7' }}>●</span> {tP('walk15')}</span>
                     </div>
                   )}
                   {mapsUrl && (
@@ -659,7 +759,7 @@ export default function PropertyDetailPage() {
                       onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '0.8')}
                     >
-                      🗺️ Open in Google Maps →
+                      {tP('openMaps')}
                     </a>
                   )}
                 </div>
@@ -669,13 +769,13 @@ export default function PropertyDetailPage() {
 
           {/* Competition & Opportunities */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 18, textTransform: 'uppercase' }}>Zone analysis</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 18, textTransform: 'uppercase' }}>{tP('sectionZone')}</p>
 
             {!competition ? (
               <div style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>
                 {isOwner && p.lat && p.lng ? (
                   <div>
-                    <p style={{ marginBottom: 14 }}>This listing does not have zone analysis yet.</p>
+                    <p style={{ marginBottom: 14 }}>{tP('noZoneYet')}</p>
                     {zoneError && (
                       <p style={{ color: '#dc2626', fontSize: 12, marginBottom: 12, fontFamily: "'DM Mono', monospace" }}>{zoneError}</p>
                     )}
@@ -692,13 +792,13 @@ export default function PropertyDetailPage() {
                         transition: 'opacity 0.15s',
                       }}
                     >
-                      {runningZone ? '⏳ Analyzing zone...' : '📍 Analyze zone now'}
+                      {runningZone ? tP('analyzingZone') : tP('analyzeNow')}
                     </button>
                   </div>
                 ) : (
                   <>
-                    <p>No zone data available.</p>
-                    <p style={{ marginTop: 8 }}>Analysis requires a map pin or address.</p>
+                    <p>{tP('noZoneData')}</p>
+                    <p style={{ marginTop: 8 }}>{tP('zoneRequiresPin')}</p>
                   </>
                 )}
               </div>
@@ -708,16 +808,16 @@ export default function PropertyDetailPage() {
                 {competition.tourist_context && (() => {
                   const tc = competition.tourist_context!;
                   const zoneLabels: Record<string, string> = {
-                    cultural: 'Cultural / Historic',
-                    religious: 'Religious',
-                    entertainment: 'Entertainment',
-                    nature: 'Nature',
-                    mixed: 'Mixed tourist',
+                    cultural: tP('zoneCultural'),
+                    religious: tP('zoneReligious'),
+                    entertainment: tP('zoneEntertainment'),
+                    nature: tP('zoneNature'),
+                    mixed: tP('zoneMixed'),
                   };
                   return (
                     <div style={{ marginBottom: 20, padding: '16px', borderRadius: 10, background: 'oklch(0.98 0.03 70)', border: '1px solid oklch(0.88 0.08 70)' }}>
                       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.48 0.14 70)', marginBottom: 12, textTransform: 'uppercase' }}>
-                        🗺️ Tourist zone — {zoneLabels[tc.zone_type]}
+                        {tP('touristZone', { type: zoneLabels[tc.zone_type] ?? tc.zone_type })}
                       </p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
                         {tc.nearby_attractions.map((a, i) => (
@@ -727,7 +827,7 @@ export default function PropertyDetailPage() {
                         ))}
                       </div>
                       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: 'oklch(0.48 0.14 70)', marginBottom: 8, textTransform: 'uppercase' }}>
-                        Recommended businesses for this area
+                        {tP('recommendedBiz')}
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {tc.suggestions.map((s, i) => (
@@ -745,7 +845,7 @@ export default function PropertyDetailPage() {
                 {competition.opportunities?.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: ACCENT, marginBottom: 10, textTransform: 'uppercase' }}>
-                      💡 Opportunities in this area
+                      {tP('opportunities')}
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {competition.opportunities.map((o) => (
@@ -758,14 +858,14 @@ export default function PropertyDetailPage() {
                           <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{o.category}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <span style={{ fontSize: 11, color: MUTED, fontFamily: "'DM Mono', monospace" }}>
-                              {o.count_500m} within 500m · {o.count_2km} within 2km
+                              {tP('within500m2km', { count500m: o.count_500m, count2km: o.count_2km })}
                             </span>
                             <span style={{
                               fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4,
                               background: o.score === 'high' ? 'rgba(59,111,160,0.1)' : '#edf0f8',
                               color: ACCENT, fontFamily: "'DM Mono', monospace", letterSpacing: '0.05em',
                             }}>
-                              {o.score === 'high' ? 'HIGH' : 'MEDIUM'}
+                              {o.score === 'high' ? tP('scoreHigh') : tP('scoreMedium')}
                             </span>
                           </div>
                         </div>
@@ -778,10 +878,10 @@ export default function PropertyDetailPage() {
                 {competition.food_subcategories?.gaps && competition.food_subcategories.gaps.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'oklch(0.42 0.14 155)', marginBottom: 6, textTransform: 'uppercase' }}>
-                      🍽️ Food gaps — demand nearby, absent here
+                      {tP('foodGaps')}
                     </p>
                     <p style={{ fontSize: 12, color: MUTED, marginBottom: 10, lineHeight: 1.5 }}>
-                      These cuisine types exist within 2–5km (demand proven) but have no presence within 500m:
+                      {tP('foodGapsDesc')}
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                       {competition.food_subcategories.gaps.map((gap) => (
@@ -802,7 +902,7 @@ export default function PropertyDetailPage() {
                 {competition.saturated?.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#dc2626', marginBottom: 10, textTransform: 'uppercase' }}>
-                      ⚠️ Saturated categories — high competition
+                      {tP('saturated')}
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                       {competition.saturated.map((s) => (
@@ -812,7 +912,7 @@ export default function PropertyDetailPage() {
                           background: 'oklch(0.97 0.04 25)', border: '1px solid oklch(0.88 0.1 25)',
                           color: 'oklch(0.50 0.18 25)',
                         }}>
-                          {s.category} · {s.count_500m} within 500m
+                          {tP('saturatedItem', { category: s.category, count: s.count_500m })}
                         </span>
                       ))}
                     </div>
@@ -824,7 +924,7 @@ export default function PropertyDetailPage() {
 
                 {/* Top nearby list */}
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, marginBottom: 10, textTransform: 'uppercase' }}>
-                  Nearest businesses
+                  {tP('nearestBiz')}
                 </p>
                 {competition.top_nearby.filter(b => b.category).slice(0, 5).map((b, i) => (
                   <div key={i} style={{
@@ -841,14 +941,14 @@ export default function PropertyDetailPage() {
                   </div>
                 ))}
                 {competition.top_nearby.filter(b => b.category).length === 0 && (
-                  <p style={{ fontSize: 12, color: MUTED }}>No businesses registered within 500m.</p>
+                  <p style={{ fontSize: 12, color: MUTED }}>{tP('noBiz500m')}</p>
                 )}
 
                 {/* Transit section */}
                 {competition.nearby_transit && competition.nearby_transit.length > 0 && (
                   <>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, margin: '20px 0 10px', textTransform: 'uppercase' }}>
-                      Nearby transit
+                      {tP('nearbyTransit')}
                     </p>
                     {competition.nearby_transit.map((t, i) => (
                       <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${BORDER}` }}>
@@ -873,7 +973,7 @@ export default function PropertyDetailPage() {
         {/* ── Description ── */}
         {p.descripcion && (
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 14, textTransform: 'uppercase' }}>Description</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 14, textTransform: 'uppercase' }}>{tP('sectionDesc')}</p>
             <p style={{ fontSize: 15, lineHeight: 1.75, color: MUTED }}>{p.descripcion}</p>
           </div>
         )}
@@ -883,8 +983,8 @@ export default function PropertyDetailPage() {
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>AI Analysis</p>
-                <p style={{ fontSize: 13, color: MUTED }}>Business recommendations generated by Claude</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>{tP('sectionAI')}</p>
+                <p style={{ fontSize: 13, color: MUTED }}>{tP('aiSubtitle')}</p>
               </div>
               {!analysis && (
                 <button
@@ -904,9 +1004,9 @@ export default function PropertyDetailPage() {
                   {analyzing ? (
                     <>
                       <span style={{ display: 'inline-block', width: 12, height: 12, border: `2px solid ${ACCENT}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                      Analyzing...
+                      {tP('analyzing')}
                     </>
-                  ) : '✦ Analyze with AI'}
+                  ) : tP('analyzeAI')}
                 </button>
               )}
             </div>
@@ -924,13 +1024,13 @@ export default function PropertyDetailPage() {
                     border: `1px solid ${analysis.nivel_competencia === 'high' ? 'oklch(0.88 0.1 25)' : analysis.nivel_competencia === 'medium' ? 'oklch(0.88 0.08 70)' : 'oklch(0.88 0.1 155)'}`,
                     color: analysis.nivel_competencia === 'high' ? 'oklch(0.50 0.18 25)' : analysis.nivel_competencia === 'medium' ? 'oklch(0.52 0.14 70)' : 'oklch(0.42 0.14 155)',
                   }}>
-                    {analysis.nivel_competencia === 'high' ? 'High competition' : analysis.nivel_competencia === 'medium' ? 'Medium competition' : 'Low competition'}
+                    {analysis.nivel_competencia === 'high' ? tP('competitionHigh') : analysis.nivel_competencia === 'medium' ? tP('competitionMedium') : tP('competitionLow')}
                   </span>
                 </div>
                 <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.6 }}>{analysis.oportunidad}</p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, textTransform: 'uppercase' }}>Recommended uses</p>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, textTransform: 'uppercase' }}>{tP('recommendedUses')}</p>
                   {analysis.usos_recomendados.map((item, i) => (
                     <div key={i} style={{ background: '#f5f6fc', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT2, marginBottom: 4 }}>{item.uso}</div>
@@ -953,22 +1053,22 @@ export default function PropertyDetailPage() {
         {!isOwner && (
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>
-              Contact the owner
+              {tP('contactOwner')}
             </p>
             <p style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>
-              Select one or more questions, or write your own.
+              {tP('contactOwnerDesc')}
             </p>
 
             {inqSent ? (
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-                <p style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: 6 }}>Message sent!</p>
-                <p style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>The owner will contact you shortly.</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: 6 }}>{tP('messageSent')}</p>
+                <p style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>{tP('ownerContactsSoon')}</p>
                 <button
                   onClick={() => { setInqSent(false); setInqSelected([]); setInqMessage(''); setInqName(''); setInqEmail(''); }}
                   style={{ fontSize: 12, color: MUTED, background: 'none', border: `1px solid ${BORDER}`, borderRadius: 8, padding: '6px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}
                 >
-                  Send another question
+                  {tP('sendAnother')}
                 </button>
               </div>
             ) : (
@@ -1001,7 +1101,7 @@ export default function PropertyDetailPage() {
                 <textarea
                   value={inqMessage}
                   onChange={e => setInqMessage(e.target.value)}
-                  placeholder="Write your question here..."
+                  placeholder={tP('writePlaceholder')}
                   rows={3}
                   style={{
                     width: '100%', resize: 'vertical', padding: '12px 14px',
@@ -1019,14 +1119,14 @@ export default function PropertyDetailPage() {
                       type="text"
                       value={inqName}
                       onChange={e => setInqName(e.target.value)}
-                      placeholder="Your name (optional)"
+                      placeholder={tP('namePlaceholder')}
                       style={{ padding: '10px 14px', border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: 13, color: TEXT, background: CARD2, fontFamily: "'Inter', sans-serif", outline: 'none' }}
                     />
                     <input
                       type="email"
                       value={inqEmail}
                       onChange={e => setInqEmail(e.target.value)}
-                      placeholder="Your email (optional)"
+                      placeholder={tP('emailPlaceholder')}
                       style={{ padding: '10px 14px', border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: 13, color: TEXT, background: CARD2, fontFamily: "'Inter', sans-serif", outline: 'none' }}
                     />
                   </div>
@@ -1048,7 +1148,7 @@ export default function PropertyDetailPage() {
                     fontFamily: "'Inter', sans-serif", transition: 'all 0.2s',
                   }}
                 >
-                  {inqSending ? 'Sending…' : 'Send message →'}
+                  {inqSending ? tP('sending') : tP('sendMessage')}
                 </button>
               </>
             )}
@@ -1061,9 +1161,9 @@ export default function PropertyDetailPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>
-                  Received inquiries
+                  {tP('inbox')}
                 </p>
-                <p style={{ fontSize: 13, color: MUTED }}>Questions sent by interested visitors</p>
+                <p style={{ fontSize: 13, color: MUTED }}>{tP('inboxSubtitle')}</p>
               </div>
               <button
                 onClick={() => {
@@ -1079,18 +1179,18 @@ export default function PropertyDetailPage() {
                   cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                 }}
               >
-                {inboxOpen ? 'Hide' : 'View inquiries'}
+                {inboxOpen ? tP('hide') : tP('viewInquiries')}
               </button>
             </div>
 
             {inboxOpen && (
               <div style={{ marginTop: 20 }}>
                 {loadingInq ? (
-                  <div style={{ color: MUTED, fontSize: 13, padding: '20px 0', textAlign: 'center' }}>Loading…</div>
+                  <div style={{ color: MUTED, fontSize: 13, padding: '20px 0', textAlign: 'center' }}>{tP('loadingInquiries')}</div>
                 ) : inquiries.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '32px 0', color: MUTED }}>
                     <div style={{ fontSize: 32, marginBottom: 10 }}>📭</div>
-                    <p style={{ fontSize: 14 }}>No inquiries yet.</p>
+                    <p style={{ fontSize: 14 }}>{tP('noInquiries')}</p>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -1108,7 +1208,7 @@ export default function PropertyDetailPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
                           <div>
                             <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>
-                              {inq.sender_name ?? 'Anonymous visitor'}
+                              {inq.sender_name ?? tP('anonymous')}
                             </span>
                             {inq.sender_email && (
                               <a href={`mailto:${inq.sender_email}`} style={{ fontSize: 12, color: ACCENT, marginLeft: 8, textDecoration: 'none' }}>
@@ -1119,7 +1219,7 @@ export default function PropertyDetailPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                             {!inq.is_read && (
                               <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, background: 'rgba(59,111,160,0.1)', border: '1px solid rgba(59,111,160,0.3)', color: ACCENT, letterSpacing: '0.06em' }}>
-                                NEW
+                                {tP('newBadge')}
                               </span>
                             )}
                             <span style={{ fontSize: 11, color: SUBTLE, fontFamily: "'DM Mono', monospace" }}>
@@ -1147,14 +1247,14 @@ export default function PropertyDetailPage() {
                         {inq.sender_email && (
                           <div style={{ marginTop: 12 }}>
                             <a
-                              href={`mailto:${inq.sender_email}?subject=Re: ${encodeURIComponent(p.tipo_local + ' en ' + p.colonia)}&body=${encodeURIComponent('Hola ' + (inq.sender_name ?? '') + ',\n\nGracias por tu interés en la propiedad.\n\n')}`}
+                              href={`mailto:${inq.sender_email}?subject=Re: ${encodeURIComponent(tipoLabel(p.tipo_local) + ' en ' + p.colonia)}&body=${encodeURIComponent('Hola ' + (inq.sender_name ?? '') + ',\n\nGracias por tu interés en la propiedad.\n\n')}`}
                               style={{
                                 display: 'inline-block', fontSize: 12, fontWeight: 700,
                                 color: ACCENT, border: `1px solid rgba(59,111,160,0.3)`,
                                 borderRadius: 8, padding: '5px 12px', textDecoration: 'none',
                               }}
                             >
-                              ✉ Reply by email →
+                              {tP('reply')}
                             </a>
                           </div>
                         )}
@@ -1174,7 +1274,7 @@ export default function PropertyDetailPage() {
             padding: '13px 28px', borderRadius: 12, fontWeight: 700, fontSize: 14,
             textDecoration: 'none', boxShadow: '0 4px 16px rgba(15,27,61,0.2)',
           }}>
-            Register a similar property →
+            {tP('registerSimilar')}
           </Link>
           <Link href="/propiedades" style={{
             background: 'transparent', color: MUTED,
@@ -1185,7 +1285,7 @@ export default function PropertyDetailPage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = ACCENT2; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED; }}
           >
-            ← Back to all properties
+            {tP('backToAllProperties')}
           </Link>
         </div>
 
