@@ -1,12 +1,17 @@
+import { getTranslations } from 'next-intl/server';
 import BuscarLocal from '@/components/BuscarLocal';
 import Link from 'next/link';
 
-export const metadata = {
-  title: 'Find Space — Plaziia',
-  description: 'Describe your project and AI finds the ideal commercial space for you.',
-};
+export async function generateMetadata() {
+  return {
+    title: 'Find Space — Plaziia',
+    description: 'Describe your project and AI finds the ideal commercial space for you.',
+  };
+}
 
-export default function BuscarPage() {
+export default async function BuscarPage() {
+  const t = await getTranslations('BuscarPage');
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'oklch(0.985 0.005 240)' }}>
       <header style={{
@@ -24,7 +29,7 @@ export default function BuscarPage() {
           fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center',
           gap: '8px', color: 'oklch(0.45 0.03 260)', transition: 'color 0.2s',
         }}>
-          <span>← Back to home</span>
+          <span>{t('backHome')}</span>
         </Link>
       </header>
 
