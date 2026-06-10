@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
@@ -188,6 +188,13 @@ export default function BuscarLocal() {
   const [businessType, setBusinessType] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zona, setZona] = useState<{ label: string; lat: number; lng: number } | null>(null);
+
+  // Location autocomplete
+  const [locationSuggestions, setLocationSuggestions] = useState<{ label: string; placeId: string; lat: number; lng: number }[]>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const locationDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const locationWrapperRef = useRef<HTMLDivElement>(null);
   const [modalidad, setModalidad] = useState<Modalidad>("any");
   const [presupuesto, setPresupuesto] = useState<number>(8000);
   const [preflight, setPreflight] = useState<PreflightResult | null>(null);
@@ -202,6 +209,32 @@ export default function BuscarLocal() {
     const interval = setInterval(() => setDots((d) => (d.length >= 3 ? "" : d + ".")), 400);
     return () => { clearInterval(interval); setDots(""); };
   }, [isLoading]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (locationWrapperRef.current && !locationWrapperRef.current.contains(e.target as Node)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const searchLocationSuggestions = useCallback((q: string) => {
+    if (locationDebounce.current) clearTimeout(locationDebounce.current);
+    if (q.trim().length < 2) { setLocationSuggestions([]); setShowLocationSuggestions(false); return; }
+    locationDebounce.current = setTimeout(async () => {
+      setLocationLoading(true);
+      try {
+        const res = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}`);
+        const { predictions } = await res.json();
+        setLocationSuggestions(predictions ?? []);
+        setShowLocationSuggestions(true);
+      } catch { /* silent */ }
+      setLocationLoading(false);
+    }, 300);
+  }, []);
 
   // Computed from translations
   const compConfig = {
@@ -221,6 +254,9 @@ export default function BuscarLocal() {
 
   // ── Paso 1: preflight (DB + saturación) ────────────────────────────────────
   const handleSubmitWith = async (bt: string, loc: string) => {
+    if (!zona ) {
+      return;
+    }
     const parts = [bt.trim(), loc.trim() ? `in ${loc.trim()}` : ""].filter(Boolean);
     const combined = parts.join(" ") || descripcion.trim();
     if (combined.length < 3) {
@@ -297,6 +333,8 @@ export default function BuscarLocal() {
     setZona(null);
     setModalidad("any");
     setPresupuesto(8000);
+    setLocationSuggestions([]);
+    setShowLocationSuggestions(false);
   };
 
   const backToInput = () => {
@@ -326,7 +364,7 @@ export default function BuscarLocal() {
             <Box display="flex" alignItems="center" gap={1.5} mb={1}>
               <Box sx={{ width: 32, height: 32, background: "linear-gradient(135deg, #0f1b3d, #3b6fa0)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔍</Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.5px", color: "#181e38" }}>
-                Local<span style={{ color: "oklch(0.45 0.08 250)" }}>IQ</span>
+                <span style={{ color: "#0f1b3d" }}>Plazi</span><span style={{ color: "#3b6fa0" }}>ia</span>
               </Typography>
               <Chip label={t("chipBeta")} size="small" sx={{ bgcolor: "#edf0f8", border: "1px solid #d5daea", color: "#5a6288", fontFamily: "'DM Mono', monospace", height: 20, fontSize: 10 }} />
             </Box>
@@ -362,13 +400,22 @@ export default function BuscarLocal() {
                 transition: "border-color 0.2s, box-shadow 0.2s",
                 "&:focus-within": { borderColor: "#a4b4d2", boxShadow: "0 2px 16px rgba(59,111,160,0.12)" },
               }}>
-                {/* Location input */}
-                <Box sx={{ display: "flex", alignItems: "center", flex: 1, px: 2, py: 0.5 }}>
-                  <Typography sx={{ color: "#9099b8", fontSize: 16, mr: 1, flexShrink: 0 }}>📍</Typography>
+                {/* Location input with autocomplete */}
+                <Box ref={locationWrapperRef} sx={{ display: "flex", alignItems: "center", flex: 1, px: 2, py: 0.5, position: "relative" }}>
+                  <Typography sx={{ color: "#9099b8", fontSize: 16, mr: 1, flexShrink: 0 }}>
+                    {locationLoading ? "⏳" : "📍"}
+                  </Typography>
                   <input
                     value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+                    onChange={(e) => {
+                      setLocation(e.target.value);
+                      searchLocationSuggestions(e.target.value);
+                    }}
+                    onFocus={() => { if (locationSuggestions.length > 0) setShowLocationSuggestions(true); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setShowLocationSuggestions(false);
+                      if (e.key === "Enter") { setShowLocationSuggestions(false); handleSubmit(); }
+                    }}
                     placeholder={t("placeholderLocation")}
                     style={{
                       background: "transparent",
@@ -380,6 +427,49 @@ export default function BuscarLocal() {
                       width: "100%",
                     }}
                   />
+                  {/* Suggestions dropdown */}
+                  {showLocationSuggestions && locationSuggestions.length > 0 && (
+                    <Box sx={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      left: -16,
+                      right: -16,
+                      bgcolor: "#ffffff",
+                      border: "1px solid #d5daea",
+                      borderRadius: 2,
+                      boxShadow: "0 8px 24px rgba(15,27,61,0.12)",
+                      zIndex: 1000,
+                      overflow: "hidden",
+                    }}>
+                      {locationSuggestions.map((s) => (
+                        <Box
+                          key={s.placeId}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setLocation(s.label);
+                            setZona({ label: s.label, lat: s.lat, lng: s.lng });
+                            setShowLocationSuggestions(false);
+                          }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 1,
+                            px: 2,
+                            py: 1.2,
+                            cursor: "pointer",
+                            "&:hover": { bgcolor: "#f0f2fa" },
+                            borderBottom: "1px solid #f0f2fa",
+                            "&:last-child": { borderBottom: "none" },
+                          }}
+                        >
+                          <Typography sx={{ fontSize: 13, color: "#9099b8", mt: "1px", flexShrink: 0 }}>📍</Typography>
+                          <Typography sx={{ fontSize: 13, color: "#181e38", fontFamily: "'DM Mono', monospace", lineHeight: 1.4 }}>
+                            {s.label}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </Box>
 
                 {/* Divider */}
