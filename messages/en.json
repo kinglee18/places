@@ -371,6 +371,23 @@
     "bizElectronics": "Electronics / tech",
     "bizTattoo": "Tattoo / piercing"
   },
+  "FeedbackWidget": {
+    "buttonLabel": "Feedback",
+    "title": "Send feedback",
+    "subtitle": "Bug, question, or suggestion?",
+    "typeBug": "Bug",
+    "typeQuestion": "Question",
+    "typeSuggestion": "Suggestion",
+    "messagePlaceholder": "Describe your feedback...",
+    "emailPlaceholder": "Your email (optional)",
+    "submitBtn": "Send",
+    "submitting": "Sending...",
+    "successTitle": "Thanks for your feedback!",
+    "successBody": "We'll review it soon.",
+    "errorMessage": "Please write a message.",
+    "errorSubmit": "Error sending. Please try again.",
+    "close": "×"
+  },
   "BuscarPage": {
     "backHome": "← Back to home"
   },

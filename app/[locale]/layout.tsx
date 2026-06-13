@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import Providers from '@/components/Providers';
+import FeedbackWidget from '@/components/FeedbackWidget';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
@@ -31,7 +32,10 @@ export default async function LocaleLayout({
       <body>
         <Analytics />
         <NextIntlClientProvider messages={messages}>
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <FeedbackWidget />
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

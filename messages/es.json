@@ -371,6 +371,23 @@
     "bizElectronics": "Electrónica / tecnología",
     "bizTattoo": "Tatuajes / perforaciones"
   },
+  "FeedbackWidget": {
+    "buttonLabel": "Feedback",
+    "title": "Enviar comentarios",
+    "subtitle": "¿Bug, pregunta o sugerencia?",
+    "typeBug": "Bug",
+    "typeQuestion": "Pregunta",
+    "typeSuggestion": "Sugerencia",
+    "messagePlaceholder": "Describe tu comentario...",
+    "emailPlaceholder": "Tu correo (opcional)",
+    "submitBtn": "Enviar",
+    "submitting": "Enviando...",
+    "successTitle": "¡Gracias por tus comentarios!",
+    "successBody": "Los revisaremos pronto.",
+    "errorMessage": "Por favor escribe un mensaje.",
+    "errorSubmit": "Error al enviar. Inténtalo de nuevo.",
+    "close": "×"
+  },
   "BuscarPage": {
     "backHome": "← Volver al inicio"
   },

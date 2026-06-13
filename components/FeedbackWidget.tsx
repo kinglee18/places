@@ -1,50 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 type FeedbackType = 'bug' | 'question' | 'suggestion';
-
-const TYPE_OPTIONS: { value: FeedbackType; label: string; placeholder: string }[] = [
-  { value: 'bug',        label: '🐛 Bug',        placeholder: 'Describe what happened and how to reproduce it…' },
-  { value: 'question',   label: '❓ Question',   placeholder: 'What would you like to know?…' },
-  { value: 'suggestion', label: '💡 Suggestion', placeholder: 'What would make Plaziia better for you?…' },
-];
+type WidgetState = 'idle' | 'open' | 'submitting' | 'success';
 
 export default function FeedbackWidget() {
+  const t = useTranslations('FeedbackWidget');
   const { data: session } = useSession();
 
-  const [open, setOpen]         = useState(false);
-  const [type, setType]         = useState<FeedbackType>('question');
-  const [message, setMessage]   = useState('');
-  const [email, setEmail]       = useState('');
-  const [sending, setSending]   = useState(false);
-  const [success, setSuccess]   = useState(false);
-  const [error, setError]       = useState('');
+  const [widgetState, setWidgetState] = useState<WidgetState>('idle');
+  const [type, setType] = useState<FeedbackType>('suggestion');
+  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const userEmail = session?.user?.email ?? null;
+  const isLoggedIn = !!session?.user;
+  const isOpen = widgetState === 'open' || widgetState === 'submitting';
 
-  function reset() {
-    setType('question');
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => textareaRef.current?.focus(), 80);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  const open = () => { setWidgetState('open'); setErrorMsg(''); };
+
+  const close = () => {
+    setWidgetState('idle');
     setMessage('');
+    setType('suggestion');
     setEmail('');
-    setError('');
-    setSuccess(false);
-  }
+    setErrorMsg('');
+  };
 
-  function handleClose() {
-    setOpen(false);
-    setTimeout(reset, 300); // wait for close animation
-  }
-
-  async function handleSubmit() {
+  const submit = async () => {
     if (!message.trim()) {
-      setError('Please write a message before sending.');
+      setErrorMsg(t('errorMessage'));
+      textareaRef.current?.focus();
       return;
     }
-
-    setSending(true);
-    setError('');
+    setErrorMsg('');
+    setWidgetState('submitting');
 
     try {
       const res = await fetch('/api/feedback', {
@@ -53,248 +61,263 @@ export default function FeedbackWidget() {
         body: JSON.stringify({
           type,
           message: message.trim(),
-          senderEmail: (userEmail ?? email.trim()) || undefined,
+          senderEmail: session?.user?.email || email.trim() || undefined,
+          senderName: session?.user?.name || undefined,
           pageUrl: window.location.href,
         }),
       });
-
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error ?? 'Unknown error');
+        throw new Error(data.error || t('errorSubmit'));
       }
-
-      setSuccess(true);
-      setTimeout(() => {
-        handleClose();
-      }, 2000);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-    } finally {
-      setSending(false);
+      setWidgetState('success');
+      setTimeout(() => close(), 3200);
+    } catch (e: unknown) {
+      setErrorMsg(e instanceof Error ? e.message : t('errorSubmit'));
+      setWidgetState('open');
     }
-  }
+  };
 
-  const placeholder = TYPE_OPTIONS.find((o) => o.value === type)?.placeholder ?? '';
+  const TYPES: { value: FeedbackType; emoji: string; label: string }[] = [
+    { value: 'bug',        emoji: '🐛', label: t('typeBug') },
+    { value: 'question',   emoji: '❓', label: t('typeQuestion') },
+    { value: 'suggestion', emoji: '💡', label: t('typeSuggestion') },
+  ];
+
+  const isVisible = isOpen || widgetState === 'success';
 
   return (
     <>
-      {/* Floating pill button */}
+      {/* ── Floating trigger button ─────────────────────────────────── */}
       <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Open feedback"
+        onClick={open}
+        aria-label={t('buttonLabel')}
         style={{
-          position:     'fixed',
-          bottom:       '24px',
-          right:        '24px',
-          zIndex:       90,
-          display:      'flex',
-          alignItems:   'center',
-          gap:          '8px',
-          padding:      '0 20px',
-          height:       '48px',
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 900,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '7px',
+          padding: '9px 16px',
           borderRadius: '999px',
-          border:       'none',
-          cursor:       'pointer',
-          background:   'linear-gradient(135deg, #0f1b3d 0%, #3b6fa0 100%)',
-          color:        '#fff',
-          fontSize:     '14px',
-          fontWeight:   600,
-          boxShadow:    '0 4px 20px rgba(15,27,61,0.35)',
-          transition:   'opacity 0.15s, transform 0.15s',
-          letterSpacing: '0.01em',
+          border: '1px solid oklch(0.88 0.02 250)',
+          background: 'oklch(0.985 0.005 240 / 0.96)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 4px 24px oklch(0.18 0.04 260 / 0.10)',
+          cursor: 'pointer',
+          fontSize: '13px',
+          fontWeight: 600,
+          color: 'oklch(0.35 0.04 260)',
+          fontFamily: "'Inter', sans-serif",
+          transition: 'all 0.2s',
+          opacity: isVisible ? 0 : 1,
+          pointerEvents: isVisible ? 'none' : 'auto',
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+        onMouseEnter={e => {
+          e.currentTarget.style.borderColor = 'oklch(0.55 0.08 250)';
+          e.currentTarget.style.boxShadow = '0 6px 28px oklch(0.18 0.04 260 / 0.16)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.borderColor = 'oklch(0.88 0.02 250)';
+          e.currentTarget.style.boxShadow = '0 4px 24px oklch(0.18 0.04 260 / 0.10)';
+        }}
       >
-        <span style={{ fontSize: '18px', lineHeight: 1 }}>💬</span>
-        Feedback
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M14 1H2C1.45 1 1 1.45 1 2v9c0 .55.45 1 1 1h2v3l4-3h6c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+        </svg>
+        {t('buttonLabel')}
       </button>
 
-      {/* Modal card */}
-      {open && (
+      {/* ── Backdrop ────────────────────────────────────────────────── */}
+      {isOpen && (
         <div
+          onClick={close}
+          style={{ position: 'fixed', inset: 0, zIndex: 901 }}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── Panel ───────────────────────────────────────────────────── */}
+      {isVisible && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('title')}
           style={{
-            position:     'fixed',
-            bottom:       '84px',
-            right:        '24px',
-            zIndex:       91,
-            width:        '308px',
-            background:   '#fff',
+            position: 'fixed',
+            bottom: 72,
+            right: 24,
+            zIndex: 902,
+            width: 320,
+            background: '#ffffff',
+            border: '1px solid oklch(0.88 0.02 250)',
             borderRadius: '16px',
-            boxShadow:    '0 8px 40px rgba(15,27,61,0.20), 0 1px 4px rgba(0,0,0,0.08)',
-            overflow:     'hidden',
-            display:      'flex',
-            flexDirection:'column',
+            boxShadow: '0 16px 48px oklch(0.18 0.04 260 / 0.14)',
+            fontFamily: "'Inter', sans-serif",
+            overflow: 'hidden',
+            animation: 'fb-slide-up 0.22s ease',
           }}
         >
-          {/* Header */}
-          <div style={{
-            background:   'linear-gradient(135deg, #0f1b3d 0%, #3b6fa0 100%)',
-            padding:      '16px 20px',
-            display:      'flex',
-            alignItems:   'center',
-            justifyContent: 'space-between',
-          }}>
-            <div>
-              <div style={{ color: '#fff', fontWeight: 700, fontSize: '15px' }}>Send feedback</div>
-              <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '12px', marginTop: '2px' }}>We read every message</div>
-            </div>
-            <button
-              onClick={handleClose}
-              aria-label="Close feedback"
-              style={{
-                background: 'rgba(255,255,255,0.15)',
-                border:     'none',
-                color:      '#fff',
-                width:      '28px',
-                height:     '28px',
-                borderRadius: '50%',
-                cursor:     'pointer',
-                fontSize:   '16px',
-                display:    'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: 1,
-              }}
-            >
-              ×
-            </button>
-          </div>
+          <style>{`
+            @keyframes fb-slide-up {
+              from { opacity: 0; transform: translateY(12px); }
+              to   { opacity: 1; transform: none; }
+            }
+          `}</style>
 
-          {/* Body */}
-          <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {success ? (
-              <div style={{
-                textAlign:  'center',
-                padding:    '24px 0',
-                color:      '#1e6b3c',
-                fontSize:   '15px',
-                fontWeight: 600,
-              }}>
-                ✓ Thanks! We&apos;ll look into it.
+          {widgetState === 'success' ? (
+            <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#181e38', marginBottom: 6 }}>
+                {t('successTitle')}
               </div>
-            ) : (
-              <>
+              <div style={{ fontSize: 13, color: '#5a6288' }}>{t('successBody')}</div>
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '16px 16px 0',
+              }}>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#181e38' }}>{t('title')}</div>
+                  <div style={{ fontSize: 12, color: '#9099b8', marginTop: 2 }}>{t('subtitle')}</div>
+                </div>
+                <button
+                  onClick={close}
+                  aria-label={t('close')}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: 18, color: '#9099b8', lineHeight: 1,
+                    padding: '4px 8px', borderRadius: 8,
+                    transition: 'color 0.15s, background 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#181e38'; e.currentTarget.style.background = 'oklch(0.95 0.01 250)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#9099b8'; e.currentTarget.style.background = 'none'; }}
+                >
+                  {t('close')}
+                </button>
+              </div>
+
+              <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {/* Type selector */}
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  {TYPE_OPTIONS.map((opt) => (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {TYPES.map(({ value, emoji, label }) => (
                     <button
-                      key={opt.value}
-                      onClick={() => setType(opt.value)}
+                      key={value}
+                      onClick={() => setType(value)}
                       style={{
-                        flex:         1,
-                        padding:      '6px 4px',
-                        borderRadius: '8px',
-                        border:       type === opt.value
-                          ? '2px solid #3b6fa0'
-                          : '2px solid #e4e7f0',
-                        background:   type === opt.value ? '#eaf1fa' : '#f8f9fb',
-                        color:        type === opt.value ? '#0f1b3d' : '#5a6288',
-                        fontSize:     '12px',
-                        fontWeight:   type === opt.value ? 700 : 500,
-                        cursor:       'pointer',
-                        transition:   'all 0.12s',
-                        whiteSpace:   'nowrap',
+                        flex: 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                        padding: '7px 4px',
+                        borderRadius: 10,
+                        border: type === value
+                          ? '1.5px solid oklch(0.55 0.08 250)'
+                          : '1.5px solid oklch(0.88 0.02 250)',
+                        background: type === value ? 'oklch(0.96 0.02 250)' : 'oklch(0.98 0.005 250)',
+                        cursor: 'pointer',
+                        fontSize: 11,
+                        fontWeight: type === value ? 700 : 500,
+                        color: type === value ? 'oklch(0.38 0.08 250)' : '#5a6288',
+                        fontFamily: "'Inter', sans-serif",
+                        transition: 'all 0.15s',
                       }}
                     >
-                      {opt.label}
+                      <span>{emoji}</span>
+                      <span>{label}</span>
                     </button>
                   ))}
                 </div>
 
-                {/* Message textarea */}
+                {/* Message */}
                 <textarea
-                  rows={4}
+                  ref={textareaRef}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={placeholder}
+                  onChange={e => { setMessage(e.target.value); if (errorMsg) setErrorMsg(''); }}
+                  placeholder={t('messagePlaceholder')}
+                  rows={4}
+                  disabled={widgetState === 'submitting'}
                   style={{
-                    width:        '100%',
-                    borderRadius: '10px',
-                    border:       '1.5px solid #e4e7f0',
-                    padding:      '10px 12px',
-                    fontSize:     '13px',
-                    color:        '#181e38',
-                    resize:       'vertical',
-                    outline:      'none',
-                    fontFamily:   'inherit',
-                    lineHeight:   1.6,
-                    boxSizing:    'border-box',
+                    width: '100%',
+                    resize: 'vertical',
+                    padding: '10px 12px',
+                    border: errorMsg ? '1.5px solid #fca5a5' : '1.5px solid oklch(0.88 0.02 250)',
+                    borderRadius: 10,
+                    background: 'oklch(0.98 0.005 250)',
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: 13,
+                    color: '#181e38',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.15s',
                   }}
-                  onFocus={(e) => { e.target.style.borderColor = '#3b6fa0'; }}
-                  onBlur={(e)  => { e.target.style.borderColor = '#e4e7f0'; }}
+                  onFocus={e => { if (!errorMsg) e.currentTarget.style.borderColor = 'oklch(0.55 0.08 250)'; }}
+                  onBlur={e => { if (!errorMsg) e.currentTarget.style.borderColor = 'oklch(0.88 0.02 250)'; }}
                 />
 
-                {/* Email input — only show when guest */}
-                {!userEmail && (
+                {/* Email — only when not logged in */}
+                {!isLoggedIn && (
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your email (optional)"
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder={t('emailPlaceholder')}
+                    disabled={widgetState === 'submitting'}
                     style={{
-                      width:        '100%',
-                      borderRadius: '10px',
-                      border:       '1.5px solid #e4e7f0',
-                      padding:      '9px 12px',
-                      fontSize:     '13px',
-                      color:        '#181e38',
-                      outline:      'none',
-                      fontFamily:   'inherit',
-                      boxSizing:    'border-box',
+                      width: '100%',
+                      padding: '9px 12px',
+                      border: '1.5px solid oklch(0.88 0.02 250)',
+                      borderRadius: 10,
+                      background: 'oklch(0.98 0.005 250)',
+                      fontFamily: "'DM Mono', monospace",
+                      fontSize: 13,
+                      color: '#181e38',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.15s',
                     }}
-                    onFocus={(e) => { e.target.style.borderColor = '#3b6fa0'; }}
-                    onBlur={(e)  => { e.target.style.borderColor = '#e4e7f0'; }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'oklch(0.55 0.08 250)')}
+                    onBlur={e => (e.currentTarget.style.borderColor = 'oklch(0.88 0.02 250)')}
                   />
                 )}
 
                 {/* Error */}
-                {error && (
-                  <div style={{ color: '#b91c1c', fontSize: '12px', marginTop: '-4px' }}>
-                    {error}
+                {errorMsg && (
+                  <div style={{ fontSize: 12, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span>⚠</span> {errorMsg}
                   </div>
                 )}
 
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
-                  <button
-                    onClick={handleClose}
-                    style={{
-                      flex:         1,
-                      padding:      '9px',
-                      borderRadius: '10px',
-                      border:       '1.5px solid #e4e7f0',
-                      background:   '#f8f9fb',
-                      color:        '#5a6288',
-                      fontSize:     '13px',
-                      fontWeight:   600,
-                      cursor:       'pointer',
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={sending}
-                    style={{
-                      flex:         2,
-                      padding:      '9px',
-                      borderRadius: '10px',
-                      border:       'none',
-                      background:   sending ? '#9099b8' : 'linear-gradient(135deg, #0f1b3d 0%, #3b6fa0 100%)',
-                      color:        '#fff',
-                      fontSize:     '13px',
-                      fontWeight:   700,
-                      cursor:       sending ? 'default' : 'pointer',
-                      transition:   'background 0.15s',
-                    }}
-                  >
-                    {sending ? 'Sending…' : 'Send'}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+                {/* Submit */}
+                <button
+                  onClick={submit}
+                  disabled={widgetState === 'submitting'}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: widgetState === 'submitting'
+                      ? 'oklch(0.70 0.06 250)'
+                      : 'linear-gradient(135deg, #0f1b3d, #3b6fa0)',
+                    color: '#f7f8fd',
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: widgetState === 'submitting' ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { if (widgetState !== 'submitting') e.currentTarget.style.opacity = '0.88'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                >
+                  {widgetState === 'submitting' ? t('submitting') : t('submitBtn')}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </>
