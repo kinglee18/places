@@ -11,6 +11,7 @@ import {
   ThemeProvider, createTheme, Box, Typography, Button, Stepper, Step, StepLabel,
   TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, Card,
   CircularProgress, IconButton, Autocomplete, Checkbox, FormGroup, FormControlLabel,
+  LinearProgress, Accordion, AccordionSummary, AccordionDetails,
 } from "@mui/material";
 
 const MapPicker = dynamic(() => import("./MapPicker"), {
@@ -180,7 +181,7 @@ export default function Plaziia() {
   const locationDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Translated option lists (English value stored in DB, translated label shown) ──
-  const steps = [t('stepLocation'), t('stepFeatures'), t('stepDetails')];
+  const steps = [t('stepLocation'), t('stepFeatures'), t('stepListing'), t('stepPresentation')];
 
   const TIPOS_LOCAL = [
     { value: 'Street-facing (with storefront)', label: t('tipoStreetFacing') },
@@ -301,7 +302,35 @@ export default function Plaziia() {
     mode: 'onTouched'
   });
 
-  const watchModalidad = watch('modalidad');
+  const formValues = watch();
+  const watchModalidad = formValues.modalidad;
+
+  const completenessScore = (() => {
+    let score = 0;
+    // Location + pin: 20
+    if (pinLocation) score += 12;
+    if (formValues.colonia) score += 8;
+    // Property essentials: 20
+    if (formValues.tipoLocal) score += 7;
+    if (formValues.m2) score += 7;
+    if (formValues.nivelPiso) score += 6;
+    // Listing type + price: 15
+    if (formValues.modalidad) score += 8;
+    if (formValues.precioInmueble) score += 7;
+    // Amenities: 10
+    if ((formValues.habitaciones ?? 0) > 0 || (formValues.banos ?? 0) > 0 || (formValues.estacionamientos ?? 0) > 0) score += 3;
+    if (formValues.aguaDrenaje) score += 4;
+    if ((formValues.servicios?.length ?? 0) > 0) score += 3;
+    // Photos: 15
+    if (photos.length >= 1) score += 7;
+    score += Math.min(8, Math.round((photos.length - 1) * 1.6));
+    // Advanced specs: 10
+    const advancedFilled = [formValues.m2Construccion, formValues.frenteM, formValues.fondoM, formValues.alturaTechoM, formValues.tipoTerreno, formValues.calidadConstruccion, formValues.tipoEnergia, formValues.usoSuelo].filter(Boolean).length;
+    score += Math.min(10, advancedFilled * 2);
+    // Preferences: 10
+    if ((formValues.usosPermitidos?.length ?? 0) + (formValues.usosNoPreferidos?.length ?? 0) > 0) score += 10;
+    return Math.min(100, score);
+  })();
 
   const reverseGeocode = useCallback(async (lat: number, lng: number, autoFillNeighborhood = false) => {
     try {
@@ -339,6 +368,9 @@ export default function Plaziia() {
     let fieldsToValidate: (keyof FormData)[] = [];
     if (activeStep === 0) fieldsToValidate = ['colonia'];
     if (activeStep === 1) fieldsToValidate = ['tipoLocal', 'm2', 'nivelPiso'];
+    if (activeStep === 2) {
+      fieldsToValidate = ['modalidad', 'precioInmueble'];
+    }
 
     const isStepValid = await trigger(fieldsToValidate);
 
@@ -353,9 +385,8 @@ export default function Plaziia() {
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const onSubmit = async (data: FormData) => {
-    const missing = 5 - photos.length;
-    if (missing > 0) {
-      setPhotoError(t('errorPhotosCount', { count: missing }));
+    if (photos.length < 1) {
+      setPhotoError(t('errorPhotoMin'));
       return;
     }
     setPhotoError(null);
@@ -538,11 +569,42 @@ export default function Plaziia() {
                 {t('formDescription')}
               </Typography>
 
-              <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 6, '& .MuiStepConnector-line': { borderColor: 'oklch(0.9 0.015 250)' } }}>
+              <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4, '& .MuiStepConnector-line': { borderColor: 'oklch(0.9 0.015 250)' } }}>
                 {steps.map((label) => (
                   <Step key={label}><StepLabel>{label}</StepLabel></Step>
                 ))}
               </Stepper>
+
+              {/* Analysis Quality Indicator */}
+              <Box mb={5}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.75}>
+                  <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: 'text.secondary', fontSize: 12 }}>
+                    {t('qualityLabel')}: <strong style={{ color: completenessScore >= 80 ? 'oklch(0.42 0.12 155)' : completenessScore >= 50 ? '#3b6fa0' : 'oklch(0.45 0.03 260)' }}>{completenessScore}%</strong>
+                  </Typography>
+                  {completenessScore < 80 && (
+                    <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: 'text.secondary', fontSize: 11, textAlign: 'right', maxWidth: '55%' }}>
+                      {t('qualityHint')}
+                    </Typography>
+                  )}
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={completenessScore}
+                  sx={{
+                    height: 6, borderRadius: 3,
+                    bgcolor: 'oklch(0.93 0.01 250)',
+                    '& .MuiLinearProgress-bar': {
+                      background: completenessScore >= 80
+                        ? 'linear-gradient(90deg, #3b6fa0, oklch(0.55 0.14 155))'
+                        : completenessScore >= 50
+                        ? 'linear-gradient(90deg, #0f1b3d, #3b6fa0)'
+                        : '#3b6fa0',
+                      borderRadius: 3,
+                      transition: 'transform 0.4s ease',
+                    }
+                  }}
+                />
+              </Box>
 
               <form onSubmit={handleSubmit(onSubmit)}>
                 <Box sx={{ minHeight: 240, display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -637,7 +699,7 @@ export default function Plaziia() {
                     </Box>
                   </Box>
 
-                  {/* STEP 2: FEATURES */}
+                  {/* STEP 2: PROPERTY BASICS */}
                   <Box sx={{ display: activeStep === 1 ? 'flex' : 'none', flexDirection: 'column', gap: 3 }}>
                     <Controller name="tipoLocal" control={control} rules={{ required: t('requiredPropertyType') }} render={({ field }) => (
                       <FormControl fullWidth error={!!errors.tipoLocal}>
@@ -649,6 +711,7 @@ export default function Plaziia() {
                         {errors.tipoLocal && <FormHelperText>{errors.tipoLocal.message}</FormHelperText>}
                       </FormControl>
                     )} />
+
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Controller name="m2" control={control} rules={{ required: t('requiredSize'), min: 1 }} render={({ field }) => (
@@ -662,7 +725,7 @@ export default function Plaziia() {
                       <Grid item xs={12} sm={6}>
                         <Controller name="antiguedad" control={control} render={({ field }) => (
                           <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelAge')}</InputLabel>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelAge')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
                             <TextField {...field} type="number" placeholder="Ex: 10" />
                           </FormControl>
                         )} />
@@ -680,64 +743,6 @@ export default function Plaziia() {
                       </FormControl>
                     )} />
 
-                    <Controller name="usoAnterior" control={control} render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelLastUse')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                        <Select {...field} displayEmpty>
-                          <MenuItem value="">{t('placeholderLastUse')}</MenuItem>
-                          {USOS_ANTERIORES.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    )} />
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="m2Construccion" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelConstruction')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <TextField {...field} type="number" placeholder="Ex: 175" />
-                          </FormControl>
-                        )} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="frenteM" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelFrontage')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <TextField {...field} type="number" placeholder="Ex: 7.2" />
-                          </FormControl>
-                        )} />
-                      </Grid>
-                    </Grid>
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="fondoM" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelDepth')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <TextField {...field} type="number" placeholder="Ex: 25" />
-                          </FormControl>
-                        )} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="alturaTechoM" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelCeilingHeight')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <TextField {...field} type="number" placeholder="Ex: 3" />
-                          </FormControl>
-                        )} />
-                      </Grid>
-                    </Grid>
-
-                    <Controller name="tipoTerreno" control={control} render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelLotType')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                        <Select {...field} displayEmpty>
-                          <MenuItem value="">{t('placeholderLotType')}</MenuItem>
-                          {TIPOS_TERRENO.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    )} />
-
                     <Controller name="estadoConservacion" control={control} render={({ field }) => (
                       <FormControl fullWidth>
                         <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelCondition')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
@@ -748,82 +753,211 @@ export default function Plaziia() {
                       </FormControl>
                     )} />
 
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="calidadConstruccion" control={control} render={({ field }) => (
+                    <Controller name="usoAnterior" control={control} render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelLastUse')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
+                        <Select {...field} displayEmpty>
+                          <MenuItem value="">{t('placeholderLastUse')}</MenuItem>
+                          {USOS_ANTERIORES.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                    )} />
+
+                    {/* Advanced Specs Accordion */}
+                    <Accordion elevation={0} sx={{ border: '1px solid #d5daea', borderRadius: '8px !important', '&:before': { display: 'none' }, '&.Mui-expanded': { margin: 0 } }}>
+                      <AccordionSummary
+                        expandIcon={<Typography sx={{ fontSize: 18, color: '#5a6288', lineHeight: 1 }}>▾</Typography>}
+                        sx={{ minHeight: 48, px: 2, '& .MuiAccordionSummary-content': { my: 1.25 } }}
+                      >
+                        <Box>
+                          <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", letterSpacing: 1, fontSize: 13, color: '#5a6288' }}>
+                            {t('advancedSpecs')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography>
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#787ea0', mt: 0.25 }}>
+                            {t('advancedSpecsHint')}
+                          </Typography>
+                        </Box>
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1, px: 2, pb: 2.5 }}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Controller name="m2Construccion" control={control} render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelConstruction')}</InputLabel>
+                                <TextField {...field} type="number" placeholder="Ex: 175" />
+                              </FormControl>
+                            )} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Controller name="frenteM" control={control} render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelFrontage')}</InputLabel>
+                                <TextField {...field} type="number" placeholder="Ex: 7.2" />
+                              </FormControl>
+                            )} />
+                          </Grid>
+                        </Grid>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Controller name="fondoM" control={control} render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelDepth')}</InputLabel>
+                                <TextField {...field} type="number" placeholder="Ex: 25" />
+                              </FormControl>
+                            )} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Controller name="alturaTechoM" control={control} render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelCeilingHeight')}</InputLabel>
+                                <TextField {...field} type="number" placeholder="Ex: 3" />
+                              </FormControl>
+                            )} />
+                          </Grid>
+                        </Grid>
+                        <Controller name="tipoTerreno" control={control} render={({ field }) => (
                           <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelBuildQuality')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelLotType')}</InputLabel>
                             <Select {...field} displayEmpty>
-                              <MenuItem value="">{t('placeholderSelect')}</MenuItem>
-                              {CALIDADES_CONSTRUCCION.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                              <MenuItem value="">{t('placeholderLotType')}</MenuItem>
+                              {TIPOS_TERRENO.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
                             </Select>
                           </FormControl>
                         )} />
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Controller name="calidadConstruccion" control={control} render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelBuildQuality')}</InputLabel>
+                                <Select {...field} displayEmpty>
+                                  <MenuItem value="">{t('placeholderSelect')}</MenuItem>
+                                  {CALIDADES_CONSTRUCCION.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                                </Select>
+                              </FormControl>
+                            )} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Controller name="tipoEnergia" control={control} render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelElectricalType')}</InputLabel>
+                                <Select {...field} displayEmpty>
+                                  <MenuItem value="">{t('placeholderSelect')}</MenuItem>
+                                  {TIPOS_ENERGIA.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                                </Select>
+                              </FormControl>
+                            )} />
+                          </Grid>
+                        </Grid>
+                        <Controller name="usoSuelo" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelLandUseZoning')}</InputLabel>
+                            <Select {...field} displayEmpty>
+                              <MenuItem value="">{t('placeholderZoning')}</MenuItem>
+                              {USOS_SUELO.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                            </Select>
+                          </FormControl>
+                        )} />
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
+
+                  {/* STEP 3: LISTING & AMENITIES */}
+                  <Box sx={{ display: activeStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: 3 }}>
+
+                    <Controller name="modalidad" control={control} rules={{ required: t('requiredListingType') }} render={({ field }) => (
+                      <FormControl fullWidth error={!!errors.modalidad}>
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelListingType')} *</InputLabel>
+                        <Select {...field} displayEmpty>
+                          <MenuItem value="" disabled>{t('placeholderListingType')}</MenuItem>
+                          <MenuItem value="sale">{t('listingForSale')}</MenuItem>
+                          <MenuItem value="rent">{t('listingForRent')}</MenuItem>
+                        </Select>
+                        {errors.modalidad && <FormHelperText>{errors.modalidad.message}</FormHelperText>}
+                      </FormControl>
+                    )} />
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Controller
+                          name="precioInmueble"
+                          control={control}
+                          rules={{
+                            validate: (value) => {
+                              if (!value || value === '') {
+                                return watchModalidad === 'rent' ? t('requiredMonthlyRent') : t('requiredSalePrice');
+                              }
+                              if (Number(value) <= 0) return t('requiredPositivePrice');
+                              return true;
+                            },
+                          }}
+                          render={({ field }) => (
+                            <FormControl fullWidth error={!!errors.precioInmueble}>
+                              <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>
+                                {watchModalidad === 'rent' ? t('labelMonthlyRent') : watchModalidad === 'sale' ? t('labelSalePrice') : t('labelPrice')} *
+                              </InputLabel>
+                              <TextField
+                                {...field}
+                                type="number"
+                                error={!!errors.precioInmueble}
+                                placeholder={watchModalidad === 'rent' ? 'Ex: 15000' : 'Ex: 2500000'}
+                                InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" mr={0.5}>$</Typography> }}
+                              />
+                              {errors.precioInmueble && <FormHelperText>{errors.precioInmueble.message}</FormHelperText>}
+                            </FormControl>
+                          )}
+                        />
                       </Grid>
                       <Grid item xs={12} sm={6}>
-                        <Controller name="tipoEnergia" control={control} render={({ field }) => (
+                        <Controller name="precioMantenimiento" control={control} render={({ field }) => (
                           <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelElectricalType')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <Select {...field} displayEmpty>
-                              <MenuItem value="">{t('placeholderSelect')}</MenuItem>
-                              {TIPOS_ENERGIA.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                            </Select>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelMaintenance')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
+                            <TextField {...field} type="number" placeholder="Ex: 3500" InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" mr={0.5}>$</Typography> }} />
                           </FormControl>
                         )} />
                       </Grid>
                     </Grid>
 
-                    <Controller name="usoSuelo" control={control} render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelLandUseZoning')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                        <Select {...field} displayEmpty>
-                          <MenuItem value="">{t('placeholderZoning')}</MenuItem>
-                          {USOS_SUELO.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    )} />
-                  </Box>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="tipoContrato" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelContractType')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
+                            <Select {...field} displayEmpty>
+                              <MenuItem value=""><em>{t('placeholderSelect')}</em></MenuItem>
+                              <MenuItem value="Gross">{t('contractGross')}</MenuItem>
+                              <MenuItem value="NNN">{t('contractNNN')}</MenuItem>
+                              <MenuItem value="Semi-Gross">{t('contractSemiGross')}</MenuItem>
+                            </Select>
+                          </FormControl>
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Controller name="fechaDisponible" control={control} render={({ field }) => (
+                          <FormControl fullWidth>
+                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelAvailableDate')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
+                            <TextField {...field} type="date" InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                          </FormControl>
+                        )} />
+                      </Grid>
+                    </Grid>
 
-                  {/* STEP 3: DETAILS */}
-                  <Box sx={{ display: activeStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: 3 }}>
-
-                    {/* Photo upload */}
-                    <Box>
-                      <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: 'oklch(0.45 0.03 260)', letterSpacing: 1, fontSize: 13 }}>
-                          {t('labelPhotos')} *
-                        </Typography>
-                        <Typography component="span" variant="caption" sx={{ color: photos.length === 5 ? 'oklch(0.55 0.11 250)' : 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
-                          {photos.length} / 5
-                        </Typography>
-                      </Box>
-                      <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoAdd} />
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-                        {photoPreviews.map((src, i) => (
-                          <Box key={i} sx={{ position: 'relative', width: 90, height: 90, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a4a', flexShrink: 0 }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={src} alt={`photo-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <IconButton size="small" onClick={() => handlePhotoRemove(i)} sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(10,10,20,0.75)', color: '#e53935', width: 22, height: 22, fontSize: 14, '&:hover': { bgcolor: 'rgba(10,10,20,0.95)' } }}>×</IconButton>
-                          </Box>
-                        ))}
-                        {photos.length < 5 && (
-                          <Box onClick={() => fileInputRef.current?.click()} sx={{ width: 90, height: 90, borderRadius: 2, border: '1px dashed #2a2a4a', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: 'oklch(0.45 0.03 260)', flexShrink: 0, '&:hover': { borderColor: 'oklch(0.55 0.11 250)', color: 'oklch(0.55 0.11 250)' }, transition: 'all 0.15s' }}>
-                            <Typography sx={{ fontSize: 24, lineHeight: 1 }}>+</Typography>
-                            <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 10 }}>{t('labelAddPhoto')}</Typography>
-                          </Box>
-                        )}
-                      </Box>
-                      {photoError && (
-                        <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block', fontFamily: "'DM Mono', monospace" }}>{photoError}</Typography>
-                      )}
-                    </Box>
-
-                    <Controller name="descripcion" control={control} render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelDescription')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                        <TextField {...field} multiline rows={3} placeholder={t('placeholderDescription')} />
-                      </FormControl>
-                    )} />
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <Controller name="habitaciones" control={control} render={({ field }) => (
+                          <NumberStepper label={t('labelRooms')} value={field.value as number} onChange={field.onChange} />
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Controller name="banos" control={control} render={({ field }) => (
+                          <NumberStepper label={t('labelBathrooms')} value={field.value as number} onChange={field.onChange} />
+                        )} />
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Controller name="estacionamientos" control={control} render={({ field }) => (
+                          <NumberStepper label={t('labelParking')} value={field.value as number} onChange={field.onChange} />
+                        )} />
+                      </Grid>
+                    </Grid>
 
                     <Controller name="aguaDrenaje" control={control} render={({ field }) => (
                       <FormControl fullWidth>
@@ -858,114 +992,61 @@ export default function Plaziia() {
                                   sx={{ color: 'oklch(0.9 0.015 250)', '&.Mui-checked': { color: 'oklch(0.55 0.11 250)' }, p: 0.75 }}
                                 />
                               }
-                              sx={{ m: 0, px: 1.5, py: 0.75, border: '1px solid #2a2a4a', borderRadius: 2, bgcolor: 'oklch(0.96 0.01 250)' }}
+                              sx={{ m: 0, px: 1.5, py: 0.75, border: '1px solid #d5daea', borderRadius: 2, bgcolor: '#f7f8fd' }}
                             />
                           ))}
                         </FormGroup>
                       </FormControl>
                     )} />
+                  </Box>
 
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <Controller name="habitaciones" control={control} render={({ field }) => (
-                          <NumberStepper label={t('labelRooms')} value={field.value as number} onChange={field.onChange} />
-                        )} />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <Controller name="banos" control={control} render={({ field }) => (
-                          <NumberStepper label={t('labelBathrooms')} value={field.value as number} onChange={field.onChange} />
-                        )} />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <Controller name="estacionamientos" control={control} render={({ field }) => (
-                          <NumberStepper label={t('labelParking')} value={field.value as number} onChange={field.onChange} />
-                        )} />
-                      </Grid>
-                    </Grid>
+                  {/* STEP 4: PRESENTATION */}
+                  <Box sx={{ display: activeStep === 3 ? 'flex' : 'none', flexDirection: 'column', gap: 3 }}>
 
-                    <Controller name="modalidad" control={control} render={({ field }) => (
+                    {/* Photo upload — min 1, recommended 5 */}
+                    <Box>
+                      <Box display="flex" alignItems="center" gap={1.5} mb={1} flexWrap="wrap">
+                        <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", color: 'oklch(0.45 0.03 260)', letterSpacing: 1, fontSize: 13 }}>
+                          {t('labelPhotos')} *
+                        </Typography>
+                        <Typography component="span" variant="caption" sx={{ color: photos.length >= 5 ? 'oklch(0.42 0.12 155)' : photos.length >= 1 ? '#3b6fa0' : 'oklch(0.45 0.03 260)', fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
+                          {photos.length} / 5 · {t('photoRecommended')}
+                        </Typography>
+                      </Box>
+                      {photos.length > 0 && photos.length < 3 && (
+                        <Typography variant="caption" sx={{ display: 'block', mb: 1.5, fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#3b6fa0' }}>
+                          {t('photoNudge')}
+                        </Typography>
+                      )}
+                      <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoAdd} />
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                        {photoPreviews.map((src, i) => (
+                          <Box key={i} sx={{ position: 'relative', width: 90, height: 90, borderRadius: 2, overflow: 'hidden', border: '1px solid #d5daea', flexShrink: 0 }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={src} alt={`photo-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <IconButton size="small" onClick={() => handlePhotoRemove(i)} sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(10,10,20,0.75)', color: '#e53935', width: 22, height: 22, fontSize: 14, '&:hover': { bgcolor: 'rgba(10,10,20,0.95)' } }}>×</IconButton>
+                          </Box>
+                        ))}
+                        {photos.length < 5 && (
+                          <Box onClick={() => fileInputRef.current?.click()} sx={{ width: 90, height: 90, borderRadius: 2, border: '1px dashed #a4b4d2', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#5a6288', flexShrink: 0, '&:hover': { borderColor: '#3b6fa0', color: '#3b6fa0' }, transition: 'all 0.15s' }}>
+                            <Typography sx={{ fontSize: 24, lineHeight: 1 }}>+</Typography>
+                            <Typography variant="caption" sx={{ fontFamily: "'DM Mono', monospace", fontSize: 10 }}>{t('labelAddPhoto')}</Typography>
+                          </Box>
+                        )}
+                      </Box>
+                      {photoError && (
+                        <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block', fontFamily: "'DM Mono', monospace" }}>{photoError}</Typography>
+                      )}
+                    </Box>
+
+                    <Controller name="descripcion" control={control} render={({ field }) => (
                       <FormControl fullWidth>
-                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelListingType')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                        <Select {...field} displayEmpty>
-                          <MenuItem value="">{t('listingNotSpecified')}</MenuItem>
-                          <MenuItem value="sale">{t('listingForSale')}</MenuItem>
-                          <MenuItem value="rent">{t('listingForRent')}</MenuItem>
-                        </Select>
+                        <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelDescription')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
+                        <TextField {...field} multiline rows={3} placeholder={t('placeholderDescription')} />
                       </FormControl>
                     )} />
 
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="tipoContrato" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelContractType')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <Select {...field} displayEmpty>
-                              <MenuItem value=""><em>{t('placeholderSelect')}</em></MenuItem>
-                              <MenuItem value="Gross">{t('contractGross')}</MenuItem>
-                              <MenuItem value="NNN">{t('contractNNN')}</MenuItem>
-                              <MenuItem value="Semi-Gross">{t('contractSemiGross')}</MenuItem>
-                            </Select>
-                          </FormControl>
-                        )} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="fechaDisponible" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelAvailableDate')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <TextField {...field} type="date" InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                          </FormControl>
-                        )} />
-                      </Grid>
-                    </Grid>
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Controller
-                          name="precioInmueble"
-                          control={control}
-                          rules={{
-                            validate: (value) => {
-                              if (watchModalidad === 'rent' || watchModalidad === 'sale') {
-                                if (!value || value === '') {
-                                  return watchModalidad === 'rent' ? t('requiredMonthlyRent') : t('requiredSalePrice');
-                                }
-                                if (Number(value) <= 0) return t('requiredPositivePrice');
-                              }
-                              return true;
-                            },
-                          }}
-                          render={({ field }) => (
-                            <FormControl fullWidth error={!!errors.precioInmueble}>
-                              <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>
-                                {watchModalidad === 'rent' ? t('labelMonthlyRent') : watchModalidad === 'sale' ? t('labelSalePrice') : t('labelPrice')}
-                                {watchModalidad === 'rent' || watchModalidad === 'sale'
-                                  ? <Typography component="span" variant="caption" color="error" ml={0.5}>*</Typography>
-                                  : <Typography component="span" variant="caption" color="text.secondary"> {t('optional')}</Typography>
-                                }
-                              </InputLabel>
-                              <TextField
-                                {...field}
-                                type="number"
-                                error={!!errors.precioInmueble}
-                                placeholder={watchModalidad === 'rent' ? 'Ex: 15000' : 'Ex: 2500000'}
-                                InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" mr={0.5}>$</Typography> }}
-                              />
-                              {errors.precioInmueble && <FormHelperText>{errors.precioInmueble.message}</FormHelperText>}
-                            </FormControl>
-                          )}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Controller name="precioMantenimiento" control={control} render={({ field }) => (
-                          <FormControl fullWidth>
-                            <InputLabel shrink={false} sx={{ position: 'relative', transform: 'none', mb: 1 }}>{t('labelMaintenance')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography></InputLabel>
-                            <TextField {...field} type="number" placeholder="Ex: 3500" InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" mr={0.5}>$</Typography> }} />
-                          </FormControl>
-                        )} />
-                      </Grid>
-                    </Grid>
-
-                    {/* ── Business Preferences ── */}
+                    {/* Business Preferences */}
                     <Controller
                       name="usosPermitidos"
                       control={control}
@@ -975,7 +1056,7 @@ export default function Plaziia() {
                           control={control}
                           render={({ field: fDisallowed }) => (
                             <Box>
-                              <Typography variant="body2" sx={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)', fontSize: 13, letterSpacing: 1, mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ fontFamily: "'DM Mono', monospace", color: '#5a6288', fontSize: 13, letterSpacing: 1, mb: 1.5 }}>
                                 {t('labelBusinessPreferences')} <Typography component="span" variant="caption" color="text.secondary">{t('optional')}</Typography>
                               </Typography>
                               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, lineHeight: 1.5 }}>
@@ -1006,18 +1087,18 @@ export default function Plaziia() {
                                       sx={{
                                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                         border: '1px solid',
-                                        borderColor: isAllowed ? 'oklch(0.78 0.14 155)' : isDisallowed ? 'oklch(0.78 0.14 25)' : 'var(--surface-border)',
+                                        borderColor: isAllowed ? 'oklch(0.78 0.14 155)' : isDisallowed ? 'oklch(0.78 0.14 25)' : '#d5daea',
                                         borderRadius: 2, px: 1.5, py: 1,
-                                        background: isAllowed ? 'oklch(0.18 0.04 155 / 0.35)' : isDisallowed ? 'oklch(0.18 0.04 25 / 0.35)' : 'var(--surface-2)',
+                                        background: isAllowed ? 'oklch(0.96 0.04 155)' : isDisallowed ? 'oklch(0.96 0.04 25)' : '#f7f8fd',
                                         transition: 'all 0.15s',
                                       }}
                                     >
-                                      <Typography variant="caption" sx={{ fontSize: 12, color: isAllowed ? 'oklch(0.78 0.14 155)' : isDisallowed ? 'oklch(0.72 0.18 25)' : 'var(--text-secondary)', flex: 1 }}>
+                                      <Typography variant="caption" sx={{ fontSize: 12, color: isAllowed ? 'oklch(0.42 0.12 155)' : isDisallowed ? 'oklch(0.45 0.18 25)' : '#5a6288', flex: 1 }}>
                                         {tipo.label}
                                       </Typography>
                                       <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
-                                        <Box component="button" type="button" onClick={() => toggle('allowed')} sx={{ width: 26, height: 26, borderRadius: 1, border: '1px solid', borderColor: isAllowed ? 'oklch(0.78 0.14 155)' : 'var(--surface-border)', background: isAllowed ? 'oklch(0.78 0.14 155)' : 'transparent', color: isAllowed ? '#fff' : 'var(--muted)', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.12s', fontWeight: 700 }} title="Ideal for this use">✓</Box>
-                                        <Box component="button" type="button" onClick={() => toggle('disallowed')} sx={{ width: 26, height: 26, borderRadius: 1, border: '1px solid', borderColor: isDisallowed ? 'oklch(0.72 0.18 25)' : 'var(--surface-border)', background: isDisallowed ? 'oklch(0.72 0.18 25)' : 'transparent', color: isDisallowed ? '#fff' : 'var(--muted)', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.12s', fontWeight: 700 }} title="Not preferred">✕</Box>
+                                        <Box component="button" type="button" onClick={() => toggle('allowed')} sx={{ width: 26, height: 26, borderRadius: 1, border: '1px solid', borderColor: isAllowed ? 'oklch(0.78 0.14 155)' : '#d5daea', background: isAllowed ? 'oklch(0.78 0.14 155)' : 'transparent', color: isAllowed ? '#fff' : '#5a6288', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.12s', fontWeight: 700 }} title="Ideal for this use">✓</Box>
+                                        <Box component="button" type="button" onClick={() => toggle('disallowed')} sx={{ width: 26, height: 26, borderRadius: 1, border: '1px solid', borderColor: isDisallowed ? 'oklch(0.72 0.18 25)' : '#d5daea', background: isDisallowed ? 'oklch(0.72 0.18 25)' : 'transparent', color: isDisallowed ? '#fff' : '#5a6288', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.12s', fontWeight: 700 }} title="Not preferred">✕</Box>
                                       </Box>
                                     </Box>
                                   );
@@ -1026,12 +1107,12 @@ export default function Plaziia() {
                               {(fAllowed.value.length > 0 || fDisallowed.value.length > 0) && (
                                 <Box sx={{ mt: 1.5, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                                   {fAllowed.value.length > 0 && (
-                                    <Typography variant="caption" sx={{ color: 'oklch(0.78 0.14 155)', fontSize: 11 }}>
+                                    <Typography variant="caption" sx={{ color: 'oklch(0.42 0.12 155)', fontSize: 11 }}>
                                       {t('summaryIdeal')} {fAllowed.value.join(', ')}
                                     </Typography>
                                   )}
                                   {fDisallowed.value.length > 0 && (
-                                    <Typography variant="caption" sx={{ color: 'oklch(0.72 0.18 25)', fontSize: 11 }}>
+                                    <Typography variant="caption" sx={{ color: 'oklch(0.45 0.18 25)', fontSize: 11 }}>
                                       {t('summaryNotPreferred')} {fDisallowed.value.join(', ')}
                                     </Typography>
                                   )}
@@ -1042,7 +1123,6 @@ export default function Plaziia() {
                         />
                       )}
                     />
-
                   </Box>
 
                 </Box>
