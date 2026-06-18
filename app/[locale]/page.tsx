@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import NavHeader from '@/components/NavHeader';
+import { TIPO_KEY } from '@/lib/tipoKey';
 
 interface Property {
   id: string;
@@ -22,6 +23,12 @@ export default function Home() {
   const t = useTranslations('HomePage');
   const tF = useTranslations('Features');
   const tS = useTranslations('Steps');
+  const tCard = useTranslations('PropertyCard');
+
+  const tipoLabel = (raw: string) => {
+    const key = TIPO_KEY[raw];
+    return key ? tCard(key as Parameters<typeof tCard>[0]) : raw;
+  };
 
   const features = [
     { icon: '🗺️', title: tF('nearbyCompetitionTitle'), desc: tF('nearbyCompetitionDesc'), plan: 'pro' },
@@ -224,7 +231,7 @@ export default function Home() {
 
                   {/* Info */}
                   <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
-                    <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>{p.tipo_local}</p>
+                    <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>{tipoLabel(p.tipo_local)}</p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '13px', color: 'var(--muted)' }}>{p.m2} m²</span>
                       <span style={{ fontSize: '15px', fontWeight: 700, color: p.precio_inmueble ? 'var(--foreground)' : 'var(--muted)' }}>

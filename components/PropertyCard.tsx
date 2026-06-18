@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { TIPO_KEY } from '@/lib/tipoKey';
 
 const TIPO_ICONS: Record<string, string> = {
   'Street-facing (with storefront)': '🪟',
@@ -9,14 +10,6 @@ const TIPO_ICONS: Record<string, string> = {
   'Corner unit': '🔀',
   'Basement / Semi-basement': '⬇️',
   'Market stall': '🛒',
-};
-
-const TIPO_KEY: Record<string, string> = {
-  'Street-facing (with storefront)': 'typeStorefront',
-  'Inside commercial plaza': 'typePlazaUnit',
-  'Corner unit': 'typeCornerUnit',
-  'Basement / Semi-basement': 'typeBasement',
-  'Market stall': 'typeMarketStall',
 };
 
 export interface PropertyCardProps {

@@ -17,8 +17,7 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
   const navLinks: { label: string; href: string; id: ActivePage | null }[] = [
     { label: t('properties'), href: '/propiedades', id: 'propiedades' },
     { label: t('howItWorks'), href: activePage === 'home' ? '#how-it-works' : '/#how-it-works', id: null },
-    { label: t('proPlan'), href: '/upgrade', id: 'upgrade' },
-    { label: t('findSpace'), href: '/buscar', id: 'buscar' },
+    // { label: t('findSpace'), href: '/buscar', id: 'buscar' },
   ];
 
   return (
@@ -154,18 +153,31 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
             )}
           </div>
         ) : (
-          <Link href="/registro" style={{
-            background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
-            color: 'oklch(0.985 0.005 240)', padding: '9px 22px', borderRadius: '10px',
-            fontWeight: 700, fontSize: '14px', textDecoration: 'none',
-            boxShadow: '0 4px 16px oklch(0.235 0.07 265 / 0.25)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px oklch(0.235 0.07 265 / 0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px oklch(0.235 0.07 265 / 0.25)'; }}
-          >
-            {t('registerProperty')}
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Link href="/login" style={{
+              color: 'var(--muted)', padding: '9px 16px', borderRadius: '10px',
+              fontWeight: 600, fontSize: '14px', textDecoration: 'none',
+              border: '1px solid var(--surface-border)',
+              transition: 'color 0.2s, border-color 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--foreground)'; e.currentTarget.style.borderColor = 'oklch(0.55 0.11 250)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
+            >
+              {t('signIn')}
+            </Link>
+            <Link href="/registro" style={{
+              background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
+              color: 'oklch(0.985 0.005 240)', padding: '9px 22px', borderRadius: '10px',
+              fontWeight: 700, fontSize: '14px', textDecoration: 'none',
+              boxShadow: '0 4px 16px oklch(0.235 0.07 265 / 0.25)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px oklch(0.235 0.07 265 / 0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px oklch(0.235 0.07 265 / 0.25)'; }}
+            >
+              {t('registerProperty')}
+            </Link>
+          </div>
         )}
       </nav>
 
@@ -209,9 +221,14 @@ export default function NavHeader({ activePage }: { activePage?: ActivePage }) {
             </button>
           </>
         ) : (
-          <Link href="/registro" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>
-            {t('registerProperty')}
-          </Link>
+          <>
+            <Link href="/login" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+              {t('signIn')}
+            </Link>
+            <Link href="/registro" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>
+              {t('registerProperty')}
+            </Link>
+          </>
         )}
       </div>
     </header>
