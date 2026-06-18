@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 const TIPO_ICONS: Record<string, string> = {
   'Street-facing (with storefront)': '🪟',
@@ -10,18 +11,13 @@ const TIPO_ICONS: Record<string, string> = {
   'Market stall': '🛒',
 };
 
-const SHORT_TIPO: Record<string, string> = {
-  'Street-facing (with storefront)': 'Storefront',
-  'Inside commercial plaza': 'Plaza unit',
-  'Corner unit': 'Corner unit',
-  'Basement / Semi-basement': 'Basement space',
-  'Market stall': 'Market stall',
+const TIPO_KEY: Record<string, string> = {
+  'Street-facing (with storefront)': 'typeStorefront',
+  'Inside commercial plaza': 'typePlazaUnit',
+  'Corner unit': 'typeCornerUnit',
+  'Basement / Semi-basement': 'typeBasement',
+  'Market stall': 'typeMarketStall',
 };
-
-function formatPrice(val: number | null, modalidad?: string | null): string {
-  if (!val) return '—';
-  return `$${val.toLocaleString('en-US')} MXN${modalidad === 'rent' ? '/mo' : ''}`;
-}
 
 export interface PropertyCardProps {
   id: string;
@@ -45,8 +41,11 @@ export interface PropertyCardProps {
 }
 
 export default function PropertyCard(p: PropertyCardProps) {
-  const shortType = SHORT_TIPO[p.tipo_local] ?? p.tipo_local;
-  const title = `${shortType} in ${p.colonia}`;
+  const t = useTranslations('PropertyCard');
+
+  const key = TIPO_KEY[p.tipo_local];
+  const typeLabel = key ? t(key as Parameters<typeof t>[0]) : p.tipo_local;
+  const title = `${typeLabel} `;
 
   const addressParts = [
     p.calle ? `${p.calle}${p.numero ? ` ${p.numero}` : ''}` : null,
@@ -57,6 +56,11 @@ export default function PropertyCard(p: PropertyCardProps) {
   const displayPrice = p.modalidad === 'rent'
     ? (p.precio_mantenimiento ?? p.precio_inmueble)
     : p.precio_inmueble;
+
+  const formatPrice = (val: number | null): string => {
+    if (!val) return '—';
+    return `$${val.toLocaleString('en-US')} MXN${p.modalidad === 'rent' ? t('perMonth') : ''}`;
+  };
 
   return (
     <Link href={`/propiedades/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
@@ -123,7 +127,7 @@ export default function PropertyCard(p: PropertyCardProps) {
                 borderRadius: 6, padding: '2px 7px', fontSize: 10, color: '#5a6288', fontWeight: 600,
               }}
             >
-              +{p.photo_urls.length - 1} photos
+              {t('photosMore', { count: p.photo_urls.length - 1 })}
             </span>
           )}
         </div>
@@ -179,7 +183,7 @@ export default function PropertyCard(p: PropertyCardProps) {
                   padding: '4px 9px',
                 }}
               >
-                {p.modalidad === 'rent' ? 'For rent' : 'For sale'}
+                {p.modalidad === 'rent' ? t('forRent') : t('forSale')}
               </span>
             )}
           </div>
@@ -197,7 +201,7 @@ export default function PropertyCard(p: PropertyCardProps) {
             </span>
             {displayPrice && (
               <span style={{ fontSize: 12, color: '#5a6288', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span>💰</span> {formatPrice(displayPrice, p.modalidad)}
+                <span>💰</span> {formatPrice(displayPrice)}
               </span>
             )}
             {p.banos > 0 && (
@@ -232,12 +236,12 @@ export default function PropertyCard(p: PropertyCardProps) {
             </p>
           ) : (
             <p style={{ fontSize: 12, color: '#b0b8d4', fontStyle: 'italic', margin: 0 }}>
-              No description added yet.
+              {t('noDescription')}
             </p>
           )}
         </div>
 
-        {/* Right arrow — subtle CTA */}
+        {/* Right arrow */}
         <div
           style={{
             display: 'flex',

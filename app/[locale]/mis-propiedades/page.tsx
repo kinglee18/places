@@ -150,20 +150,7 @@ export default async function MisPropiedadesPage() {
                         {t('viewBtn')}
                       </Link>
                     </div>
-                    <Link
-                      href={`/propiedades/${p.id}#pricing-suggestion`}
-                      style={{
-                        display: 'block', textAlign: 'center', marginTop: 10,
-                        fontSize: 12, fontWeight: 600,
-                        color: 'oklch(0.42 0.12 280)',
-                        border: '1px solid oklch(0.84 0.06 280)',
-                        borderRadius: 8, padding: '6px 12px',
-                        background: 'oklch(0.97 0.02 280)',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      {t('pricingSuggestion')}
-                    </Link>
+         
                     <PropertyActions id={p.id} isPublished={p.is_published} />
                   </div>
                 </div>

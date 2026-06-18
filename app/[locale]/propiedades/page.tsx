@@ -7,6 +7,7 @@ export const metadata: Metadata = {
 };
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { getTranslations } from 'next-intl/server';
 import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PropiedadesFilters from '@/components/PropiedadesFilters';
@@ -62,6 +63,7 @@ interface Property {
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function PropiedadesPage({ searchParams }: { searchParams: SearchParams }) {
+  const t = await getTranslations('PropiedadesPage');
   const params = await searchParams;
 
   const str = (k: string) => (Array.isArray(params[k]) ? params[k][0] : params[k] ?? '') as string;
@@ -190,7 +192,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
               marginBottom: 8,
             }}
           >
-            Platform
+            {t('eyebrow')}
           </span>
           <h1
             style={{
@@ -202,11 +204,11 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
               color: '#181e38',
             }}
           >
-            Available properties
+            {t('heading')}
           </h1>
           <p style={{ color: '#5a6288', fontSize: 15 }}>
-            {count ?? 0} {(count ?? 0) === 1 ? 'property found' : 'properties found'}
-            {' · '}Opportunity scores update as our AI finishes analyzing each location.
+            {t('countFound', { count: count ?? 0 })}
+            {' · '}{t('aiScore')}
           </p>
         </div>
 
@@ -247,7 +249,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
                   color: '#9099b8',
                 }}
               >
-                No location data available for current results.
+                {t('noMapData')}
               </p>
             )}
           </div>
@@ -258,9 +260,9 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
               <div style={{ textAlign: 'center', padding: '80px 24px', color: '#5a6288' }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
                 <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: '#181e38' }}>
-                  No results
+                  {t('noResults')}
                 </p>
-                <p style={{ fontSize: 15 }}>Try adjusting your filters</p>
+                <p style={{ fontSize: 15 }}>{t('noResultsHint')}</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -283,7 +285,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
               >
                 {page > 1 && (
                   <Link href={pageUrl(page - 1)} style={pageBtnStyle(false)}>
-                    ← Prev
+                    {t('prev')}
                   </Link>
                 )}
                 {buildPageRange(page, totalPages).map((p, i) =>
@@ -299,7 +301,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
                 )}
                 {page < totalPages && (
                   <Link href={pageUrl(page + 1)} style={pageBtnStyle(false)}>
-                    Next →
+                    {t('next')}
                   </Link>
                 )}
               </div>
@@ -320,10 +322,10 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
         >
           <div style={{ fontSize: 28, marginBottom: 12 }}>🏢</div>
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, color: '#181e38' }}>
-            Do you have a property?
+            {t('ctaHeading')}
           </h2>
           <p style={{ color: '#5a6288', fontSize: 15, marginBottom: 24 }}>
-            Publish it for free or unlock the Pro area analysis.
+            {t('ctaBody')}
           </p>
           <Link
             href="/registro"
@@ -338,7 +340,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
               boxShadow: '0 6px 24px rgba(15,27,61,0.18)',
             }}
           >
-            Publish my property →
+            {t('ctaBtn')}
           </Link>
         </div>
       </div>
