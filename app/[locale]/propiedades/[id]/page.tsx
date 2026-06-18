@@ -135,7 +135,7 @@ const ACCENT  = '#3b6fa0';
 const ACCENT2 = '#0f1b3d';
 
 export default function PropertyDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id, locale } = useParams<{ id: string; locale: string }>();
   const { data: session } = useSession();
   const tP = useTranslations('PropertyDetail');
   const tL = useTranslations('LocalIQ');
@@ -318,7 +318,7 @@ export default function PropertyDetailPage() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyId: id }),
+        body: JSON.stringify({ propertyId: id, locale }),
       });
       let json: { analysis?: AiAnalysis; error?: string } = {};
       try {
@@ -979,14 +979,13 @@ export default function PropertyDetailPage() {
         )}
 
         {/* ── AI Analysis ── */}
-        {session?.user && (
-          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>{tP('sectionAI')}</p>
                 <p style={{ fontSize: 13, color: MUTED }}>{tP('aiSubtitle')}</p>
               </div>
-              {!analysis && (
+              {!analysis && session?.user && (
                 <button
                   onClick={handleAnalyze}
                   disabled={analyzing}
@@ -1046,8 +1045,11 @@ export default function PropertyDetailPage() {
                 )}
               </div>
             )}
+
+            {!analysis && !session?.user && (
+              <p style={{ fontSize: 13, color: MUTED }}>{tP('loginToAnalyze')}</p>
+            )}
           </div>
-        )}
 
         {/* ── Inquiry form (non-owners) ── */}
         {!isOwner && (

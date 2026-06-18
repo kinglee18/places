@@ -10,10 +10,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { propertyId } = await req.json();
+  const { propertyId, locale } = await req.json();
   if (!propertyId) {
     return NextResponse.json({ error: 'propertyId required' }, { status: 400 });
   }
+  const language = locale === 'es' ? 'Spanish' : 'English';
 
   const { data: property, error } = await getSupabase()
     .from('properties')
@@ -104,7 +105,7 @@ RULES (strictly follow):
 4. Use the city/state to reason about regional food culture, consumer habits, and local demand.
 5. Be specific: instead of "restaurant", say "Chinese restaurant" or "breakfast café" based on the gap data.
 
-Respond ONLY in JSON with this exact structure:
+Respond ONLY in ${language}. Respond ONLY in JSON with this exact structure:
 {
   "nivel_competencia": "low | medium | high",
   "oportunidad": "One sentence describing the main market opportunity in this specific location",
