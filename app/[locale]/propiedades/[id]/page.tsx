@@ -528,7 +528,20 @@ export default function PropertyDetailPage() {
   return (
     <main style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: "'Inter', sans-serif" }}>
       <NavHeader />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .prop-photo-hero { border-radius: 16px; overflow: hidden; height: 420px; background: #edf0f8; margin-bottom: 10px; position: relative; }
+        .prop-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; margin-bottom: 32px; }
+        .prop-price-block { min-width: 200px; text-align: right; }
+        .prop-two-col { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; margin-bottom: 24px; }
+        .prop-inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 640px) {
+          .prop-photo-hero { height: 240px; }
+          .prop-two-col { grid-template-columns: 1fr; }
+          .prop-price-block { min-width: unset; text-align: left; width: 100%; box-sizing: border-box; }
+          .prop-inputs-row { grid-template-columns: 1fr; }
+        }
+      `}</style>
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px 80px' }}>
 
@@ -568,7 +581,7 @@ export default function PropertyDetailPage() {
         {/* ── Photo gallery ── */}
         {photos ? (
           <div style={{ marginBottom: 36 }}>
-            <div style={{ borderRadius: 16, overflow: 'hidden', height: 420, background: '#edf0f8', marginBottom: 10, position: 'relative' }}>
+            <div className="prop-photo-hero">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photos[activePhoto]} alt={`Photo ${activePhoto + 1}`}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.2s' }} />
@@ -598,7 +611,7 @@ export default function PropertyDetailPage() {
         )}
 
         {/* ── Header ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap', marginBottom: 32 }}>
+        <div className="prop-header-row">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: ACCENT2, textTransform: 'uppercase' }}>
@@ -630,7 +643,7 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Price block */}
-          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '20px 24px', minWidth: 200, textAlign: 'right', boxShadow: '0 2px 12px rgba(15,27,61,0.06)' }}>
+          <div className="prop-price-block" style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '20px 24px', boxShadow: '0 2px 12px rgba(15,27,61,0.06)' }}>
             <div style={{ fontSize: 11, color: SUBTLE, fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
               {p.modalidad === 'rent' ? tP('priceRent') : p.modalidad === 'sale' ? tP('priceSale') : tP('priceLabel')}
             </div>
@@ -660,7 +673,7 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* ── Two-column layout ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 20, marginBottom: 24 }}>
+        <div className="prop-two-col">
 
           {/* Stats */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '24px', boxShadow: '0 2px 12px rgba(15,27,61,0.05)' }}>
@@ -1116,7 +1129,7 @@ export default function PropertyDetailPage() {
 
                 {/* Sender info — only shown to guests */}
                 {!session?.user && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                  <div className="prop-inputs-row">
                     <input
                       type="text"
                       value={inqName}
