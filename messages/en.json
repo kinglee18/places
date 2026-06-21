@@ -94,6 +94,28 @@
     "subtitle": "You need an account to register and manage your properties.",
     "continueWithGoogle": "Continue with Google",
     "termsNote": "By signing in you accept our terms of use and privacy policy.",
+    "backToHome": "← Back to home",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "signInWithEmail": "Sign in",
+    "orContinueWith": "or continue with",
+    "noAccount": "Don't have an account?",
+    "signUpLink": "Sign up",
+    "invalidCredentials": "Invalid email or password."
+  },
+  "SignupPage": {
+    "title": "Create your account",
+    "subtitle": "Register to publish and manage your properties.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Confirm password",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "passwordMismatch": "Passwords do not match.",
+    "emailAlreadyExists": "This email is already registered.",
+    "unknownError": "Something went wrong. Please try again.",
+    "termsNote": "By creating an account you accept our terms of use and privacy policy.",
     "backToHome": "← Back to home"
   },
   "RegistroPage": {

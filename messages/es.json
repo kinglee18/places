@@ -94,6 +94,28 @@
     "subtitle": "Necesitas una cuenta para registrar y gestionar tus propiedades.",
     "continueWithGoogle": "Continuar con Google",
     "termsNote": "Al iniciar sesión aceptas nuestros términos de uso y política de privacidad.",
+    "backToHome": "← Volver al inicio",
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "signInWithEmail": "Iniciar sesión",
+    "orContinueWith": "o continúa con",
+    "noAccount": "¿No tienes cuenta?",
+    "signUpLink": "Regístrate",
+    "invalidCredentials": "Correo o contraseña incorrectos."
+  },
+  "SignupPage": {
+    "title": "Crea tu cuenta",
+    "subtitle": "Regístrate para publicar y gestionar tus propiedades.",
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "confirmPasswordLabel": "Confirmar contraseña",
+    "createAccount": "Crear cuenta",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "signInLink": "Inicia sesión",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "emailAlreadyExists": "Este correo ya está registrado.",
+    "unknownError": "Algo salió mal. Inténtalo de nuevo.",
+    "termsNote": "Al crear una cuenta aceptas nuestros términos de uso y política de privacidad.",
     "backToHome": "← Volver al inicio"
   },
   "RegistroPage": {
