@@ -7,11 +7,6 @@ import Providers from '@/components/Providers';
 import FeedbackWidget from '@/components/FeedbackWidget';
 import { Analytics } from '@vercel/analytics/next';
 
-export const metadata = {
-  title: 'Plaziia',
-  description: 'Business intelligence for commercial properties and property registration.',
-};
-
 export default async function LocaleLayout({
   children,
   params,

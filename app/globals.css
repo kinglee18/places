@@ -279,3 +279,10 @@ a {
   background-repeat: repeat;
   background-size: 192px;
 }
+
+.footer-link {
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: var(--accent);
+}

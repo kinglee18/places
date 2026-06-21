@@ -1,9 +1,9 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
+import PricingCards from '@/components/PricingCards';
 import { TIPO_KEY } from '@/lib/tipoKey';
 
 interface Property {
@@ -16,14 +16,65 @@ interface Property {
   created_at: string;
 }
 
-export default function Home() {
-  const [hoveredPlan, setHoveredPlan] = useState<'basic' | 'pro' | null>(null);
-  const [latestProperties, setLatestProperties] = useState<Property[]>([]);
-  const [loadingProps, setLoadingProps] = useState(true);
-  const t = useTranslations('HomePage');
-  const tF = useTranslations('Features');
-  const tS = useTranslations('Steps');
-  const tCard = useTranslations('PropertyCard');
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (locale === 'es') {
+    return {
+      title: { absolute: 'Locales en Renta — Propiedades Comerciales | Plaziia' },
+      description:
+        'Encuentra locales comerciales en renta en México. Oficinas, bodegas, tiendas y más. Registra tu propiedad gratis.',
+      keywords: [
+        'locales en renta',
+        'locales comerciales',
+        'renta de locales',
+        'bodegas en renta',
+        'oficinas en renta',
+        'propiedades comerciales México',
+      ],
+      openGraph: {
+        title: 'Locales en Renta — Propiedades Comerciales | Plaziia',
+        description:
+          'Encuentra locales comerciales en renta en México. Registra tu propiedad gratis en Plaziia.',
+        locale: 'es_MX',
+      },
+    };
+  }
+  return {
+    title: { absolute: 'Commercial Properties for Rent | Plaziia' },
+    description:
+      'Find commercial spaces for rent in Mexico. Offices, warehouses, stores and more. Register your property for free.',
+    openGraph: {
+      title: 'Commercial Properties for Rent | Plaziia',
+      description: 'Find commercial spaces for rent in Mexico. Register your property for free on Plaziia.',
+    },
+  };
+}
+
+async function getLatestProperties(): Promise<Property[]> {
+  const supabase = getSupabase();
+  const { data } = await supabase
+    .from('properties')
+    .select('id, colonia, tipo_local, m2, precio_inmueble, photo_urls, created_at')
+    .eq('is_published', true)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+    .order('created_at', { ascending: false })
+    .limit(6);
+  return data ?? [];
+}
+
+export default async function Home() {
+  const [t, tF, tS, tCard] = await Promise.all([
+    getTranslations('HomePage'),
+    getTranslations('Features'),
+    getTranslations('Steps'),
+    getTranslations('PropertyCard'),
+  ]);
+
+  const latestProperties = await getLatestProperties();
 
   const tipoLabel = (raw: string) => {
     const key = TIPO_KEY[raw];
@@ -42,18 +93,31 @@ export default function Home() {
     { number: '03', title: tS('step3Title'), desc: tS('step3Desc') },
   ];
 
-  useEffect(() => {
-    fetch('/api/properties?limit=6&published=true')
-      .then(r => r.json())
-      .then((data: Property[]) => {
-        setLatestProperties(data ?? []);
-        setLoadingProps(false);
-      });
-  }, []);
+  const pricingStrings = {
+    basicTag: t('basicTag'),
+    basicPrice: t('basicPrice'),
+    basicSubtitle: t('basicSubtitle'),
+    basicDesc: t('basicDesc'),
+    basicFeatures: (
+      ['basicFeature1', 'basicFeature2', 'basicFeature3', 'basicFeature4', 'basicFeature5'] as const
+    ).map((k) => t(k)),
+    basicCta: t('basicCta'),
+    proTag: t('proTag'),
+    proPrice: t('proPrice'),
+    proUnit: t('proUnit'),
+    proSubtitle: t('proSubtitle'),
+    proDesc: t('proDesc'),
+    proFeatures: [
+      { label: t('proFeature1'), isPro: false },
+      { label: t('proFeature2'), isPro: true },
+      { label: t('proFeature3'), isPro: true },
+      { label: t('proFeature4'), isPro: true },
+    ],
+    proCta: t('proCta'),
+  };
 
   return (
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Noise texture overlay */}
       <div className="noise-overlay" />
 
       <NavHeader activePage="home" />
@@ -70,7 +134,6 @@ export default function Home() {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Background blobs */}
         <div style={{
           position: 'absolute', top: '10%', left: '50%', transform: 'translate(-50%, 0)',
           width: '900px', height: '700px',
@@ -91,7 +154,6 @@ export default function Home() {
         }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px' }}>
-          {/* Badge */}
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
             <span className="tag tag-accent" style={{ fontSize: '13px' }}>
               ✦ {t('badge')}
@@ -133,7 +195,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Mini stats */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
@@ -169,22 +230,13 @@ export default function Home() {
             <Link href="/propiedades" style={{
               fontSize: '14px', fontWeight: 600, color: 'var(--accent)',
               display: 'flex', alignItems: 'center', gap: '6px',
-              opacity: 0.85, transition: 'opacity 0.2s',
-            }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0.85')}
-            >
+              opacity: 0.85,
+            }}>
               {t('viewAll')}
             </Link>
           </div>
 
-          {loadingProps ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="card" style={{ height: 280, opacity: 0.4, animation: 'pulse 1.5s ease-in-out infinite' }} />
-              ))}
-            </div>
-          ) : latestProperties.length === 0 ? (
+          {latestProperties.length === 0 ? (
             <div style={{
               textAlign: 'center', padding: '80px 24px',
               border: '1px dashed var(--surface-border)', borderRadius: '16px',
@@ -200,48 +252,46 @@ export default function Home() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
               {latestProperties.map(p => (
                 <Link key={p.id} href={`/propiedades/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer', transition: 'border-color 0.2s' }}>
-                  {/* Photo */}
-                  <div style={{
-                    height: 180, background: 'oklch(0.96 0.01 250)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, position: 'relative', overflow: 'hidden',
-                  }}>
-                    {p.photo_urls?.length > 0 ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.photo_urls[0]}
-                        alt={p.colonia}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: '36px', opacity: 0.3 }}>🏬</span>
-                    )}
-                    <span style={{
-                      position: 'absolute', top: 12, left: 12,
-                      background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(6px)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '100px', padding: '4px 10px',
-                      fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em',
-                      color: 'var(--accent)',
+                  <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}>
+                    <div style={{
+                      height: 180, background: 'oklch(0.96 0.01 250)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0, position: 'relative', overflow: 'hidden',
                     }}>
-                      {p.colonia}
-                    </span>
-                  </div>
-
-                  {/* Info */}
-                  <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
-                    <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>{tipoLabel(p.tipo_local)}</p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '13px', color: 'var(--muted)' }}>{p.m2} m²</span>
-                      <span style={{ fontSize: '15px', fontWeight: 700, color: p.precio_inmueble ? 'var(--foreground)' : 'var(--muted)' }}>
-                        {p.precio_inmueble
-                          ? `$${p.precio_inmueble.toLocaleString('en-US')} MXN`
-                          : t('priceNotListed')}
+                      {p.photo_urls?.length > 0 ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.photo_urls[0]}
+                          alt={p.colonia}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '36px', opacity: 0.3 }}>🏬</span>
+                      )}
+                      <span style={{
+                        position: 'absolute', top: 12, left: 12,
+                        background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(6px)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '100px', padding: '4px 10px',
+                        fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em',
+                        color: 'var(--accent)',
+                      }}>
+                        {p.colonia}
                       </span>
                     </div>
+
+                    <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                      <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>{tipoLabel(p.tipo_local)}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', color: 'var(--muted)' }}>{p.m2} m²</span>
+                        <span style={{ fontSize: '15px', fontWeight: 700, color: p.precio_inmueble ? 'var(--foreground)' : 'var(--muted)' }}>
+                          {p.precio_inmueble
+                            ? `$${p.precio_inmueble.toLocaleString('en-US')} MXN`
+                            : t('priceNotListed')}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
                 </Link>
               ))}
             </div>
@@ -301,8 +351,7 @@ export default function Home() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {steps.map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: '32px', marginBottom: i < steps.length - 1 ? '0' : '0' }}>
-                {/* Vertical line + number */}
+              <div key={i} style={{ display: 'flex', gap: '32px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px' }}>
                   <div style={{
                     width: 52, height: 52,
@@ -341,123 +390,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px' }}>
-            {/* ── BASIC PLAN ── */}
-            <div
-              className="card"
-              onMouseEnter={() => setHoveredPlan('basic')}
-              onMouseLeave={() => setHoveredPlan(null)}
-              style={{
-                padding: '40px',
-                background: hoveredPlan === 'basic' ? 'rgba(0,245,160,0.03)' : 'var(--plan-basic-bg)',
-                borderColor: hoveredPlan === 'basic' ? 'rgba(0,245,160,0.4)' : 'var(--plan-basic-border)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <div style={{ marginBottom: '32px' }}>
-                <span className="tag tag-accent" style={{ marginBottom: '20px', display: 'inline-flex' }}>
-                  ✓ {t('basicTag')}
-                </span>
-                <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '4px' }}>
-                  {t('basicPrice')}
-                </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>{t('basicSubtitle')}</div>
-              </div>
-
-              <div style={{ borderTop: '1px solid var(--plan-basic-border)', paddingTop: '28px', marginBottom: '36px' }}>
-                <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '24px', lineHeight: 1.6 }}>
-                  {t('basicDesc')}
-                </p>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {(['basicFeature1', 'basicFeature2', 'basicFeature3', 'basicFeature4', 'basicFeature5'] as const).map((key, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
-                      <span style={{ color: 'var(--accent)', fontSize: '16px', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                      <span style={{ color: 'var(--foreground)' }}>{t(key)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <Link href="/registro" className="btn-secondary" style={{
-                display: 'block', textAlign: 'center', width: '100%',
-                padding: '14px', borderRadius: '12px', fontSize: '15px',
-              }}>
-                {t('basicCta')}
-              </Link>
-            </div>
-
-            {/* ── PRO PLAN ── */}
-            <div
-              className="card"
-              onMouseEnter={() => setHoveredPlan('pro')}
-              onMouseLeave={() => setHoveredPlan(null)}
-              style={{
-                padding: '40px',
-                background: 'linear-gradient(160deg, rgba(124,58,237,0.12) 0%, rgba(0,180,216,0.06) 100%)',
-                borderColor: hoveredPlan === 'pro' ? '#7c3aed' : 'rgba(124,58,237,0.45)',
-                position: 'relative',
-                overflow: 'hidden',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              {/* Pro glow */}
-              <div style={{
-                position: 'absolute', top: '-60px', right: '-60px',
-                width: '200px', height: '200px',
-                background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%)',
-                pointerEvents: 'none',
-              }} />
-
-              <div style={{ marginBottom: '32px', position: 'relative' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <span className="tag tag-pro">⚡ {t('proTag')}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ fontSize: '44px', fontWeight: 900, letterSpacing: '-0.02em' }}>
-                    <span className="gradient-text-accent">{t('proPrice')}</span>
-                  </div>
-                  <span style={{ color: 'var(--muted)', fontSize: '15px' }}>{t('proUnit')}</span>
-                </div>
-                <div style={{ color: 'var(--muted)', fontSize: '15px' }}>{t('proSubtitle')}</div>
-              </div>
-
-              <div style={{ borderTop: '1px solid rgba(124,58,237,0.25)', paddingTop: '28px', marginBottom: '36px' }}>
-                <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '24px', lineHeight: 1.6 }}>
-                  {t('proDesc')}
-                </p>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {[
-                    { key: 'proFeature1' as const, isPro: false },
-                    { key: 'proFeature2' as const, isPro: true },
-                    { key: 'proFeature3' as const, isPro: true },
-                    { key: 'proFeature4' as const, isPro: true },
-                  ].map((item, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '15px' }}>
-                      <span style={{
-                        color: item.isPro ? '#a78bfa' : 'var(--accent)',
-                        fontSize: '16px', flexShrink: 0, marginTop: '2px',
-                      }}>
-                        {item.isPro ? '⚡' : '✓'}
-                      </span>
-                      <span>{t(item.key)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
-                <Link href="/registro" className="btn-primary" style={{
-                  display: 'block', textAlign: 'center', width: '100%',
-                  padding: '14px', borderRadius: '12px', fontSize: '15px',
-                  background: 'linear-gradient(135deg, oklch(0.235 0.07 265), oklch(0.55 0.11 250))',
-                  boxShadow: '0 8px 30px oklch(0.235 0.07 265 / 0.3)',
-                }}>
-                  {t('proCta')}
-                </Link>
-              </div>
-            </div>
-          </div>
+          <PricingCards s={pricingStrings} />
         </div>
       </section>
 
@@ -518,24 +451,12 @@ export default function Home() {
         </div>
         <p>{t('footerRights', { year: new Date().getFullYear() })}</p>
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-          <Link href="/propiedades" style={{ transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerProperties')}</Link>
-          <a href="#plans" style={{ transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerPlans')}</a>
-          <a href="#features" style={{ transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerFeatures')}</a>
-          <Link href="/registro" style={{ transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerRegister')}</Link>
-          <Link href="/terms" style={{ transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerTerms')}</Link>
-          <Link href="/privacy" style={{ transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '')}>{t('footerPrivacy')}</Link>
+          <Link href="/propiedades" className="footer-link">{t('footerProperties')}</Link>
+          <a href="#plans" className="footer-link">{t('footerPlans')}</a>
+          <a href="#features" className="footer-link">{t('footerFeatures')}</a>
+          <Link href="/registro" className="footer-link">{t('footerRegister')}</Link>
+          <Link href="/terms" className="footer-link">{t('footerTerms')}</Link>
+          <Link href="/privacy" className="footer-link">{t('footerPrivacy')}</Link>
         </div>
       </footer>
     </main>
