@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PricingCards from '@/components/PricingCards';
+import Testimonials from '@/components/Testimonials';
 import { TIPO_KEY } from '@/lib/tipoKey';
 
 interface Property {
@@ -66,6 +67,27 @@ async function getLatestProperties(): Promise<Property[]> {
   return data ?? [];
 }
 
+async function getPropertyStats(): Promise<{ total: number; recentWeek: number }> {
+  const supabase = getSupabase();
+  const now = new Date().toISOString();
+  const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [{ count: total }, { count: recentWeek }] = await Promise.all([
+    supabase
+      .from('properties')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_published', true)
+      .or(`expires_at.is.null,expires_at.gt.${now}`),
+    supabase
+      .from('properties')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_published', true)
+      .gte('created_at', lastWeek),
+  ]);
+
+  return { total: total ?? 0, recentWeek: recentWeek ?? 0 };
+}
+
 export default async function Home() {
   const [t, tF, tS, tCard] = await Promise.all([
     getTranslations('HomePage'),
@@ -74,7 +96,10 @@ export default async function Home() {
     getTranslations('PropertyCard'),
   ]);
 
-  const latestProperties = await getLatestProperties();
+  const [latestProperties, { total: totalCount, recentWeek }] = await Promise.all([
+    getLatestProperties(),
+    getPropertyStats(),
+  ]);
 
   const tipoLabel = (raw: string) => {
     const key = TIPO_KEY[raw];
@@ -195,15 +220,39 @@ export default async function Home() {
             </Link>
           </div>
 
+          {/* Trust strip */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '8px',
+            marginTop: '28px',
+            flexWrap: 'wrap',
+          }}>
+            {[t('trustFree'), t('trustNoCommission'), t('trustNoContract'), t('trustRealTime')].map((label, i) => (
+              <span key={i} style={{
+                fontSize: '12px',
+                color: 'var(--muted)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}>
+                {i > 0 && <span style={{ opacity: 0.3, marginRight: '4px' }}>·</span>}
+                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>✓</span>
+                {label}
+              </span>
+            ))}
+          </div>
+
+          {/* Hero stats */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
             gap: '48px',
-            marginTop: '72px',
+            marginTop: '64px',
             flexWrap: 'wrap',
           }}>
             {[
-              { value: t('stat1Value'), label: t('stat1Label') },
+              { value: String(totalCount), label: t('stat1Label') },
               { value: t('stat2Value'), label: t('stat2Label') },
               { value: t('stat3Value'), label: t('stat3Label') },
             ].map((s, i) => (
@@ -227,13 +276,25 @@ export default async function Home() {
                 <span className="gradient-text-accent">{t('latestPropertiesAccent')}</span>
               </h2>
             </div>
-            <Link href="/propiedades" style={{
-              fontSize: '14px', fontWeight: 600, color: 'var(--accent)',
-              display: 'flex', alignItems: 'center', gap: '6px',
-              opacity: 0.85,
-            }}>
-              {t('viewAll')}
-            </Link>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+              {recentWeek > 0 && (
+                <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 500 }}>
+                  {t('recentActivity', { count: recentWeek })}
+                </span>
+              )}
+              {recentWeek === 0 && (
+                <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 500 }}>
+                  {t('recentActivityZero')}
+                </span>
+              )}
+              <Link href="/propiedades" style={{
+                fontSize: '14px', fontWeight: 600, color: 'var(--accent)',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                opacity: 0.85,
+              }}>
+                {t('viewAll')}
+              </Link>
+            </div>
           </div>
 
           {latestProperties.length === 0 ? (
@@ -298,6 +359,8 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      <Testimonials />
 
       {/* ────────────────── FEATURES ────────────────── */}
       <section id="features" style={{ padding: '100px 24px', background: 'var(--surface)' }}>
@@ -391,6 +454,50 @@ export default async function Home() {
           </div>
 
           <PricingCards s={pricingStrings} />
+        </div>
+      </section>
+
+      {/* ────────────────── WHY PLAZIIA ────────────────── */}
+      <section style={{ padding: '100px 24px', background: 'var(--background)' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <span className="section-label">{t('whyLabel')}</span>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2, marginTop: '8px' }}>
+              {t('whyTitle')}<br />
+              <span className="gradient-text-accent">{t('whyAccent')}</span>
+            </h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
+            {[
+              { icon: t('why1Icon'), title: t('why1Title'), desc: t('why1Desc') },
+              { icon: t('why2Icon'), title: t('why2Title'), desc: t('why2Desc') },
+              { icon: t('why3Icon'), title: t('why3Title'), desc: t('why3Desc') },
+            ].map((item, i) => (
+              <div key={i} style={{ textAlign: 'center', padding: '32px 24px' }}>
+                <div style={{
+                  fontSize: '48px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 72,
+                  height: 72,
+                  background: 'rgba(0,245,160,0.08)',
+                  borderRadius: '20px',
+                  margin: '0 auto 20px auto',
+                }}>
+                  {item.icon}
+                </div>
+                <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px', color: 'var(--foreground)' }}>
+                  {item.title}
+                </h3>
+                <p style={{ fontSize: '15px', color: 'var(--muted)', lineHeight: 1.7 }}>
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
