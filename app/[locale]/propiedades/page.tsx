@@ -1,10 +1,39 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Commercial Properties',
-  description: 'Browse commercial properties listed on Plaziia — offices, stores, warehouses, and more.',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (locale === 'es') {
+    return {
+      title: { absolute: 'Locales Comerciales en Renta en México | Plaziia' },
+      description:
+        'Encuentra locales en renta en México: tiendas, oficinas, bodegas y más. Analiza la competencia cercana y publica tu local gratis.',
+      keywords: ['locales en renta', 'locales comerciales', 'renta de locales', 'propiedades comerciales México', 'bodegas en renta'],
+      openGraph: {
+        title: 'Locales Comerciales en Renta en México | Plaziia',
+        description: 'Encuentra locales en renta en México. Analiza competencia y publica gratis.',
+        locale: 'es_MX',
+      },
+      alternates: {
+        canonical: 'https://plaziia.com/es/propiedades',
+        languages: { es: 'https://plaziia.com/es/propiedades', en: 'https://plaziia.com/en/propiedades' },
+      },
+    };
+  }
+  return {
+    title: { absolute: 'Commercial Properties for Rent in Mexico | Plaziia' },
+    description: 'Browse commercial spaces for rent in Mexico: stores, offices, warehouses and more. Analyze nearby competition and publish for free.',
+    alternates: {
+      canonical: 'https://plaziia.com/en/propiedades',
+      languages: { es: 'https://plaziia.com/es/propiedades', en: 'https://plaziia.com/en/propiedades' },
+    },
+  };
+}
+
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { getTranslations } from 'next-intl/server';

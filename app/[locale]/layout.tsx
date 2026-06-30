@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import '../globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -6,6 +7,24 @@ import { routing } from '@/i18n/routing';
 import Providers from '@/components/Providers';
 import FeedbackWidget from '@/components/FeedbackWidget';
 import { Analytics } from '@vercel/analytics/next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    alternates: {
+      canonical: `https://plaziia.com/${locale}`,
+      languages: {
+        en: 'https://plaziia.com/en',
+        es: 'https://plaziia.com/es',
+        'x-default': 'https://plaziia.com/en',
+      },
+    },
+  };
+}
 
 export default async function LocaleLayout({
   children,

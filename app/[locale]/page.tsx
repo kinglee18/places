@@ -88,7 +88,12 @@ async function getPropertyStats(): Promise<{ total: number; recentWeek: number }
   return { total: total ?? 0, recentWeek: recentWeek ?? 0 };
 }
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const [t, tF, tS, tCard] = await Promise.all([
     getTranslations('HomePage'),
     getTranslations('Features'),
@@ -141,7 +146,28 @@ export default async function Home() {
     proCta: t('proCta'),
   };
 
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Plaziia',
+    url: 'https://plaziia.com',
+    description:
+      locale === 'es'
+        ? 'Plataforma de locales comerciales en renta en México'
+        : 'Commercial real estate marketplace in Mexico',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `https://plaziia.com/${locale}/buscar?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+    />
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="noise-overlay" />
 
@@ -567,5 +593,6 @@ export default async function Home() {
         </div>
       </footer>
     </main>
+    </>
   );
 }
