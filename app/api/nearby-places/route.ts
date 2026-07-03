@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getZoneSuggestions } from '@/lib/zoneSuggestions';
 
 const TYPE_TO_CATEGORY: Record<string, string> = {
   cafe: 'Café',
@@ -67,48 +68,7 @@ const TRANSIT_ICON: Record<string, string> = {
   transit_station: '🚉',
 };
 
-type ZoneType = 'cultural' | 'religious' | 'entertainment' | 'nature' | 'lodging' | 'mixed';
-
-// Business suggestions per tourist zone type
-const ZONE_SUGGESTIONS: Record<ZoneType, Array<{ category: string; reason: string }>> = {
-  cultural: [
-    { category: 'Souvenir / Crafts', reason: 'Museum and historic district visitors look for local mementos.' },
-    { category: 'Themed café', reason: 'Cultural tourists value spaces to rest and socialize between visits.' },
-    { category: 'Tour operator', reason: 'High demand for guided tours and organized experiences.' },
-    { category: 'Photo / Print shop', reason: 'Visitors want to print or frame photos from their trip.' },
-    { category: 'Bookstore / Art', reason: 'Books, catalogs, and local art reproductions sell well here.' },
-  ],
-  religious: [
-    { category: 'Religious articles', reason: 'Visitors and worshippers seek candles, icons, and devotional items.' },
-    { category: 'Café / Bakery', reason: 'Religious-zone visitors look for nearby rest options.' },
-    { category: 'Flower shop', reason: 'High demand for flowers and offerings for ceremonies.' },
-    { category: 'Convenience / Grocery', reason: 'Basic needs for tourists and residents in the area.' },
-  ],
-  entertainment: [
-    { category: 'Snacks / Fast food', reason: 'Stadiums and amusement parks drive high demand for casual food.' },
-    { category: 'Souvenir / Merchandise', reason: 'Event attendees look for memorabilia and branded goods.' },
-    { category: 'Photo / Print shop', reason: 'Photo printing and event souvenirs.' },
-    { category: 'Convenience store', reason: 'Drinks, snacks, and quick-use items before and after events.' },
-  ],
-  nature: [
-    { category: 'Outdoor gear rental', reason: 'Bicycles, kayaks, and camping equipment are in high demand near parks and zoos.' },
-    { category: 'Café / Restaurant', reason: 'Park visitors look for outdoor dining options.' },
-    { category: 'Snacks / Juices', reason: 'High demand for healthy and light options.' },
-    { category: 'Photo / Print shop', reason: 'Nature tourists want to print their photos locally.' },
-  ],
-  lodging: [
-    { category: 'Laundry', reason: 'Hotel and hostel guests frequently need laundry service.' },
-    { category: 'Convenience / Grocery', reason: 'Staying tourists look for nearby stores for essentials.' },
-    { category: 'Café / Breakfast', reason: 'Travelers want quick breakfast options near their accommodation.' },
-    { category: 'Tour operator', reason: 'Hotel guests seek organized activities and excursions.' },
-  ],
-  mixed: [
-    { category: 'Souvenir / Crafts', reason: 'Mixed tourist flow zone — high demand for general souvenirs.' },
-    { category: 'Café', reason: 'Universal rest point for any type of tourist.' },
-    { category: 'Tour operator', reason: 'Diverse attractions generate demand for organized tours.' },
-    { category: 'Photo / Print shop', reason: 'Tourists of all types want to save visual memories.' },
-  ],
-};
+import type { ZoneType } from '@/lib/zoneSuggestions';
 
 // Which business categories make sense for each property type.
 // "Bank / Finance" is intentionally excluded — it requires special licensing
@@ -298,7 +258,7 @@ function detectTouristContext(places: PlacesV2Result[]): TouristContext | null {
     zone_type,
     attraction_count: places.length,
     nearby_attractions,
-    suggestions: ZONE_SUGGESTIONS[zone_type],
+    suggestions: getZoneSuggestions(zone_type, 'en'),
   };
 }
 

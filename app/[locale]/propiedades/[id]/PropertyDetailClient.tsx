@@ -5,8 +5,10 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import NavHeader from '@/components/NavHeader';
+import { getZoneSuggestions } from '@/lib/zoneSuggestions';
+import type { ZoneType } from '@/lib/zoneSuggestions';
 
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
@@ -139,6 +141,7 @@ export default function PropertyDetailPage() {
   const { data: session } = useSession();
   const tP = useTranslations('PropertyDetail');
   const tL = useTranslations('LocalIQ');
+  const currentLocale = useLocale();
 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading]   = useState(true);
@@ -843,7 +846,7 @@ export default function PropertyDetailPage() {
                         {tP('recommendedBiz')}
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {tc.suggestions.map((s, i) => (
+                        {getZoneSuggestions(tc.zone_type as ZoneType, currentLocale).map((s, i) => (
                           <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <span style={{ fontSize: 13, fontWeight: 700, color: 'oklch(0.52 0.14 70)' }}>{s.category}</span>
                             <span style={{ fontSize: 12, color: MUTED, lineHeight: 1.5 }}>{s.reason}</span>
