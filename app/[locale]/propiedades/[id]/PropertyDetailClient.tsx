@@ -9,6 +9,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import NavHeader from '@/components/NavHeader';
 import { getZoneSuggestions } from '@/lib/zoneSuggestions';
 import type { ZoneType } from '@/lib/zoneSuggestions';
+import { categoryLabel } from '@/lib/categoryLabels';
 
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
@@ -871,7 +872,7 @@ export default function PropertyDetailPage() {
                           background: o.score === 'high' ? 'rgba(59,111,160,0.07)' : '#f5f6fc',
                           border: `1px solid ${o.score === 'high' ? 'rgba(59,111,160,0.2)' : BORDER}`,
                         }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{o.category}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{categoryLabel(o.category, currentLocale)}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <span style={{ fontSize: 11, color: MUTED, fontFamily: "'DM Mono', monospace" }}>
                               {tP('within500m2km', { count500m: o.count_500m, count2km: o.count_2km })}
@@ -907,7 +908,7 @@ export default function PropertyDetailPage() {
                           background: 'oklch(0.97 0.05 155)', border: '1px solid oklch(0.86 0.1 155)',
                           color: 'oklch(0.40 0.14 155)',
                         }}>
-                          {gap}
+                          {categoryLabel(gap, currentLocale)}
                         </span>
                       ))}
                     </div>
@@ -928,7 +929,7 @@ export default function PropertyDetailPage() {
                           background: 'oklch(0.97 0.04 25)', border: '1px solid oklch(0.88 0.1 25)',
                           color: 'oklch(0.50 0.18 25)',
                         }}>
-                          {tP('saturatedItem', { category: s.category, count: s.count_500m })}
+                          {tP('saturatedItem', { category: categoryLabel(s.category, currentLocale), count: s.count_500m })}
                         </span>
                       ))}
                     </div>
@@ -949,7 +950,7 @@ export default function PropertyDetailPage() {
                   }}>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{b.name}</div>
-                      <div style={{ fontSize: 11, color: MUTED }}>{b.category}</div>
+                      <div style={{ fontSize: 11, color: MUTED }}>{categoryLabel(b.category ?? '', currentLocale)}</div>
                     </div>
                     {b.rating && (
                       <span style={{ fontSize: 12, color: 'oklch(0.52 0.14 70)', fontFamily: "'DM Mono', monospace", flexShrink: 0 }}>★ {b.rating}</span>
