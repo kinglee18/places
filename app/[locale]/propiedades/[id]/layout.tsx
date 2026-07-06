@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { getSupabase } from '@/lib/supabase';
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale } = await params;
   const supabase = getSupabase();
 
   const { data } = await supabase
@@ -24,6 +24,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: { title, description },
+    alternates: {
+      canonical: `https://plaziia.com/${locale}/propiedades/${id}`,
+      languages: {
+        es: `https://plaziia.com/es/propiedades/${id}`,
+        en: `https://plaziia.com/en/propiedades/${id}`,
+        'x-default': `https://plaziia.com/es/propiedades/${id}`,
+      },
+    },
   };
 }
 

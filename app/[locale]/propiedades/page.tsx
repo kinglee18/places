@@ -20,7 +20,11 @@ export async function generateMetadata({
       },
       alternates: {
         canonical: 'https://plaziia.com/es/propiedades',
-        languages: { es: 'https://plaziia.com/es/propiedades', en: 'https://plaziia.com/en/propiedades' },
+        languages: {
+          es: 'https://plaziia.com/es/propiedades',
+          en: 'https://plaziia.com/en/propiedades',
+          'x-default': 'https://plaziia.com/es/propiedades',
+        },
       },
     };
   }
@@ -29,7 +33,11 @@ export async function generateMetadata({
     description: 'Browse commercial spaces for rent in Mexico: stores, offices, warehouses and more. Analyze nearby competition and publish for free.',
     alternates: {
       canonical: 'https://plaziia.com/en/propiedades',
-      languages: { es: 'https://plaziia.com/es/propiedades', en: 'https://plaziia.com/en/propiedades' },
+      languages: {
+        es: 'https://plaziia.com/es/propiedades',
+        en: 'https://plaziia.com/en/propiedades',
+        'x-default': 'https://plaziia.com/es/propiedades',
+      },
     },
   };
 }

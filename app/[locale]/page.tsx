@@ -42,6 +42,14 @@ export async function generateMetadata({
           'Encuentra locales comerciales en renta en México. Registra tu propiedad gratis en Plaziia.',
         locale: 'es_MX',
       },
+      alternates: {
+        canonical: 'https://plaziia.com/es',
+        languages: {
+          es: 'https://plaziia.com/es',
+          en: 'https://plaziia.com/en',
+          'x-default': 'https://plaziia.com/es',
+        },
+      },
     };
   }
   return {
@@ -51,6 +59,14 @@ export async function generateMetadata({
     openGraph: {
       title: 'Commercial Properties for Rent | Plaziia',
       description: 'Find commercial spaces for rent in Mexico. Register your property for free on Plaziia.',
+    },
+    alternates: {
+      canonical: 'https://plaziia.com/en',
+      languages: {
+        es: 'https://plaziia.com/es',
+        en: 'https://plaziia.com/en',
+        'x-default': 'https://plaziia.com/es',
+      },
     },
   };
 }

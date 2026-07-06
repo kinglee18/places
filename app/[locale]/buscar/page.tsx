@@ -2,10 +2,26 @@ import { getTranslations } from 'next-intl/server';
 import BuscarLocal from '@/components/BuscarLocal';
 import Link from 'next/link';
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const isEs = locale === 'es';
   return {
-    title: 'Find Space — Plaziia',
-    description: 'Describe your project and AI finds the ideal commercial space for you.',
+    title: isEs ? 'Buscar Local — Plaziia' : 'Find Space — Plaziia',
+    description: isEs
+      ? 'Describe tu proyecto y la IA encuentra el local comercial ideal para ti.'
+      : 'Describe your project and AI finds the ideal commercial space for you.',
+    alternates: {
+      canonical: `https://plaziia.com/${locale}/buscar`,
+      languages: {
+        es: 'https://plaziia.com/es/buscar',
+        en: 'https://plaziia.com/en/buscar',
+        'x-default': 'https://plaziia.com/es/buscar',
+      },
+    },
   };
 }
 
