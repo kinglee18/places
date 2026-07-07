@@ -28,6 +28,31 @@ const LABELS_ES: Record<string, string> = {
   'Tacos / Street food':     'Tacos / Comida callejera',
   'Coffee / Specialty':      'Café de especialidad',
   'Bakery / Pastry':         'Panadería / Repostería',
+
+  // Property type (tipo_local)
+  'Street-facing (with storefront)': 'Local frontal',
+  'Inside commercial plaza':         'Local en plaza',
+  'Corner unit':                     'Local en esquina',
+  'Basement / Semi-basement':        'Sótano / semi-sótano',
+  'Market stall':                    'Puesto de mercado',
+
+  // Condition (estado_conservacion)
+  'New':                     'Nuevo',
+  'Excellent':               'Excelente',
+  'Good':                    'Bueno',
+  'Fair':                    'Regular',
+  'Needs renovation':        'Necesita renovación',
+
+  // Zoning (uso_suelo)
+  'Commercial':              'Comercial',
+  'Industrial':              'Industrial',
+  'Mixed-use':               'Uso mixto',
+  'Residential with commercial': 'Residencial con comercial',
+  'Not specified':           'No especificado',
+
+  // Electrical (tipo_energia)
+  'Single-phase':            'Monofásica',
+  'Three-phase':             'Trifásica',
 };
 
 export function categoryLabel(raw: string, locale: string): string {

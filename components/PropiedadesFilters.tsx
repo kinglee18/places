@@ -2,7 +2,8 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useTransition, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { categoryLabel } from '@/lib/categoryLabels';
 
 interface FilterOptions {
   colonias: string[];
@@ -27,6 +28,7 @@ const labelStyle: React.CSSProperties = {
 
 export default function PropiedadesFilters({ filterOptions }: { filterOptions: FilterOptions }) {
   const t = useTranslations('PropiedadesFilters');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -121,7 +123,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
           <label style={labelStyle}>{t('labelPropertyType')}</label>
           <select value={get('tipo')} onChange={e => setParam('tipo', e.target.value)} style={{ ...inputStyle(isPending), cursor: 'pointer' }}>
             <option value="">{t('all')}</option>
-            {filterOptions.tipos.map(tp => <option key={tp} value={tp}>{tp}</option>)}
+            {filterOptions.tipos.map(tp => <option key={tp} value={tp}>{categoryLabel(tp, locale)}</option>)}
           </select>
         </div>
         {filterOptions.condiciones.length > 0 && (
@@ -129,7 +131,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
             <label style={labelStyle}>{t('labelCondition')}</label>
             <select value={get('condicion')} onChange={e => setParam('condicion', e.target.value)} style={{ ...inputStyle(isPending), cursor: 'pointer' }}>
               <option value="">{t('all')}</option>
-              {filterOptions.condiciones.map(c => <option key={c} value={c}>{c}</option>)}
+              {filterOptions.condiciones.map(c => <option key={c} value={c}>{categoryLabel(c, locale)}</option>)}
             </select>
           </div>
         )}
@@ -138,7 +140,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
             <label style={labelStyle}>{t('labelZoning')}</label>
             <select value={get('zoning')} onChange={e => setParam('zoning', e.target.value)} style={{ ...inputStyle(isPending), cursor: 'pointer' }}>
               <option value="">{t('all')}</option>
-              {filterOptions.zonings.map(z => <option key={z} value={z}>{z}</option>)}
+              {filterOptions.zonings.map(z => <option key={z} value={z}>{categoryLabel(z, locale)}</option>)}
             </select>
           </div>
         )}
@@ -147,7 +149,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
             <label style={labelStyle}>{t('labelElectrical')}</label>
             <select value={get('energia')} onChange={e => setParam('energia', e.target.value)} style={{ ...inputStyle(isPending), cursor: 'pointer' }}>
               <option value="">{t('all')}</option>
-              {filterOptions.energias.map(en => <option key={en} value={en}>{en}</option>)}
+              {filterOptions.energias.map(en => <option key={en} value={en}>{categoryLabel(en, locale)}</option>)}
             </select>
           </div>
         )}
