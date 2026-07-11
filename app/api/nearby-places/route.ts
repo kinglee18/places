@@ -214,8 +214,8 @@ const GENUINE_ATTRACTOR_TYPES = new Set([
 ]);
 
 function detectTouristContext(places: PlacesV2Result[]): TouristContext | null {
-  if (places.length < 2) return null;
-
+  return null;
+/* 
   const hasGenuineAttractor = places.some(p =>
     (p.types ?? []).some(t => GENUINE_ATTRACTOR_TYPES.has(t))
   );
@@ -259,7 +259,7 @@ function detectTouristContext(places: PlacesV2Result[]): TouristContext | null {
     attraction_count: places.length,
     nearby_attractions,
     suggestions: getZoneSuggestions(zone_type, 'en'),
-  };
+  }; */
 }
 
 function analyzeOpportunities(
@@ -346,11 +346,9 @@ export async function POST(req: NextRequest) {
 
   let r500: PlacesV2Result[], r5000: PlacesV2Result[], rTourist: PlacesV2Result[], rTransit: PlacesV2Result[];
   try {
-    [r500, r5000, rTourist, rTransit] = await Promise.all([
+    [r500, r5000] = await Promise.all([
       fetchNearbyV2(lat, lng, 500, key),
       fetchNearbyV2(lat, lng, 5000, key),
-      fetchNearbyV2(lat, lng, 1000, key, TOURIST_TYPES),
-      fetchNearbyV2(lat, lng, 1500, key, TRANSIT_TYPES, 'places.displayName,places.types,places.location'),
     ]);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error querying Google Places';
@@ -372,7 +370,7 @@ export async function POST(req: NextRequest) {
   const tourist_context = detectTouristContext(rTourist);
   const food_subcategories = detectFoodSubcategories(r500, r5000);
 
-  const nearby_transit = rTransit.slice(0, 5).map(p => {
+/*   const nearby_transit = rTransit.slice(0, 5).map(p => {
     const typeKey = (p.types ?? []).find(t => TRANSIT_ICON[t]) ?? 'transit_station';
     const dist = p.location
       ? metersAway(lat, lng, p.location.latitude, p.location.longitude)
@@ -383,9 +381,9 @@ export async function POST(req: NextRequest) {
       icon: TRANSIT_ICON[typeKey] ?? '🚉',
       distance_m: dist !== null ? Math.round(dist) : null,
     };
-  }).sort((a, b) => (a.distance_m ?? Infinity) - (b.distance_m ?? Infinity));
+  }).sort((a, b) => (a.distance_m ?? Infinity) - (b.distance_m ?? Infinity)); */
 
-  const result = { within_500m, within_2km, top_nearby, opportunities, saturated, tourist_context, nearby_transit, food_subcategories };
+  const result = { within_500m, within_2km, top_nearby, opportunities, saturated, tourist_context, food_subcategories };
 
   return NextResponse.json(result);
 }

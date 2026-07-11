@@ -445,16 +445,6 @@ export default function PropertyDetailPage() {
           if (data.competition_data?.ai_analysis) {
             setAnalysis(data.competition_data.ai_analysis as AiAnalysis);
           }
-          if (data.lat && data.lng) {
-            fetch('/api/isochrone', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ lat: data.lat, lng: data.lng }),
-            })
-              .then(r => r.json())
-              .then(d => { if (Array.isArray(d.features)) setIsochrones(d.features); })
-              .catch(() => {});
-          }
         }
         setLoading(false);
       });
@@ -821,7 +811,7 @@ export default function PropertyDetailPage() {
               </div>
             ) : (
               <>
-                {/* Tourist context */}
+                {/* Tourist context }
                 {competition.tourist_context && (() => {
                   const tc = competition.tourist_context!;
                   const zoneLabels: Record<string, string> = {
@@ -856,7 +846,7 @@ export default function PropertyDetailPage() {
                       </div>
                     </div>
                   );
-                })()}
+                })()*/}
 
                 {/* Opportunities */}
                 {competition.opportunities?.length > 0 && (
@@ -961,7 +951,7 @@ export default function PropertyDetailPage() {
                   <p style={{ fontSize: 12, color: MUTED }}>{tP('noBiz500m')}</p>
                 )}
 
-                {/* Transit section */}
+                {/* Transit section }
                 {competition.nearby_transit && competition.nearby_transit.length > 0 && (
                   <>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, margin: '20px 0 10px', textTransform: 'uppercase' }}>
@@ -981,7 +971,7 @@ export default function PropertyDetailPage() {
                       </div>
                     ))}
                   </>
-                )}
+                )*/}
               </>
             )}
           </div>
