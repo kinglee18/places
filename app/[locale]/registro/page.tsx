@@ -1,4 +1,4 @@
-import LocalIQComponent from '@/components/LocalIQ';
+import LocalIQComponent from '@/components/Plaziia';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getTranslations } from 'next-intl/server';

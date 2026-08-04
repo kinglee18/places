@@ -43,31 +43,12 @@ export async function generateMetadata({
 }
 
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { getTranslations } from 'next-intl/server';
 import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PropiedadesFilters from '@/components/PropiedadesFilters';
 import PropertyCard from '@/components/PropertyCard';
-
-const PropertiesListMap = dynamic(() => import('@/components/PropertiesListMap'), {
-  ssr: true,
-  loading: () => (
-    <div
-      style={{
-        height: 560,
-        borderRadius: 16,
-        background: '#edf0f8',
-        border: '1px solid #d5daea',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <span style={{ color: '#9099b8', fontSize: 13 }}>Loading map…</span>
-    </div>
-  ),
-});
+import BestSpotsExplorer from '@/components/BestSpotsExplorer';
 
 const PAGE_SIZE = 12;
 
@@ -271,12 +252,12 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
           className="props-split"
           style={{ display: 'flex', gap: 24, alignItems: 'start' }}
         >
-          {/* Left — sticky map */}
+          {/* Left — sticky map + "best spots for" explorer */}
           <div
             className="props-map-col"
             style={{ width: 420, flexShrink: 0, position: 'sticky', top: 80 }}
           >
-            <PropertiesListMap pins={mapPins} />
+            <BestSpotsExplorer initialPins={mapPins} />
             {mapPins.length === 0 && (
               <p
                 style={{

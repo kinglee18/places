@@ -89,27 +89,32 @@ Response (id only):`;
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { descripcion, lat, lng, modalidad, presupuesto } = body as {
+  const { descripcion, giro_id, lat, lng, modalidad, presupuesto } = body as {
     descripcion?: string;
+    giro_id?: string | null;
     lat?: number | null;
     lng?: number | null;
     modalidad?: 'rent' | 'sale' | 'any' | null;
     presupuesto?: number | null;
   };
 
-  if (!descripcion || descripcion.trim().length < 10) {
-    return NextResponse.json({ error: 'Description too short.' }, { status: 400 });
-  }
-
-  // ── 1. Detección híbrida de giro ──────────────────────────────────────────
-  let giro = detectGiroByKeywords(descripcion);
+  // ── 1. Detección de giro: id directo del catálogo, o híbrida por texto ────
+  let giro: GiroDef | null = giro_id ? GIRO_BY_ID[giro_id] ?? null : null;
   let giroSource: 'keyword' | 'ai' | 'unknown' = giro ? 'keyword' : 'unknown';
 
   if (!giro) {
-    const aiGiro = await detectGiroByAi(descripcion);
-    if (aiGiro) {
-      giro = aiGiro;
-      giroSource = 'ai';
+    if (!descripcion || descripcion.trim().length < 3) {
+      return NextResponse.json({ error: 'Description too short.' }, { status: 400 });
+    }
+    giro = detectGiroByKeywords(descripcion);
+    giroSource = giro ? 'keyword' : 'unknown';
+
+    if (!giro) {
+      const aiGiro = await detectGiroByAi(descripcion);
+      if (aiGiro) {
+        giro = aiGiro;
+        giroSource = 'ai';
+      }
     }
   }
 

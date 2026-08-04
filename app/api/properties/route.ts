@@ -48,11 +48,11 @@ export async function GET(req: NextRequest) {
 /**
  * Creates a property.
  *
- * Freemium rule (trial stage): each user gets ONE free listing per calendar
- * month, published immediately for 30 days. Any additional listing in the same
- * month is created unpublished (is_extra) and must be paid for via Stripe
- * before it goes live. The client should redirect to /api/checkout when
- * `requiresPayment` is true.
+ * Freemium rule (trial stage): each user gets ONE free listing with every
+ * feature included, published immediately for 1 month. Any additional listing
+ * is created unpublished (is_extra) and must be paid for via Stripe
+ * ($200 MXN / 3 months) before it goes live. The client should redirect to
+ * /api/checkout when `requiresPayment` is true.
  */
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -65,16 +65,15 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const admin = getSupabaseAdmin();
 
-  // Count this user's FREE listings created in the current calendar month.
+  // Count this user's FREE listings. The free plan includes a single listing;
+  // every listing after that requires payment.
   const now = new Date();
-  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 
   const { count, error: countError } = await admin
     .from('properties')
     .select('id', { count: 'exact', head: true })
     .eq('user_email', email)
-    .eq('is_extra', false)
-    .gte('created_at', startOfMonth);
+    .eq('is_extra', false);
 
   if (countError) {
     console.error('Count query error:', countError.code, countError.message, countError.details);

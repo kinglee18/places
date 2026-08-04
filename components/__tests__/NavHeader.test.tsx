@@ -41,7 +41,7 @@ describe('NavHeader — unauthenticated state', () => {
     mockUseSession.mockReturnValue({ data: null, status: 'unauthenticated' });
   });
 
-  it('should render the LocalIQ logo link', () => {
+  it('should render the Plaziia logo link', () => {
     renderNav();
     // "Local" and "IQ" are in separate child elements; check the link exists by href
     const homeLink = screen.getByRole('link', { name: /local/i });

@@ -24,22 +24,27 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>3. Intellectual Property</h2>
+          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>3. Listings, Free Period and Payments</h2>
+          <p>Your first listing includes every platform feature and remains published free of charge for one (1) month. After the free period, keeping a listing published requires a payment of $200 MXN for three (3) additional months. Each additional listing beyond the first also costs $200 MXN for three (3) months. Payments are one-time (non-recurring) and are processed through our payment provider. Prices are stated in Mexican pesos and may change; any change will apply only to future purchases.</p>
+        </section>
+
+        <section>
+          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>4. Intellectual Property</h2>
           <p>All content, trademarks, and data on this platform are the property of Plaziia or its licensors. You may not reproduce or redistribute any part of this platform without written permission.</p>
         </section>
 
         <section>
-          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>4. Limitation of Liability</h2>
+          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>5. Limitation of Liability</h2>
           <p>Plaziia provides information on an &quot;as is&quot; basis. We do not guarantee the accuracy of market analysis or AI recommendations. Use this information as one factor among many in your decision-making process.</p>
         </section>
 
         <section>
-          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>5. Changes to Terms</h2>
+          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>6. Changes to Terms</h2>
           <p>We reserve the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.</p>
         </section>
 
         <section>
-          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>6. Contact</h2>
+          <h2 style={{ color: '#181e38', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>7. Contact</h2>
           <p>For questions about these terms, please contact us at <a href="mailto:hello@plaziia.com" style={{ color: 'oklch(0.55 0.11 250)' }}>hello@plaziia.com</a>.</p>
         </section>
       </div>

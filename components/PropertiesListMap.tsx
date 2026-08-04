@@ -7,17 +7,32 @@ export interface MapPin {
   lat: number;
   lng: number;
   label: string;
+  /** Marker fill color (defaults to brand navy). */
+  color?: string;
+  /** Extra popup line, e.g. competition level or price. */
+  sublabel?: string;
+  /** If set, clicking the marker navigates here. */
+  href?: string;
 }
 
 interface PropertiesListMapProps {
   pins: MapPin[];
+  /** Browser geolocation of the visitor; shown as a distinct marker and included in bounds. */
+  userLocation?: { lat: number; lng: number } | null;
+  userLocationLabel?: string;
+  height?: number;
 }
 
 // Default center: CDMX
 const DEFAULT_CENTER: [number, number] = [19.4326, -99.1332];
 const DEFAULT_ZOOM = 12;
 
-export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
+export default function PropertiesListMap({
+  pins,
+  userLocation = null,
+  userLocationLabel,
+  height = 560,
+}: PropertiesListMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
 
@@ -39,8 +54,8 @@ export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
       if (el._leaflet_id) delete el._leaflet_id;
 
       const map = L.map(mapRef.current!, {
-        center: DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
+        center: userLocation ? [userLocation.lat, userLocation.lng] : DEFAULT_CENTER,
+        zoom: userLocation ? 14 : DEFAULT_ZOOM,
         zoomControl: true,
         scrollWheelZoom: false,
         dragging: true,
@@ -55,33 +70,73 @@ export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
 
       const valid = pins.filter((p) => p.lat != null && p.lng != null);
 
-      if (valid.length > 0) {
-        const bounds = L.latLngBounds(valid.map((p) => [p.lat, p.lng] as [number, number]));
+      const boundPoints: [number, number][] = valid.map((p) => [p.lat, p.lng]);
+      if (userLocation) boundPoints.push([userLocation.lat, userLocation.lng]);
+
+      if (boundPoints.length > 0) {
+        const bounds = L.latLngBounds(boundPoints);
         map.fitBounds(bounds, { padding: [48, 48], maxZoom: 15 });
+      }
 
-        valid.forEach((p) => {
-          const dot = L.divIcon({
-            html: `<div style="
-              width:14px;height:14px;
-              background:#0f1b3d;
-              border-radius:50%;
-              border:2.5px solid #ffffff;
-              box-shadow:0 2px 8px rgba(15,27,61,0.35);
-            "></div>`,
-            className: '',
-            iconSize: [14, 14],
-            iconAnchor: [7, 7],
-          });
-
-          const marker = L.marker([p.lat, p.lng], { icon: dot }).addTo(map);
-          marker.bindPopup(
-            `<div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:#181e38;min-width:110px;padding:2px 0">${p.label}</div>`,
+      if (userLocation) {
+        const userDot = L.divIcon({
+          html: `<div style="
+            width:16px;height:16px;
+            background:#2563eb;
+            border-radius:50%;
+            border:3px solid #ffffff;
+            box-shadow:0 0 0 4px rgba(37,99,235,0.25), 0 2px 8px rgba(15,27,61,0.35);
+          "></div>`,
+          className: '',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+        });
+        const userMarker = L.marker([userLocation.lat, userLocation.lng], {
+          icon: userDot,
+          zIndexOffset: 1000,
+        }).addTo(map);
+        if (userLocationLabel) {
+          userMarker.bindPopup(
+            `<div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:#181e38;padding:2px 0">${userLocationLabel}</div>`,
             { closeButton: false, offset: [0, -6], className: 'plaziia-popup' }
           );
-          marker.on('mouseover', () => marker.openPopup());
-          marker.on('mouseout', () => marker.closePopup());
-        });
+          userMarker.on('mouseover', () => userMarker.openPopup());
+          userMarker.on('mouseout', () => userMarker.closePopup());
+        }
       }
+
+      valid.forEach((p) => {
+        const fill = p.color ?? '#0f1b3d';
+        const dot = L.divIcon({
+          html: `<div style="
+            width:14px;height:14px;
+            background:${fill};
+            border-radius:50%;
+            border:2.5px solid #ffffff;
+            box-shadow:0 2px 8px rgba(15,27,61,0.35);
+            ${p.href ? 'cursor:pointer;' : ''}
+          "></div>`,
+          className: '',
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+
+        const marker = L.marker([p.lat, p.lng], { icon: dot }).addTo(map);
+        const sublabelHtml = p.sublabel
+          ? `<div style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#5a6288;margin-top:2px">${p.sublabel}</div>`
+          : '';
+        marker.bindPopup(
+          `<div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:#181e38;min-width:110px;padding:2px 0">${p.label}${sublabelHtml}</div>`,
+          { closeButton: false, offset: [0, -6], className: 'plaziia-popup' }
+        );
+        marker.on('mouseover', () => marker.openPopup());
+        marker.on('mouseout', () => marker.closePopup());
+        if (p.href) {
+          marker.on('click', () => {
+            window.location.href = p.href!;
+          });
+        }
+      });
 
       leafletMap.current = map;
     });
@@ -95,7 +150,7 @@ export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
       if (mapRef.current) delete (mapRef.current as any)._leaflet_id;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(pins)]);
+  }, [JSON.stringify(pins), userLocation?.lat, userLocation?.lng]);
 
   return (
     <div
@@ -115,7 +170,7 @@ export default function PropertiesListMap({ pins }: PropertiesListMapProps) {
         }
         .plaziia-popup .leaflet-popup-tip { display: none; }
       `}</style>
-      <div ref={mapRef} style={{ width: '100%', height: 560 }} />
+      <div ref={mapRef} style={{ width: '100%', height }} />
     </div>
   );
 }

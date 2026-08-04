@@ -161,7 +161,7 @@ interface CompetitionData {
 export default function Plaziia() {
   const { data: session } = useSession();
   const router = useRouter();
-  const t = useTranslations('LocalIQ');
+  const t = useTranslations('Plaziia');
   const [activeStep, setActiveStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [pinLocation, setPinLocation] = useState<PinLocation | null>(null);

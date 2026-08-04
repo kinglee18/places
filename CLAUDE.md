@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**LocalIQ** is a commercial property registration and analysis platform that allows property owners to:
+**Plaziia** is a commercial property registration and analysis platform that allows property owners to:
 - Register commercial properties with detailed metadata (location, size, price, amenities)
 - View competitors within a 2km radius (Pro plan)
 - Analyze consumption trends and get AI-powered business recommendations (Pro plan)
@@ -60,11 +60,11 @@ npm run lint
 ### Pages & Routes
 - **`app/page.tsx`**: Landing page - hero section, features, pricing, how-it-works
 - **`app/login/page.tsx`**: Google OAuth login button
-- **`app/registro/page.tsx`** (not shown): Registration page (protected route, likely imports `LocalIQ` component)
+- **`app/registro/page.tsx`** (not shown): Registration page (protected route, likely imports `Plaziia` component)
 - **`app/propiedades/page.tsx`** (not shown): Properties listing page
 
 ### Components
-- **`components/LocalIQ.tsx`**: Multi-step registration form (3 steps: Location → Features → Details)
+- **`components/Plaziia.tsx`**: Multi-step registration form (3 steps: Location → Features → Details)
   - Uses MUI Stepper + React Hook Form
   - Includes location picker via Leaflet (MapPicker component)
   - Form fields: neighborhood, location, property type, size, utilities, rooms/baths/parking, price, maintenance
@@ -91,7 +91,7 @@ npm run lint
 ## Development Patterns
 
 ### Form Handling
-- Use React Hook Form with Controller pattern (see LocalIQ.tsx ~140-400)
+- Use React Hook Form with Controller pattern (see Plaziia.tsx ~140-400)
 - Validation: `rules` prop on Controller (required, min/max, custom)
 - Multi-step forms: trigger validation per step before advancing
 
@@ -111,9 +111,9 @@ npm run lint
 
 ## Known Issues & TODOs
 
-1. **Backend Integration**: LocalIQ form submission is stubbed (line 176-178) - needs backend API to persist registrations
+1. **Backend Integration**: Plaziia form submission is stubbed (line 176-178) - needs backend API to persist registrations
 2. **MapPicker Component**: Referenced but implementation not shown (in `app/components/MapPicker.tsx`)
-3. **Registro Page**: Imports LocalIQ but implementation not visible
+3. **Registro Page**: Imports Plaziia but implementation not visible
 
 ## Testing & Deployment Notes
 

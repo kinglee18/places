@@ -3,17 +3,18 @@ import Stripe from 'stripe';
 
 type Kind = 'extra' | 'extend';
 
-// Trial-stage pricing (MXN, in centavos).
+// Trial-stage pricing (MXN, in centavos): flat $200 MXN per 3 months,
+// whether it is an additional listing or an extension of an existing one.
 const PRODUCTS: Record<Kind, { amount: number; name: string; description: string }> = {
   extra: {
-    amount: 14900, // $149 MXN
-    name: 'Additional listing on Plaziia',
-    description: 'Publish another listing this month · 30 days live · full Google Maps + AI analysis',
+    amount: 20000, // $200 MXN
+    name: 'Additional listing on Plaziia · 3 months',
+    description: 'Publish another listing · 3 months live · full Google Maps + AI analysis',
   },
   extend: {
-    amount: 9900, // $99 MXN
-    name: 'Extend listing · 30 days',
-    description: 'Keep your listing published for another 30 days',
+    amount: 20000, // $200 MXN
+    name: 'Extend listing · 3 months',
+    description: 'Keep your listing published for another 3 months',
   },
 };
 

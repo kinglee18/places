@@ -34,7 +34,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('heading', { name: /sign in to publish/i })).toBeInTheDocument();
   });
 
-  it('should render the LocalIQ brand name', () => {
+  it('should render the Plaziia brand name', () => {
     render(<LoginPage />);
     // "Local" and "IQ" are in separate elements; check both parts are present
     expect(screen.getByText(/local/i)).toBeInTheDocument();

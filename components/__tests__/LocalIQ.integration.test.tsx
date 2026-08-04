@@ -1,5 +1,5 @@
 /**
- * Integration test for the LocalIQ registration form.
+ * Integration test for the Plaziia registration form.
  *
  * Covers the full happy-path flow:
  *   Step 1 (Location) → Step 2 (Features) → Step 3 (Details) → Submit → Success
@@ -58,7 +58,7 @@ jest.mock('../MapPicker', () => ({
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-import LocalIQ from '../LocalIQ';
+import Plaziia from '../Plaziia';
 
 /** Select a MUI <Select> by its label text and pick an option */
 async function selectOption(user: ReturnType<typeof userEvent.setup>, labelText: string, optionText: string) {
@@ -78,10 +78,10 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
-describe('LocalIQ registration form', () => {
+describe('Plaziia registration form', () => {
   it('completes all three steps and saves the property to Supabase', async () => {
     const user = userEvent.setup();
-    render(<LocalIQ />);
+    render(<Plaziia />);
 
     // ── Step 1: Location ──────────────────────────────────────────────────
     expect(screen.getByText('Location')).toBeInTheDocument();
@@ -155,7 +155,7 @@ describe('LocalIQ registration form', () => {
 
   it('blocks "Next" on step 1 when no neighborhood is selected', async () => {
     const user = userEvent.setup();
-    render(<LocalIQ />);
+    render(<Plaziia />);
 
     await user.click(screen.getByRole('button', { name: /next/i }));
 
@@ -168,7 +168,7 @@ describe('LocalIQ registration form', () => {
 
   it('blocks "Next" on step 2 when required fields are missing', async () => {
     const user = userEvent.setup();
-    render(<LocalIQ />);
+    render(<Plaziia />);
 
     // pass step 1
     await selectOption(user, 'NEIGHBORHOOD', 'Roma Norte');
@@ -187,7 +187,7 @@ describe('LocalIQ registration form', () => {
     mockInsert.mockResolvedValue({ error: { message: 'DB error' } });
 
     const user = userEvent.setup();
-    render(<LocalIQ />);
+    render(<Plaziia />);
 
     // step 1
     await selectOption(user, 'NEIGHBORHOOD', 'Polanco');
@@ -211,7 +211,7 @@ describe('LocalIQ registration form', () => {
 
   it('"Register another property" resets the form back to step 1', async () => {
     const user = userEvent.setup();
-    render(<LocalIQ />);
+    render(<Plaziia />);
 
     // fast path to submission
     await selectOption(user, 'NEIGHBORHOOD', 'Del Valle');

@@ -141,7 +141,7 @@ export default function PropertyDetailPage() {
   const { id, locale } = useParams<{ id: string; locale: string }>();
   const { data: session } = useSession();
   const tP = useTranslations('PropertyDetail');
-  const tL = useTranslations('LocalIQ');
+  const tL = useTranslations('Plaziia');
   const currentLocale = useLocale();
 
   const [property, setProperty] = useState<Property | null>(null);

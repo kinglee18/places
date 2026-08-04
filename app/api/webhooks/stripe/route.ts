@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+// Every payment ($200 MXN) buys 3 months of listing time.
+const PAID_PERIOD_MS = 90 * 24 * 60 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
       const now = Date.now();
 
       if (kind === 'extend') {
-        // Push expiry forward by 30 days from whichever is later: now or current expiry.
+        // Push expiry forward by 3 months from whichever is later: now or current expiry.
         const { data: current } = await supabaseAdmin
           .from('properties')
           .select('expires_at')
@@ -43,19 +44,19 @@ export async function POST(req: NextRequest) {
         const base = current?.expires_at
           ? Math.max(new Date(current.expires_at).getTime(), now)
           : now;
-        const newExpiry = new Date(base + THIRTY_DAYS_MS).toISOString();
+        const newExpiry = new Date(base + PAID_PERIOD_MS).toISOString();
 
         await supabaseAdmin
           .from('properties')
           .update({ is_published: true, expires_at: newExpiry })
           .eq('id', propertyId);
       } else {
-        // Paid additional listing: publish it for 30 days.
+        // Paid additional listing: publish it for 3 months.
         await supabaseAdmin
           .from('properties')
           .update({
             is_published: true,
-            expires_at: new Date(now + THIRTY_DAYS_MS).toISOString(),
+            expires_at: new Date(now + PAID_PERIOD_MS).toISOString(),
           })
           .eq('id', propertyId);
       }

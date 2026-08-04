@@ -1,4 +1,4 @@
-// Tests for components/LocalIQ.tsx
+// Tests for components/Plaziia.tsx
 // Covers: stepper rendering, step validation, step navigation,
 // form submission (success + error), and NumberStepper interactions.
 //
@@ -13,7 +13,7 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LocalIQ from '@/components/LocalIQ';
+import Plaziia from '@/components/Plaziia';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -72,7 +72,7 @@ function getFirstVisibleCombobox() {
 // ── Step navigation helpers ────────────────────────────────────────────────
 
 function renderLocalIQ() {
-  return render(<LocalIQ />);
+  return render(<Plaziia />);
 }
 
 /** Advance past Step 1 by selecting a valid colonia */
@@ -101,7 +101,7 @@ async function advanceFromStep2(user: ReturnType<typeof userEvent.setup>) {
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-describe('LocalIQ — initial render', () => {
+describe('Plaziia — initial render', () => {
   it('should render without crashing', () => {
     renderLocalIQ();
     expect(screen.getByText(/register your property/i)).toBeInTheDocument();
@@ -142,7 +142,7 @@ describe('LocalIQ — initial render', () => {
   });
 });
 
-describe('LocalIQ — Step 1 validation', () => {
+describe('Plaziia — Step 1 validation', () => {
   it('should show a validation error when Next is clicked without selecting a neighborhood', async () => {
     renderLocalIQ();
     const user = userEvent.setup();
@@ -168,7 +168,7 @@ describe('LocalIQ — Step 1 validation', () => {
   });
 });
 
-describe('LocalIQ — Step navigation', () => {
+describe('Plaziia — Step navigation', () => {
   it('should reveal Property Type fields after valid step 1', async () => {
     renderLocalIQ();
     const user = userEvent.setup();
@@ -223,7 +223,7 @@ describe('LocalIQ — Step navigation', () => {
   });
 });
 
-describe('LocalIQ — Step 2 validation', () => {
+describe('Plaziia — Step 2 validation', () => {
   async function goToStep2(user: ReturnType<typeof userEvent.setup>) {
     renderLocalIQ();
     await advanceFromStep1(user);
@@ -262,7 +262,7 @@ describe('LocalIQ — Step 2 validation', () => {
   });
 });
 
-describe('LocalIQ — NumberStepper', () => {
+describe('Plaziia — NumberStepper', () => {
   async function navigateToStep3() {
     const user = userEvent.setup();
     renderLocalIQ();
@@ -342,7 +342,7 @@ describe('LocalIQ — NumberStepper', () => {
   });
 });
 
-describe('LocalIQ — form submission', () => {
+describe('Plaziia — form submission', () => {
   beforeEach(() => {
     mockInsert.mockReset();
     mockFrom.mockReturnValue({ insert: mockInsert });
@@ -438,7 +438,7 @@ describe('LocalIQ — form submission', () => {
   });
 });
 
-describe('LocalIQ — map pin interaction', () => {
+describe('Plaziia — map pin interaction', () => {
   it('should render the map picker on step 1', () => {
     renderLocalIQ();
     expect(screen.getByTestId('mock-map-picker')).toBeInTheDocument();

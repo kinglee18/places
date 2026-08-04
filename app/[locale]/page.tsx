@@ -257,7 +257,7 @@ export default async function Home({
             <Link href="/registro" className="btn-primary">
               {t('ctaHaveProperty')}
             </Link>
-            <Link href="/buscar" className="btn-secondary">
+            <Link href="/propiedades" className="btn-secondary">
               {t('ctaLookingForSpace')}
             </Link>
           </div>
@@ -432,9 +432,9 @@ export default async function Home({
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '26px',
                   }}>{f.icon}</div>
-                  <span className={f.plan === 'pro' ? 'tag tag-pro' : 'tag tag-accent'} style={{ fontSize: '11px' }}>
+                 {/*  <span className={f.plan === 'pro' ? 'tag tag-pro' : 'tag tag-accent'} style={{ fontSize: '11px' }}>
                     {f.plan === 'pro' ? '⚡ PRO' : '✓ BASIC'}
-                  </span>
+                  </span> */}
                 </div>
                 <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '10px' }}>{f.title}</h3>
                 <p style={{ color: 'var(--muted)', lineHeight: 1.65, fontSize: '15px' }}>{f.desc}</p>

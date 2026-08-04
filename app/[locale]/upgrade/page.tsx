@@ -27,19 +27,19 @@ const proFeatures = [
 const faqItems = [
   {
     q: 'How much does it cost to publish?',
-    a: 'Your first listing each month is free and stays live for 30 days, with the full market analysis included. Additional listings in the same month are $149 MXN each, and you can keep any listing live another 30 days for $99 MXN.',
+    a: 'Your first listing is free and stays live for 1 month, with every feature and the full market analysis included. After that, extending it costs $200 MXN for 3 months, and each additional listing is also $200 MXN for 3 months.',
   },
   {
     q: 'Is the competitor analysis included for free?',
     a: 'Yes. Every listing — including the free one — gets the 2 km competitor analysis and AI recommendations at no extra cost.',
   },
   {
-    q: 'What happens after 30 days?',
-    a: 'The listing expires and stops showing on the marketplace. You can republish it for another 30 days for $99 MXN from the property detail page.',
+    q: 'What happens after the free month?',
+    a: 'The listing expires and stops showing on the marketplace. You can keep it live for another 3 months for $200 MXN from the property detail page.',
   },
   {
     q: 'How many free listings can I publish?',
-    a: 'One free listing per calendar month during this trial stage. Any additional listing that month is $149 MXN.',
+    a: 'One free listing per account during this trial stage. Any additional listing is $200 MXN for 3 months.',
   },
   {
     q: 'How is the data kept current?',
@@ -70,8 +70,8 @@ const comparisonTable = [
   { feature: 'Competitor Analysis (2 km)', basic: true, pro: true },
   { feature: 'AI Business Recommendations', basic: true, pro: true },
   { feature: 'Rental Potential Estimation', basic: true, pro: true },
-  { feature: 'Extra listing same month ($149)', basic: false, pro: true },
-  { feature: 'Keep live beyond 30 days ($99)', basic: false, pro: true },
+  { feature: 'Additional listing · 3 months ($200)', basic: false, pro: true },
+  { feature: 'Keep live beyond the free month · 3 months ($200)', basic: false, pro: true },
 ];
 
 export default function UpgradePage() {
@@ -183,8 +183,8 @@ export default function UpgradePage() {
             margin: '0 auto 52px auto',
             lineHeight: 1.7,
           }}>
-            Your first listing each month is free for 30 days — competitor analysis and{' '}
-            <strong style={{ color: 'var(--foreground)' }}>AI recommendations</strong> included. Pay only for extra listings or longer runtime.
+            Your first listing is free for 1 month — competitor analysis and{' '}
+            <strong style={{ color: 'var(--foreground)' }}>AI recommendations</strong> included. Pay only to extend it or publish more listings: $200 MXN per 3 months.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -205,9 +205,9 @@ export default function UpgradePage() {
             flexWrap: 'wrap',
           }}>
             {[
-              { value: 'Free', label: '1 listing / month' },
+              { value: 'Free', label: '1 listing · first month' },
               { value: '2 km+', label: 'Analysis radius' },
-              { value: '30 days', label: 'Live per listing' },
+              { value: '$200', label: 'Per 3 extra months' },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--accent)' }}>{s.value}</div>
@@ -300,7 +300,7 @@ export default function UpgradePage() {
           <div style={{ textAlign: 'center', marginBottom: '72px' }}>
             <span className="section-label">Comparison</span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, lineHeight: 1.2 }}>
-              Free vs Pay-as-you-go
+              Free month vs Paid extension
             </h2>
           </div>
 
@@ -433,7 +433,7 @@ export default function UpgradePage() {
               and unlock your property&quot;s potential
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: '18px', marginBottom: '44px', lineHeight: 1.7 }}>
-              Publish your first listing free each month — full market analysis included. Pay only when you need more.
+              Publish your first listing free for 1 month — full market analysis included. Pay only when you need more time or more listings.
             </p>
           </div>
 
@@ -459,16 +459,16 @@ export default function UpgradePage() {
             }} />
 
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <span className="tag tag-pro" style={{ marginBottom: '24px' }}>⚡ PAY AS YOU GO</span>
+              <span className="tag tag-pro" style={{ marginBottom: '24px' }}>⚡ EXTEND OR ADD</span>
               <div style={{
                 fontSize: '56px', fontWeight: 900, letterSpacing: '-0.02em',
                 marginBottom: '12px', background: 'linear-gradient(135deg, #7c3aed, #00b4d8)', backgroundClip: 'text',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               }}>
-                $149
+                $200
               </div>
               <p style={{ color: 'var(--muted)', fontSize: '16px', marginBottom: '36px' }}>
-                per additional listing · $99 to extend any listing +30 days
+                per 3 months — extend your listing or publish an additional one
               </p>
 
               <Link href="/registro" className="btn-primary" style={{
@@ -480,7 +480,7 @@ export default function UpgradePage() {
               </Link>
 
               <p style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '24px' }}>
-                Your first listing each month is free for 30 days — analysis included.
+                Your first listing is free for 1 month — every feature included.
               </p>
             </div>
           </div>
