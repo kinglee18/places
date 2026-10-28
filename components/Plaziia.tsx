@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { getSupabase } from "@/lib/supabase";
 import {
   ThemeProvider, createTheme, Box, Typography, Button, Stepper, Step, StepLabel,
@@ -162,6 +162,7 @@ export default function Plaziia() {
   const { data: session } = useSession();
   const router = useRouter();
   const t = useTranslations('Plaziia');
+  const locale = useLocale();
   const [activeStep, setActiveStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [pinLocation, setPinLocation] = useState<PinLocation | null>(null);
@@ -507,7 +508,7 @@ export default function Plaziia() {
           await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ propertyId: created.id }),
+            body: JSON.stringify({ propertyId: created.id, locale }),
           });
         }
       } catch { /* analysis is non-blocking */ }

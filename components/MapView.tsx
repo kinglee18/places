@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cartoTileUrl } from '@/lib/mapTiles';
 
 export interface IsochroneFeature {
   type: "Feature";
@@ -48,7 +49,7 @@ export default function MapView({ lat, lng, isochrones }: MapViewProps) {
       });
 
       // Light tile layer (CartoDB Positron)
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      L.tileLayer(cartoTileUrl('light_all'), {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
         subdomains: "abcd",
         maxZoom: 20,

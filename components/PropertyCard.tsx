@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { TIPO_KEY } from '@/lib/tipoKey';
+import { businessCategoryLabel } from '@/lib/businessCategories';
 
 const TIPO_ICONS: Record<string, string> = {
   'Street-facing (with storefront)': '🪟',
@@ -31,10 +32,12 @@ export interface PropertyCardProps {
   city: string | null;
   state: string | null;
   estado_conservacion?: string | null;
+  best_use?: string | null;
 }
 
 export default function PropertyCard(p: PropertyCardProps) {
   const t = useTranslations('PropertyCard');
+  const locale = useLocale();
 
   const key = TIPO_KEY[p.tipo_local];
   const typeLabel = key ? t(key as Parameters<typeof t>[0]) : p.tipo_local;
@@ -186,6 +189,24 @@ export default function PropertyCard(p: PropertyCardProps) {
             <span style={{ fontSize: 11 }}>📍</span>
             {address}
           </p>
+
+          {/* AI best-use badge */}
+          {p.best_use && (
+            <span
+              style={{
+                alignSelf: 'flex-start',
+                fontSize: 11,
+                fontWeight: 700,
+                background: 'oklch(0.95 0.03 250)',
+                color: 'oklch(0.38 0.10 250)',
+                border: '1px solid oklch(0.85 0.05 250)',
+                borderRadius: 100,
+                padding: '4px 11px',
+              }}
+            >
+              ★ {t('bestFor')}: {businessCategoryLabel(p.best_use, locale)}
+            </span>
+          )}
 
           {/* Row 3: stats */}
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>

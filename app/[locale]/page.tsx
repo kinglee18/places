@@ -4,7 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import { getSupabase } from '@/lib/supabase';
 import NavHeader from '@/components/NavHeader';
 import PricingCards from '@/components/PricingCards';
-import Testimonials from '@/components/Testimonials';
+//import Testimonials from '@/components/Testimonials';
+import HeroDemo from '@/components/HeroDemo';
 import { TIPO_KEY } from '@/lib/tipoKey';
 
 interface Property {
@@ -305,6 +306,9 @@ export default async function Home({
             ))}
           </div>
         </div>
+
+        {/* Animated product walkthrough */}
+        <HeroDemo />
       </section>
 
       {/* ────────────────── LATEST PROPERTIES ────────────────── */}
@@ -402,7 +406,7 @@ export default async function Home({
         </div>
       </section>
 
-      <Testimonials />
+     {/*  <Testimonials /> */}
 
       {/* ────────────────── FEATURES ────────────────── */}
       <section id="features" style={{ padding: '100px 24px', background: 'var(--surface)' }}>

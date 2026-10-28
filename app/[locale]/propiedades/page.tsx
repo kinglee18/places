@@ -76,6 +76,7 @@ interface Property {
   tipo_energia: string | null;
   lat: number | null;
   lng: number | null;
+  best_use: string | null;
 }
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -93,6 +94,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   const condicion = str('condicion');
   const zoning    = str('zoning');
   const energia   = str('energia');
+  const uso       = str('uso');
   const sort      = str('sort') || 'recent';
   const page      = Math.max(1, Number(str('page')) || 1);
 
@@ -102,7 +104,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   const SELECT =
     'id, colonia, calle, numero, tipo_local, m2, banos, habitaciones, estacionamientos, modalidad, ' +
     'precio_inmueble, precio_mantenimiento, descripcion, photo_urls, nivel_piso, created_at, ' +
-    'city, state, estado_conservacion, uso_suelo, tipo_energia, lat, lng';
+    'city, state, estado_conservacion, uso_suelo, tipo_energia, lat, lng, best_use';
 
   const nowIso    = new Date().toISOString();
   const notExpired = `expires_at.is.null,expires_at.gt.${nowIso}`;
@@ -120,6 +122,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
   if (condicion) q = q.eq('estado_conservacion', condicion);
   if (zoning)    q = q.eq('uso_suelo', zoning);
   if (energia)   q = q.eq('tipo_energia', energia);
+  if (uso)       q = q.contains('recommended_uses', [uso]);
 
   if (sort === 'precio-asc')  q = q.order('precio_inmueble', { ascending: true,  nullsFirst: false });
   else if (sort === 'precio-desc') q = q.order('precio_inmueble', { ascending: false, nullsFirst: false });
@@ -133,7 +136,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     q,
     getSupabase()
       .from('properties')
-      .select('colonia, tipo_local, estado_conservacion, uso_suelo, tipo_energia')
+      .select('colonia, tipo_local, estado_conservacion, uso_suelo, tipo_energia, recommended_uses')
       .eq('is_published', true)
       .or(notExpired),
   ]);
@@ -147,6 +150,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     condiciones: unique(allData?.map(p => p.estado_conservacion) ?? []),
     zonings:     unique(allData?.map(p => p.uso_suelo) ?? []),
     energias:    unique(allData?.map(p => p.tipo_energia) ?? []),
+    usos:        unique(allData?.flatMap(p => p.recommended_uses ?? []) ?? []),
   };
 
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
@@ -170,6 +174,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     if (condicion) ps.set('condicion', condicion);
     if (zoning)    ps.set('zoning', zoning);
     if (energia)   ps.set('energia', energia);
+    if (uso)       ps.set('uso', uso);
     if (sort !== 'recent') ps.set('sort', sort);
     if (p > 1)     ps.set('page', String(p));
     const qs = ps.toString();

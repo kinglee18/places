@@ -174,6 +174,10 @@ const CUISINE_KEYWORDS: Record<string, string[]> = {
   'Tacos / Street food': ['taco', 'tacos', 'taqueria', 'birria', 'barbacoa', 'carnitas', 'quesadilla', 'torta'],
   'Coffee / Specialty':  ['specialty coffee', 'third wave', 'artisan coffee', 'cold brew', 'espresso bar'],
   'Bakery / Pastry':     ['bakery', 'panaderia', 'pasteleria', 'reposteria', 'boulangerie'],
+  'Argentinian':         ['argentin', 'parrilla argentina', 'empanadas', 'choripan'],
+  'French':              ['french', 'frances', 'bistro', 'brasserie', 'crepe', 'creperia'],
+  'Spanish':             ['spanish', 'espanol', 'espanola', 'paella', 'tapas'],
+  'Steak':               ['steak', 'steakhouse', 'asador', 'cortes', 'carnes asadas'],
 };
 
 const FOOD_TYPES = new Set([

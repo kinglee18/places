@@ -8,6 +8,7 @@ import {
   Box,
   Typography,
 } from "@mui/material";
+import { cartoTileUrl } from '@/lib/mapTiles';
 
 interface LocationOption {
   label: string;
@@ -81,7 +82,7 @@ export default function ZonaPicker({ onChange }: ZonaPickerProps) {
         zoomControl: true,
       });
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      L.tileLayer(cartoTileUrl('dark_all'), {
         attribution: '&copy; OpenStreetMap &copy; CARTO',
         subdomains: "abcd",
         maxZoom: 20,

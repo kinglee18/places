@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@/auth';
 import { getSupabase } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import {
+  BUSINESS_CATEGORIES,
+  GAP_LABEL_TO_CATEGORY_IDS,
+  normalizeRecommendations,
+} from '@/lib/businessCategories';
 
 export async function POST(req: NextRequest) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -18,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   const { data: property, error } = await getSupabase()
     .from('properties')
-    .select('tipo_local, m2, colonia, city, state, descripcion, modalidad, competition_data, precio_inmueble')
+    .select('tipo_local, m2, colonia, city, state, descripcion, modalidad, competition_data, precio_inmueble, usos_permitidos, usos_no_preferidos')
     .eq('id', propertyId)
     .single();
 
@@ -77,11 +83,33 @@ export async function POST(req: NextRequest) {
     ? `$${property.precio_inmueble.toLocaleString('en-US')} MXN`
     : 'price not specified';
 
+  // ── Owner-declared use constraints ────────────────────────────────────────
+  const usosPermitidos = (property.usos_permitidos ?? []) as string[];
+  const usosNoPreferidos = (property.usos_no_preferidos ?? []) as string[];
+  const ownerConstraints = usosPermitidos.length > 0 || usosNoPreferidos.length > 0
+    ? `
+OWNER CONSTRAINTS:${usosPermitidos.length > 0 ? `\n  Allowed uses declared by the owner: ${usosPermitidos.join(', ')}` : ''}${usosNoPreferidos.length > 0 ? `\n  Uses the owner does NOT want: ${usosNoPreferidos.join(', ')}` : ''}
+Never recommend a category that conflicts with these constraints.
+`
+    : '';
+
+  const taxonomyLines = BUSINESS_CATEGORIES
+    .map(c => `  ${c.id} — ${c.labelEn}`)
+    .join('\n');
+
+  const gapLine = (g: string): string => {
+    const ids = GAP_LABEL_TO_CATEGORY_IDS[g];
+    return ids?.length ? `  • ${g} (taxonomy: ${ids.join(', ')})` : `  • ${g}`;
+  };
+
   // ── Compose prompt ────────────────────────────────────────────────────────
-  const prompt = `You are a local market analyst helping small and medium entrepreneurs decide what business to open in a commercial space. Give concrete, actionable suggestions for businesses that a single entrepreneur can realistically start.
+  const prompt = `You are a local market analyst helping people searching for a commercial space decide what business would thrive in it. Give concrete, actionable suggestions for businesses that a single entrepreneur can realistically start.
 
 LOCATION: ${location}
 SPACE: ${property.tipo_local} · ${property.m2} m² · ${property.modalidad === 'rent' ? 'for rent' : property.modalidad === 'sale' ? 'for sale' : 'listing type unspecified'} · ${price}${property.descripcion ? `\nDESCRIPTION: ${property.descripcion}` : ''}
+
+BUSINESS CATEGORY TAXONOMY (every recommendation MUST use an "id" copied EXACTLY from this list, nothing else):
+${taxonomyLines}
 
 NEARBY BUSINESSES (500m — what already exists):
 ${categoryCounts}
@@ -93,27 +121,27 @@ WIDER AREA BUSINESSES (2–5km — demand signals):
 ${demandSignals}
 ${foodGaps.length > 0 ? `
 FOOD SUBCATEGORY GAPS — these cuisines are present 2–5km away (demand is proven in the area) but absent within 500m:
-${foodGaps.map(g => `  • ${g}`).join('\n')}` : ''}
+${foodGaps.map(gapLine).join('\n')}` : ''}
 ${highOpportunities.length > 0 ? `
 LOW-COMPETITION CATEGORIES (few or no competitors within 500m):
-${highOpportunities.map(o => `  • ${o}`).join('\n')}` : ''}
-
+${highOpportunities.map(o => `  • ${o}`).join('\n')}` : ''}${ownerConstraints}
 RULES (strictly follow):
 1. NEVER recommend banks, ATMs, insurance agencies, government offices, hospitals, or any business that requires special government licensing — these are not viable for typical entrepreneurs.
 2. Food gaps are high-priority: if a cuisine type is present in the wider area but missing locally, that is proven demand with low local competition — flag it explicitly.
 3. Recommend only businesses an entrepreneur can start with under $500,000 MXN in initial investment.
 4. Use the city/state to reason about regional food culture, consumer habits, and local demand.
-5. Be specific: instead of "restaurant", say "Chinese restaurant" or "breakfast café" based on the gap data.
+5. Every recommendation MUST carry an "id" copied exactly from the taxonomy above. The "uso" field is a short, specific display name in ${language} (e.g. id "taco" → uso "Taquería de birria"). Never invent ids and never answer with a generic "restaurant".
+6. "mejor_uso" is your single strongest pick — the one business with the best demand/competition fit for this exact location. Do not repeat its id in "otros_usos".
 
 Respond ONLY in ${language}. Respond ONLY in JSON with this exact structure:
 {
   "nivel_competencia": "low | medium | high",
   "oportunidad": "One sentence describing the main market opportunity in this specific location",
-  "usos_recomendados": [
-    { "uso": "Specific business type", "razon": "Why it fits this location and what gap or demand it fills" },
-    { "uso": "Specific business type", "razon": "Why it fits this location and what gap or demand it fills" },
-    { "uso": "Specific business type", "razon": "Why it fits this location and what gap or demand it fills" },
-    { "uso": "Specific business type", "razon": "Why it fits this location and what gap or demand it fills" }
+  "mejor_uso": { "id": "taxonomy id", "uso": "Specific business name in ${language}", "razon": "Why this is the single best fit for this location" },
+  "otros_usos": [
+    { "id": "taxonomy id", "uso": "Specific business name", "razon": "Why it fits this location and what gap or demand it fills" },
+    { "id": "taxonomy id", "uso": "Specific business name", "razon": "Why it fits this location and what gap or demand it fills" },
+    { "id": "taxonomy id", "uso": "Specific business name", "razon": "Why it fits this location and what gap or demand it fills" }
   ],
   "advertencia": "Main risk or important consideration, or null if none"
 }`;
@@ -122,7 +150,7 @@ Respond ONLY in ${language}. Respond ONLY in JSON with this exact structure:
   try {
     message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 900,
+      max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
     });
   } catch (err) {
@@ -138,19 +166,35 @@ Respond ONLY in ${language}. Respond ONLY in JSON with this exact structure:
     return NextResponse.json({ error: 'Could not generate analysis' }, { status: 500 });
   }
 
-  let analysis;
+  let parsed;
   try {
-    analysis = JSON.parse(jsonMatch[0]);
+    parsed = JSON.parse(jsonMatch[0]);
   } catch {
     return NextResponse.json({ error: 'Invalid JSON from AI response' }, { status: 500 });
   }
 
-  // Persist ai_analysis into competition_data without overwriting zone data
-  const existing = (property.competition_data ?? {}) as Record<string, unknown>;
-  await getSupabase()
-    .from('properties')
-    .update({ competition_data: { ...existing, ai_analysis: analysis } })
-    .eq('id', propertyId);
+  // Validate recommendation ids against the closed taxonomy
+  const { mejorUso, otrosUsos, bestUse, recommendedUses } = normalizeRecommendations(parsed);
+  const analysis = {
+    ...parsed,
+    mejor_uso: mejorUso,
+    otros_usos: otrosUsos,
+  };
 
-  return NextResponse.json({ analysis });
+  // Persist ai_analysis into competition_data without overwriting zone data,
+  // plus the searchable best_use / recommended_uses columns
+  const existing = (property.competition_data ?? {}) as Record<string, unknown>;
+  const { error: updateError } = await getSupabaseAdmin()
+    .from('properties')
+    .update({
+      competition_data: { ...existing, ai_analysis: analysis },
+      best_use: bestUse,
+      recommended_uses: recommendedUses,
+    })
+    .eq('id', propertyId);
+  if (updateError) {
+    console.error('analyze: failed to persist analysis', updateError.message);
+  }
+
+  return NextResponse.json({ analysis, persisted: !updateError });
 }

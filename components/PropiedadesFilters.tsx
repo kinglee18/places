@@ -4,6 +4,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useTransition, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { categoryLabel } from '@/lib/categoryLabels';
+import { businessCategoryLabel } from '@/lib/businessCategories';
 
 interface FilterOptions {
   colonias: string[];
@@ -11,6 +12,7 @@ interface FilterOptions {
   condiciones: string[];
   zonings: string[];
   energias: string[];
+  usos: string[];
 }
 
 const inputStyle = (isPending: boolean): React.CSSProperties => ({
@@ -55,7 +57,7 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localSearch]);
 
-  const hasFilters = ['search', 'colonia', 'tipo', 'modalidad', 'condicion', 'zoning', 'energia']
+  const hasFilters = ['search', 'colonia', 'tipo', 'modalidad', 'condicion', 'zoning', 'energia', 'uso']
     .some(k => searchParams.get(k));
 
   const clearAll = () => {
@@ -126,6 +128,15 @@ export default function PropiedadesFilters({ filterOptions }: { filterOptions: F
             {filterOptions.tipos.map(tp => <option key={tp} value={tp}>{categoryLabel(tp, locale)}</option>)}
           </select>
         </div>
+        {filterOptions.usos.length > 0 && (
+          <div style={{ flex: '1 1 160px', minWidth: '140px' }}>
+            <label style={labelStyle}>{t('labelBestFor')}</label>
+            <select value={get('uso')} onChange={e => setParam('uso', e.target.value)} style={{ ...inputStyle(isPending), cursor: 'pointer' }}>
+              <option value="">{t('all')}</option>
+              {filterOptions.usos.map(u => <option key={u} value={u}>{businessCategoryLabel(u, locale)}</option>)}
+            </select>
+          </div>
+        )}
         {filterOptions.condiciones.length > 0 && (
           <div style={{ flex: '1 1 150px', minWidth: '130px' }}>
             <label style={labelStyle}>{t('labelCondition')}</label>

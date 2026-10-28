@@ -28,6 +28,10 @@ const LABELS_ES: Record<string, string> = {
   'Tacos / Street food':     'Tacos / Comida callejera',
   'Coffee / Specialty':      'Café de especialidad',
   'Bakery / Pastry':         'Panadería / Repostería',
+  'Argentinian':             'Argentina',
+  'French':                  'Francesa',
+  'Spanish':                 'Española',
+  'Steak':                   'Cortes / Asador',
 
   // Property type (tipo_local)
   'Street-facing (with storefront)': 'Local frontal',

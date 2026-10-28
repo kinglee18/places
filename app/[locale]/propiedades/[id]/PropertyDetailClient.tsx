@@ -10,6 +10,7 @@ import NavHeader from '@/components/NavHeader';
 import { getZoneSuggestions } from '@/lib/zoneSuggestions';
 import type { ZoneType } from '@/lib/zoneSuggestions';
 import { categoryLabel } from '@/lib/categoryLabels';
+import { businessCategoryLabel } from '@/lib/businessCategories';
 
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
@@ -33,10 +34,18 @@ interface CompetitionEntry {
   rating: number | null;
 }
 
+interface AiUse {
+  id?: string;
+  uso: string;
+  razon: string;
+}
+
 interface AiAnalysis {
   nivel_competencia: 'low' | 'medium' | 'high';
   oportunidad: string;
-  usos_recomendados: { uso: string; razon: string }[];
+  mejor_uso?: AiUse | null;
+  otros_usos?: AiUse[];
+  usos_recomendados?: AiUse[]; // legacy shape (pre best-use analyses)
   advertencia: string | null;
 }
 
@@ -990,9 +999,8 @@ export default function PropertyDetailPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: SUBTLE, marginBottom: 4, textTransform: 'uppercase' }}>{tP('sectionAI')}</p>
-                <p style={{ fontSize: 13, color: MUTED }}>{tP('aiSubtitle')}</p>
               </div>
-              {!analysis && session?.user && (
+              {(!analysis || !analysis.mejor_uso) && session?.user && (
                 <button
                   onClick={handleAnalyze}
                   disabled={analyzing}
@@ -1012,7 +1020,7 @@ export default function PropertyDetailPage() {
                       <span style={{ display: 'inline-block', width: 12, height: 12, border: `2px solid ${ACCENT}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                       {tP('analyzing')}
                     </>
-                  ) : tP('analyzeAI')}
+                  ) : analysis ? tP('reanalyzeAI') : tP('analyzeAI')}
                 </button>
               )}
             </div>
@@ -1035,15 +1043,53 @@ export default function PropertyDetailPage() {
                 </div>
                 <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.6 }}>{analysis.oportunidad}</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, textTransform: 'uppercase' }}>{tP('recommendedUses')}</p>
-                  {analysis.usos_recomendados.map((item, i) => (
-                    <div key={i} style={{ background: '#f5f6fc', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT2, marginBottom: 4 }}>{item.uso}</div>
-                      <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.5 }}>{item.razon}</div>
+                {analysis.mejor_uso && (
+                  <div style={{ background: '#eef4fb', border: `2px solid ${ACCENT}`, borderRadius: 12, padding: '16px 18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                        background: ACCENT2, color: '#ffffff', borderRadius: 100, padding: '4px 12px',
+                      }}>
+                        ★ {tP('bestSuggestion')}
+                      </span>
+                      {analysis.mejor_uso.id && (
+                        <span style={{
+                          fontSize: 11, fontWeight: 600, color: ACCENT,
+                          background: '#ffffff', border: `1px solid ${ACCENT}`, borderRadius: 100, padding: '3px 10px',
+                        }}>
+                          {businessCategoryLabel(analysis.mejor_uso.id, currentLocale)}
+                        </span>
+                      )}
                     </div>
-                  ))}
-                </div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: ACCENT2, marginBottom: 4 }}>{analysis.mejor_uso.uso}</div>
+                    <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.55 }}>{analysis.mejor_uso.razon}</div>
+                  </div>
+                )}
+
+                {(() => {
+                  const secondary = analysis.otros_usos ?? analysis.usos_recomendados ?? [];
+                  if (secondary.length === 0) return null;
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: SUBTLE, textTransform: 'uppercase' }}>
+                        {analysis.mejor_uso ? tP('otherUses') : tP('recommendedUses')}
+                      </p>
+                      {secondary.map((item, i) => (
+                        <div key={i} style={{ background: '#f5f6fc', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: ACCENT2 }}>{item.uso}</span>
+                            {item.id && (
+                              <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, background: '#ffffff', border: `1px solid ${BORDER}`, borderRadius: 100, padding: '2px 8px' }}>
+                                {businessCategoryLabel(item.id, currentLocale)}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.5 }}>{item.razon}</div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {analysis.advertencia && (
                   <div style={{ background: 'oklch(0.98 0.03 70)', border: '1px solid oklch(0.88 0.08 70)', borderRadius: 10, padding: '10px 14px' }}>
